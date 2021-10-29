@@ -1,23 +1,22 @@
 import unittest
 
-from learners.observation_table_learners.lstar_learner import \
-    LStarLearner
+from learners.observation_tree_learners.kearns_vazirani_learner import \
+    KearnsVaziraniLearner
 from teachers.automaton_teacher import \
     DeterministicFiniteAutomatonTeacher as AutomatonTeacher
 from pythautomata.automata.deterministic_finite_automaton import \
     DeterministicFiniteAutomaton
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars
+from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
+    HopcroftKarpComparisonStrategy as ComparisonStrategy
 from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
 from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
 from pythautomata.automata_definitions.other_automata import OtherAutomata
-from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
-    HopcroftKarpComparisonStrategy as ComparisonStrategy
 from itertools import chain
 
-
-class TestLStarLearner(unittest.TestCase):
+class TestKearnsVaziraniLearner(unittest.TestCase):
     def setUp(self):
-        self.learner = LStarLearner()
+        self.learner = KearnsVaziraniLearner()
 
     def teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, ComparisonStrategy())
@@ -49,7 +48,7 @@ class TestLStarLearner(unittest.TestCase):
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar4)
-
+    
     def test_against_many_DFAs(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata(),
                                     [BolligHabermehlKernLeuckerAutomata.get_first_example_DFA()],
