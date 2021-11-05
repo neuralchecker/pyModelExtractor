@@ -52,7 +52,7 @@ class TestLStarLearner(unittest.TestCase):
 
     def test_against_many_DFAs(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata(),
-                                    [BolligHabermehlKernLeuckerAutomata.get_first_example_DFA()],
+                                    BolligHabermehlKernLeuckerAutomata.get_all_automata(),
                                     OmlinGilesAutomata.get_all_automata()))
         for automaton in mergedAutomata:
             teacher = self.teacher(automaton)
