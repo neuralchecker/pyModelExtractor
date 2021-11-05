@@ -7,8 +7,12 @@ from teachers.automaton_teacher import \
 from pythautomata.automata.deterministic_finite_automaton import \
     DeterministicFiniteAutomaton
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars
+from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
+from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
+from pythautomata.automata_definitions.other_automata import OtherAutomata
 from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
+from itertools import chain
 
 
 class TestLStarLearner(unittest.TestCase):
@@ -45,3 +49,13 @@ class TestLStarLearner(unittest.TestCase):
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar4)
+
+    def test_against_many_DFAs(self):
+        mergedAutomata = list(chain(TomitasGrammars.get_all_automata(),
+                                    BolligHabermehlKernLeuckerAutomata.get_all_automata(),
+                                    OmlinGilesAutomata.get_all_automata()))
+        for automaton in mergedAutomata:
+            teacher = self.teacher(automaton)
+            result = self.learner.learn(teacher)
+            assert ComparisonStrategy().are_equivalent(
+                result.model, automaton)
