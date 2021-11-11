@@ -1,8 +1,8 @@
 from typing import Union
 
-from learners.observation_table_learners.observation_table import \
+from pymodelextractor.learners.observation_table_learners.observation_table import \
     ObservationTable
-from learners.observation_table_learners.translators.observation_table_translator import \
+from pymodelextractor.learners.observation_table_learners.translators.observation_table_translator import \
     ObservationTableTranslator
 from pythautomata.abstract.finite_automaton import FiniteAutomaton as FA
 from pythautomata.automata.deterministic_finite_automaton import \

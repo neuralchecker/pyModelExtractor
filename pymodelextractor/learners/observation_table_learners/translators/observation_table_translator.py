@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from pythautomata.abstract.finite_automaton import FiniteAutomaton
 from pythautomata.base_types.alphabet import Alphabet
-from learners.observation_table_learners.observation_table \
+from pymodelextractor.learners.observation_table_learners.observation_table \
     import ObservationTable
 
 
