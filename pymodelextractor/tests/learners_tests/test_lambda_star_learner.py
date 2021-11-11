@@ -1,8 +1,8 @@
 import unittest
 
-from learners.observation_table_learners.lambda_star_learner import \
+from pymodelextractor.learners.observation_table_learners.lambda_star_learner import \
     LambdaStarLearner
-from teachers.automaton_teacher import \
+from pymodelextractor.teachers.automaton_teacher import \
     DeterministicFiniteAutomatonTeacher as AutomatonTeacher
 from pythautomata.automata.deterministic_finite_automaton import \
     DeterministicFiniteAutomaton

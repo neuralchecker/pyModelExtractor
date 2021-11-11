@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from learners.learning_result import LearningResult
-from teachers.teacher import Teacher
+from pymodelextractor.learners.learning_result import LearningResult
+from pymodelextractor.teachers.teacher import Teacher
 
 
 class Learner(ABC):

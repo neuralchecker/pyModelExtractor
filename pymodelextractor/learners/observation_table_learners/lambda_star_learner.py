@@ -1,12 +1,12 @@
 from typing import Union
 
-from learners.learner import Learner
-from learners.learning_result import LearningResult
-from learners.observation_table_learners.observation_table import (
+from pymodelextractor.learners.learner import Learner
+from pymodelextractor.learners.learning_result import LearningResult
+from pymodelextractor.learners.observation_table_learners.observation_table import (
     epsilon, ObservationTable, TableInconsistency)
-from learners.observation_table_learners.translators.fa_observation_table_translator import \
+from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import \
     FAObservationTableTranslator
-from teachers.teacher import Teacher
+from pymodelextractor.teachers.teacher import Teacher
 from pythautomata.automata.deterministic_finite_automaton import \
     DeterministicFiniteAutomaton as DFA
 from pythautomata.automata.symbolic_finite_automaton import \
