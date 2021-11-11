@@ -33,8 +33,7 @@ class DeterministicFiniteAutomatonTeacher(Teacher):
 
     def equivalence_query(self, model: FiniteAutomaton) -> Tuple[bool, Union[Sequence, None]]:
         self._equivalence_queries_count += 1
-        counterexample = self._comparison_strategy.get_counterexample_between(
-            model, self.automaton)
+        counterexample = self._comparison_strategy.get_counterexample_between(model, self.automaton)
         are_equivalent = counterexample is None
         return (are_equivalent, counterexample)
 
