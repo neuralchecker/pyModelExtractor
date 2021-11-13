@@ -4,7 +4,7 @@ from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
 from pymodelextractor.utilities import pdfa_utils
-
+from typing import Union
 
 class ProbabilisticTeacher(ABC):
 
@@ -25,7 +25,7 @@ class ProbabilisticTeacher(ABC):
     def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]) -> list[float]:
         raise NotImplementedError
 
-    def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Sequence | None]:
+    def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence,None]]:
         tried = set()
         suffixes = list()
         suffixes.append(self.terminal_symbol)

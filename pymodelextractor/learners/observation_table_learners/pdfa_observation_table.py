@@ -1,6 +1,7 @@
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.alphabet import Alphabet
 from collections import namedtuple
+from typing import Union
 import heapq
 from pymodelextractor.utilities import pdfa_utils
 
@@ -57,7 +58,7 @@ class PDFAObservationTable:
     def get_observed_sequences(self) -> list[Sequence]:
         return list(self.__observations.keys())
 
-    def get_violating_closedness_sequence(self) -> Sequence | None:
+    def get_violating_closedness_sequence(self) -> Union[Sequence, None]:
         violating_sequence = None
         non_violating_seqs = []
         while len(self.__blue_queue) > 0 and violating_sequence is None:
@@ -75,7 +76,7 @@ class PDFAObservationTable:
         return any(pdfa_utils.are_within_tolerance_limit(self[blue_sequence], self[sequence], self.__tolerance)
                    for sequence in self.red)
 
-    def find_inconsistency(self) -> Inconsistency | None:
+    def find_inconsistency(self) -> Union[Inconsistency, None]:
         red_list = sorted(list(self.red))
         red_list_length = len(red_list)
         for i in range(red_list_length):
