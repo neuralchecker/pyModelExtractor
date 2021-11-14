@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "pymodelextractor"
+version = "0.1.0"
+description = ""
+authors = ["Federico VIlensky <fedevilensky@gmail.com>"]
+license = "Apache 2.0"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pythautomata = "^0.6.2"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.902"
+autopep8 = "^1.5.7"
+pytest = "^6.2.4"
+rope = "^0.19.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
