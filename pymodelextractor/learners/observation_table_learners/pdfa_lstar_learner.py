@@ -8,7 +8,7 @@ from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstar
      PDFALStarObservationTableTranslation
 from pymodelextractor.learners.pdfa_learner import PDFALearner
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
-
+from pymodelextractor.learners.learning_result import LearningResult
 
 class PDFALStarLearner(PDFALearner):
 
@@ -18,7 +18,7 @@ class PDFALStarLearner(PDFALearner):
         self._teacher = None
         self.tolerance = None
 
-    def learn(self, teacher: ProbabilisticTeacher) -> WeightedAutomaton:
+    def learn(self, teacher: ProbabilisticTeacher) -> LearningResult:
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         self.tolerance = teacher.tolerance
@@ -57,7 +57,13 @@ class PDFALStarLearner(PDFALearner):
                   "- overall CE count:", counter_example_count, "***\n\n")
 
         print("***** Learning completed successfully *****\n\n")
-        return model
+
+        info = {
+            'membership_queries_count': self._teacher._equivalence_queries_count,
+            'equivalence_queries_count': self._teacher._last_token_weight_queries_count,           
+        }
+        learningResult = LearningResult(model, len(model.weighted_states), info)
+        return learningResult
 
     def reset(self):
         self.__build_observation_table()
