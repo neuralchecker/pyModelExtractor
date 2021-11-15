@@ -17,6 +17,7 @@ class PDFATeacher(ProbabilisticTeacher):
         return self.__model.log_sequence_weight(sequence)
 
     def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]):
+        self._last_token_weight_queries_count +=1
         return self.__model.get_last_token_weights(sequence, required_suffixes)
 
     def get_log_probability_error(self, seq, aut: WeightedAutomaton):

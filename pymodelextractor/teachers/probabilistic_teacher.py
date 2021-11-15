@@ -22,7 +22,7 @@ class ProbabilisticTeacher(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]) -> list[float]:
+    def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]) -> list[float]:        
         raise NotImplementedError
 
     def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence,None]]:
@@ -41,6 +41,7 @@ class ProbabilisticTeacher(ABC):
                     if not pdfa_utils.are_within_tolerance_limit(obs1, obs2, self.tolerance):
                         return False, prefix
                     tried.add(prefix)
+        self._equivalence_queries_count += 1
         return True, None
 
     def reset(self) -> None:
@@ -62,8 +63,8 @@ class ProbabilisticTeacher(ABC):
 
     @property
     def equivalence_queries_count(self):
-        return self.equivalence_queries_count
+        return self._equivalence_queries_count
 
     @property
     def last_token_weight_queries_count(self):
-        return self.equivalence_queries_count
+        return self._last_token_weight_queries_count
