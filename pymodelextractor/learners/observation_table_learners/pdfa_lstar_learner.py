@@ -59,8 +59,8 @@ class PDFALStarLearner(PDFALearner):
         print("***** Learning completed successfully *****\n\n")
 
         info = {
-            'membership_queries_count': self._teacher._equivalence_queries_count,
-            'equivalence_queries_count': self._teacher._last_token_weight_queries_count,           
+            'equivalence_queries_count': self._teacher.equivalence_queries_count,
+            'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,           
         }
         learningResult = LearningResult(model, len(model.weighted_states), info)
         return learningResult
