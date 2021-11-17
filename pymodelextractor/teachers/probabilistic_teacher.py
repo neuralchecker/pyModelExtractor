@@ -26,6 +26,7 @@ class ProbabilisticTeacher(ABC):
         raise NotImplementedError
 
     def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence,None]]:
+        self._equivalence_queries_count += 1
         tried = set()
         suffixes = list()
         suffixes.append(self.terminal_symbol)
@@ -40,8 +41,7 @@ class ProbabilisticTeacher(ABC):
                     obs2 = aut.get_last_token_weights(prefix, suffixes)
                     if not pdfa_utils.are_within_tolerance_limit(obs1, obs2, self.tolerance):
                         return False, prefix
-                    tried.add(prefix)
-        self._equivalence_queries_count += 1
+                    tried.add(prefix)        
         return True, None
 
     def reset(self) -> None:
