@@ -2,15 +2,19 @@ from pythautomata.base_types.sequence import Sequence
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
+from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pymodelextractor.utilities import pdfa_utils
 from typing import Union
 
 class SampleProbabilisticTeacher(ProbabilisticTeacher):
-
-    def __init__(self, model: ProbabilisticModel, tolerance: float, comparison_strategy: PDFAComparator):
+    def __init__(self, model: ProbabilisticModel, tolerance: float, sample_size: float, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128):
         super().__init__(tolerance)
-        self._comparison_strategy = comparison_strategy
+        self._sample_size = sample_size
         self.__target_model = model
+        if sequence_generator is None:
+            self._sequence_generator = SequenceGenerator(self.__target_model.alphabet, max_seq_length= max_seq_length)
+        else:
+            self._sequence_generator = sequence_generator
 
     def sequence_weight(self, sequence: Sequence):
         return self.__target_model.sequence_weight(sequence)
@@ -32,7 +36,7 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
         suffixes.append(self.terminal_symbol)
         for symbol in self.alphabet.symbols:
             suffixes.append(Sequence([symbol]))
-        rand_words = pdfa_utils.get_test_data(self.alphabet, 5000)
+        rand_words = sorted(self._sequence_generator.generate_words(self._sample_size))
         for word in rand_words:
             prefixes = sorted(word.get_prefixes(), key=len)
             for prefix in prefixes:
@@ -46,8 +50,8 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
 
     @property
     def alphabet(self):
-        return self.__model.alphabet
+        return self.__target_model.alphabet
 
     @property
     def terminal_symbol(self):
-        return self.__model.terminal_symbol
+        return self.__target_model.terminal_symbol

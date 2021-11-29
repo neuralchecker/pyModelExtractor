@@ -12,5 +12,6 @@ def are_within_tolerance_limit(obs1, obs2, tolerance):
 
 
 def get_test_data(alphabet: Alphabet, size: int) -> list[Sequence]:
+    raise Exception('DEPRECATED')
     sq = SequenceGenerator(alphabet, 15)
     return sorted(sq.generate_words(size))

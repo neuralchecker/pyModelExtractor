@@ -1,3 +1,4 @@
+from random import sample
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
@@ -11,18 +12,18 @@ import numpy as np
 class PACProbabilisticTeacher(ProbabilisticTeacher):
 
     def __init__(self, model: ProbabilisticModel, epsilon: float, delta:float,
-     tolerance: float, sequence_generator: SequenceGenerator, comparison_strategy: PDFAComparator, 
-     compute_epsilon_star = False):
-
+     tolerance: float, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128, compute_epsilon_star: bool = True):
         super().__init__(tolerance)
-        self._comparison_strategy = comparison_strategy
         self.__target_model = model
         self._epsilon = epsilon
         self._delta = delta
         self.sample_size = 0
         self.epsilon_star = 0
-        self.__compute_epsilon_star = compute_epsilon_star
-        self._sequence_generator = sequence_generator
+        self._compute_epsilon_star = compute_epsilon_star
+        if sequence_generator is None:
+            self._sequence_generator = SequenceGenerator(self.__target_model.alphabet, max_seq_length= max_seq_length)
+        else:
+            self._sequence_generator = sequence_generator
 
 
     def sequence_weight(self, sequence: Sequence):
@@ -50,12 +51,12 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         for symbol in self.alphabet.symbols:
             suffixes.append(Sequence(symbol))
         
-        rand_words = self._sequence_generator.generate_words(self.sample_size)
+        rand_words = self._sequence_generator.generate_words(sample_size)
         np.sort(rand_words)
         counterexample = None
         for word in rand_words:            
             #print(prefix)
-            obs1 = self.get_last_token_weights(word, suffixes)
+            obs1 = self.__target_model.get_last_token_weights(word, suffixes)
             obs2 = aut.get_last_token_weights(word, suffixes)
             error = self.get_log_probability_error(word, aut)
             total_error += error
@@ -63,7 +64,7 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
                 errorCount += 1
                 if counterexample is None:
                     counterexample = word 
-                if not self.__calculate_epsilon_star:
+                if not self._compute_epsilon_star:
                     return False, counterexample               
         if errorCount > 0:
             self._calculate_epsilon_star_with(errorCount)
@@ -72,18 +73,23 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
 
     @property
     def alphabet(self):
-        return self.__model.alphabet
+        return self.__target_model.alphabet
 
     @property
     def terminal_symbol(self):
-        return self.__model.terminal_symbol
+        return self.__target_model.terminal_symbol
 
     def _calculate_sample_size(self):
         numberOfCalls = self.equivalence_queries_count
-        self.sample_size = ceil((log(2) * (numberOfCalls + 1) - log(self._delta)) / self._epsilon)
-        self.epsilon_star = -log(self._delta) / self.sample_size
+        sample_size = ceil((log(2) * (numberOfCalls + 1) - log(self._delta)) / self._epsilon)
+        self.epsilon_star = -log(self._delta) / sample_size
+        self.last_sample_size = sample_size
+        return sample_size
 
     def _calculate_epsilon_star_with(self, errorCount: int):
-        combinations = factorial(self.sample_size) // factorial(errorCount) // factorial(self.sample_size - errorCount)
-        self.epsilon_star = (log(combinations) - log(self._delta)) / (self.sample_size - errorCount)
+        combinations = factorial(self.last_sample_size) // factorial(errorCount) // factorial(self.last_sample_size - errorCount)
+        if (self.last_sample_size - errorCount) == 0:
+            self.epsilon_star = float('inf')
+        else:
+            self.epsilon_star = (log(combinations) - log(self._delta)) / (self.last_sample_size - errorCount)
 
