@@ -69,7 +69,7 @@ class PDFALStarColLearner(PDFALearner):
         self.observation_table = PDFAObservationTable(self.__alphabet, self.tolerance)
 
     def __initialize_observation_table(self):
-        self.observation_table.add_suffix(self.terminal_symbol)
+        self.observation_table.add_suffix(Sequence([self.terminal_symbol]))
         for s in self.__symbols:
             self.observation_table.add_suffix(Sequence([s]))
         self.__add_to_red(epsilon)

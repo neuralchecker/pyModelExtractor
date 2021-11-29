@@ -1,6 +1,7 @@
-from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton, WeightedState
+from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedState
+from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
 from pythautomata.base_types.sequence import Sequence
-
+from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator as PDFAComparator
 from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
      epsilon
 from pymodelextractor.learners.observation_table_learners.translators.pdfa_observation_table_translator import \
@@ -68,7 +69,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
             return (self.centroid * self.obs_count + value) / (self.obs_count + 1)
 
     def translate(self, observation_table: PDFAObservationTable, tolerance: float, terminal_symbol: Sequence) \
-            -> WeightedAutomaton:
+            -> PDFA:
         states = self.__make_states(observation_table.get_red_observations(), tolerance)
         self.__add_transitions(observation_table, states)
         was_deterministic = self.__make_deterministic(states, tolerance)
@@ -79,7 +80,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
         wfa_states = self.__make_wfa_states(states)
         self.__add_wfa_transitions(states, wfa_states)
         wfa_states = set(wfa_states)
-        return WeightedAutomaton(observation_table.alphabet, wfa_states, terminal_symbol)
+        return PDFA(observation_table.alphabet, wfa_states, terminal_symbol, PDFAComparator())
 
     def __make_states(self, red, tolerance):
         intermediate_states = list()

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
-from pymodelextractor.utilities import pdfa_utils
+
 from typing import Union
 
 class ProbabilisticTeacher(ABC):
@@ -26,23 +26,7 @@ class ProbabilisticTeacher(ABC):
         raise NotImplementedError
 
     def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence,None]]:
-        self._equivalence_queries_count += 1
-        tried = set()
-        suffixes = list()
-        suffixes.append(self.terminal_symbol)
-        for symbol in self.alphabet.symbols:
-            suffixes.append(Sequence([symbol]))
-        rand_words = pdfa_utils.get_test_data(self.alphabet, 5000)
-        for word in rand_words:
-            prefixes = sorted(word.get_prefixes(), key=len)
-            for prefix in prefixes:
-                if prefix not in tried:
-                    obs1 = self.last_token_weights(prefix, suffixes)
-                    obs2 = aut.get_last_token_weights(prefix, suffixes)
-                    if not pdfa_utils.are_within_tolerance_limit(obs1, obs2, self.tolerance):
-                        return False, prefix
-                    tried.add(prefix)        
-        return True, None
+        raise NotImplementedError
 
     def reset(self) -> None:
         self._equivalence_queries_count = 0

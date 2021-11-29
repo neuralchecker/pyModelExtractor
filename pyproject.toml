@@ -7,7 +7,7 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pythautomata = "^0.7"
+pythautomata = "0.10.2"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.902"
