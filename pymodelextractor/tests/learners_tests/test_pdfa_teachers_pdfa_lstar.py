@@ -10,7 +10,7 @@ from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 from pymodelextractor.teachers.sample_probabilistic_teacher import SampleProbabilisticTeacher
 from pymodelextractor.teachers.pac_probabilistic_teacher import PACProbabilisticTeacher
 
-class TestPDFATeachers(unittest.TestCase):
+class TestPDFATeachersLStar(unittest.TestCase):
 
     def setUp(self):
         self.learner = PDFALStarLearner()
