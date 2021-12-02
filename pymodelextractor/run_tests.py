@@ -7,7 +7,7 @@ from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_learner import Tes
 from tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerWithEqualityAlgebra
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
-
+from tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanModelTeachers
 
 
 def run():
@@ -17,7 +17,8 @@ def run():
                            TestLStarLearner,
                            TestPDFALStarColLearner,
                            TestPDFATeachersLStar,
-                           TestPDFATeachersLStarCol]
+                           TestPDFATeachersLStarCol,
+                           TestPACBooleanModelTeachers]                      
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

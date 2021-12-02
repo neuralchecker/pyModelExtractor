@@ -7,6 +7,10 @@ from pythautomata.abstract.finite_automaton import FiniteAutomaton
 
 class Teacher(ABC):
 
+    def __init__(self):        
+        self._equivalence_queries_count: int = 0
+        self._membership_queries_count: int = 0
+
     @property
     @abstractmethod
     def alphabet(self) -> Alphabet:
