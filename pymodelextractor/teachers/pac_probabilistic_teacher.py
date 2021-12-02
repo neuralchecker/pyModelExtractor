@@ -5,7 +5,7 @@ from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.utilities import pdfa_utils
-from math import ceil, log, factorial
+from math import ceil, log, factorial, comb
 from typing import Union
 import numpy as np
 
@@ -82,12 +82,12 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
     def _calculate_sample_size(self):
         numberOfCalls = self.equivalence_queries_count
         sample_size = ceil((log(2) * (numberOfCalls + 1) - log(self._delta)) / self._epsilon)
-        self.epsilon_star = -log(self._delta) / sample_size
         self.last_sample_size = sample_size
         return sample_size
 
     def _calculate_epsilon_star_with(self, errorCount: int):
-        combinations = factorial(self.last_sample_size) // factorial(errorCount) // factorial(self.last_sample_size - errorCount)
+        #combinations = factorial(self.last_sample_size) // factorial(errorCount) // factorial(self.last_sample_size - errorCount)
+        combinations = comb(self.last_sample_size, errorCount)
         if (self.last_sample_size - errorCount) == 0:
             self.epsilon_star = float('inf')
         else:

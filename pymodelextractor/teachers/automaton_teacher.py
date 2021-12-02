@@ -10,8 +10,6 @@ from pythautomata.base_types.alphabet import Alphabet
 class DeterministicFiniteAutomatonTeacher(Teacher):
     def __init__(self, automaton: DFA, comparison_strategy: FiniteAutomataComparator):
         self.automaton = automaton
-        self._membership_queries_count: int = 0
-        self._equivalence_queries_count: int = 0
         self._comparison_strategy = comparison_strategy
         super().__init__()
 
