@@ -1,6 +1,7 @@
 from re import I
 import unittest
 from numpy import result_type
+from pythautomata.abstract.boolean_model import BooleanModel
 from pythautomata.automata.deterministic_finite_automaton import DeterministicFiniteAutomaton
 
 
@@ -24,8 +25,8 @@ class TestPACBooleanModelTeachers(unittest.TestCase):
     def setUp(self):
         self.learners = [LStarLearner()]
     
-    def teacher(self, automaton: DeterministicFiniteAutomaton) -> PACBooleanTeacher:
-        return PACBooleanTeacher(automaton, 0.005, 0.005,max_seq_length=20)
+    def teacher(self, model: BooleanModel) -> PACBooleanTeacher:
+        return PACBooleanTeacher(model, 0.005, 0.005,max_seq_length=20)
 
     def test_against_many_DFAs(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata()))
