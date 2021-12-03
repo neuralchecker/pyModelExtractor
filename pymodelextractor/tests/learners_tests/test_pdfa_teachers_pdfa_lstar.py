@@ -20,9 +20,9 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, 0, PDFAComparator())
         teacher2 = SampleProbabilisticTeacher(model, 0, sample_size=500, max_seq_length=20)
         teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0, max_seq_length=20)
-        result1 = self.learner.learn(teacher1)
-        result2 = self.learner.learn(teacher2)
-        result3 = self.learner.learn(teacher3)
+        result1 = self.learner.learn(teacher1, verbose = True)
+        result2 = self.learner.learn(teacher2, verbose = True)
+        result3 = self.learner.learn(teacher3, verbose = True)
         extracted_model1 = result1.model
         extracted_model2 = result2.model
         extracted_model3 = result3.model
@@ -35,10 +35,10 @@ class TestPDFATeachersLStar(unittest.TestCase):
         model = WeightedTomitasGrammars.get_automaton_2()
         teacher1 = PDFATeacher(model, 0, PDFAComparator())
         teacher2 = SampleProbabilisticTeacher(model, 0, sample_size=500, max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0, max_seq_length=20)
-        result1 = self.learner.learn(teacher1)
-        result2 = self.learner.learn(teacher2)
-        result3 = self.learner.learn(teacher3)
+        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0, max_seq_length=20)        
+        result1 = self.learner.learn(teacher1, verbose = True)
+        result2 = self.learner.learn(teacher2, verbose = True)
+        result3 = self.learner.learn(teacher3, verbose = True)
         extracted_model1 = result1.model
         extracted_model2 = result2.model
         extracted_model3 = result3.model
@@ -51,10 +51,10 @@ class TestPDFATeachersLStar(unittest.TestCase):
         model = WeightedTomitasGrammars.get_automaton_3()
         teacher1 = PDFATeacher(model, 0, PDFAComparator())
         teacher2 = SampleProbabilisticTeacher(model, 0.000001, sample_size=500, max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)
-        result1 = self.learner.learn(teacher1)
-        result2 = self.learner.learn(teacher2)
-        result3 = self.learner.learn(teacher3)
+        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)        
+        result1 = self.learner.learn(teacher1, verbose = True)
+        result2 = self.learner.learn(teacher2, verbose = True)
+        result3 = self.learner.learn(teacher3, verbose = True)
         extracted_model1 = result1.model
         extracted_model2 = result2.model
         extracted_model3 = result3.model
@@ -66,10 +66,10 @@ class TestPDFATeachersLStar(unittest.TestCase):
         model = WeightedTomitasGrammars.get_automaton_4()
         teacher1 = PDFATeacher(model, 0, PDFAComparator())
         teacher2 = SampleProbabilisticTeacher(model, 0.000001, sample_size=500, max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)
-        result1 = self.learner.learn(teacher1)
-        result2 = self.learner.learn(teacher2)
-        result3 = self.learner.learn(teacher3)
+        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)        
+        result1 = self.learner.learn(teacher1, verbose = True)
+        result2 = self.learner.learn(teacher2, verbose = True)
+        result3 = self.learner.learn(teacher3, verbose = True)
         extracted_model1 = result1.model
         extracted_model2 = result2.model
         extracted_model3 = result3.model
@@ -82,10 +82,10 @@ class TestPDFATeachersLStar(unittest.TestCase):
         model = WeightedTomitasGrammars.get_automaton_5()
         teacher1 = PDFATeacher(model, 0, PDFAComparator())
         teacher2 = SampleProbabilisticTeacher(model, 0.000001, sample_size=500, max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)
-        result1 = self.learner.learn(teacher1)
-        result2 = self.learner.learn(teacher2)
-        result3 = self.learner.learn(teacher3)
+        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)        
+        result1 = self.learner.learn(teacher1, verbose = True)
+        result2 = self.learner.learn(teacher2, verbose = True)
+        result3 = self.learner.learn(teacher3, verbose = True)
         extracted_model1 = result1.model
         extracted_model2 = result2.model
         extracted_model3 = result3.model
@@ -98,9 +98,9 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, 0, PDFAComparator())
         teacher2 = SampleProbabilisticTeacher(model, 0.000001, sample_size=500, max_seq_length=20)
         teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)
-        result1 = self.learner.learn(teacher1)
-        result2 = self.learner.learn(teacher2)
-        result3 = self.learner.learn(teacher3)
+        result1 = self.learner.learn(teacher1, verbose = True)
+        result2 = self.learner.learn(teacher2, verbose = True)
+        result3 = self.learner.learn(teacher3, verbose = True)
         extracted_model1 = result1.model
         extracted_model2 = result2.model
         extracted_model3 = result3.model
@@ -113,9 +113,9 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, 0, PDFAComparator())
         teacher2 = SampleProbabilisticTeacher(model, 0.000001, sample_size=500, max_seq_length=20)
         teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, 0.000001, max_seq_length=20)
-        result1 = self.learner.learn(teacher1)
-        result2 = self.learner.learn(teacher2)
-        result3 = self.learner.learn(teacher3)
+        result1 = self.learner.learn(teacher1, verbose = True)
+        result2 = self.learner.learn(teacher2, verbose = True)
+        result3 = self.learner.learn(teacher3, verbose = True)
         extracted_model1 = result1.model
         extracted_model2 = result2.model
         extracted_model3 = result3.model

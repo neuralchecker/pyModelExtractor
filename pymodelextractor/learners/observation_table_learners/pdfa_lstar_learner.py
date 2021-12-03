@@ -18,13 +18,13 @@ class PDFALStarLearner(PDFALearner):
         self._teacher = None
         self.tolerance = None
 
-    def learn(self, teacher: ProbabilisticTeacher) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         self.tolerance = teacher.tolerance
         start_time = time.time()
         self.reset()
-        print("\n\n***** Learning started at:", start_time, "*****\n\n")
+        if verbose: print("\n\n***** Learning started at:", start_time, "*****\n\n")
 
         model = None
         model_learned = False
@@ -32,31 +32,31 @@ class PDFALStarLearner(PDFALearner):
         counter_example_count = 0
 
         while not model_learned:
-            print("*** Start Iter", counter, "***")
+            if verbose: print("*** Start Iter", counter, "***")
             counter += 1
             start_inter_time = time.time()
 
-            print("Closing table...")
+            if verbose: print("Closing table...")
             self.__close()
 
-            print("Making table consistent...")
+            if verbose: print("Making table consistent...")
             self.__make_consistent()
 
-            print("Translating...")
+            if verbose: print("Translating...")
             model = self.model_translator.translate(self.observation_table, self.tolerance, self.terminal_symbol)
-            print("Performing Equivalence Query...")
+            if verbose: print("Performing Equivalence Query...")
             model_learned, counterexample = self.perform_equivalence_query(model)
             if not model_learned:
                 ce_time = time.time() - start_time
-                print("Found CounterExample after", ce_time, ":", counterexample)
+                if verbose: print("Found CounterExample after", ce_time, ":", counterexample)
                 counter_example_count += 1
                 self.__update_observation_table_with(counterexample)
 
             inter_time = time.time() - start_inter_time
-            print("*** Iter", counter, "finished after(secs):", inter_time, "- states:", len(model.weighted_states),
+            if verbose: print("*** Iter", counter, "finished after(secs):", inter_time, "- states:", len(model.weighted_states),
                   "- overall CE count:", counter_example_count, "***\n\n")
 
-        print("***** Learning completed successfully *****\n\n")
+        if verbose: print("***** Learning completed successfully *****\n\n")
 
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
