@@ -60,7 +60,8 @@ class PDFALStarLearner(PDFALearner):
 
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
-            'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,           
+            'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,
+            'observation_table_prefixes':self.observation_table               
         }
         learningResult = LearningResult(model, len(model.weighted_states), info)
         return learningResult
