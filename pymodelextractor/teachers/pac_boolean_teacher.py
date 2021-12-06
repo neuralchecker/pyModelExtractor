@@ -10,7 +10,7 @@ import numpy as np
 class PACBooleanTeacher(Teacher):
 
     def __init__(self, model: BooleanModel, epsilon: float, delta: float, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128,
-                 compute_epsilon_star: bool = True):
+                 compute_epsilon_star: bool = True, verbose: bool = False):
         self.__target_model = model
         self._epsilon = epsilon
         self._delta = delta
@@ -21,6 +21,7 @@ class PACBooleanTeacher(Teacher):
             self._sequence_generator = SequenceGenerator(self.__target_model.alphabet, max_seq_length= max_seq_length)
         else:
             self._sequence_generator = sequence_generator
+        self._verbose = verbose
         super().__init__()
 
     @property
@@ -41,10 +42,10 @@ class PACBooleanTeacher(Teacher):
 
     def equivalence_query(self, model: BooleanModel) -> Tuple[bool, Sequence]:
         self._equivalence_queries_count += 1
-        print("*** Equivalence Query - teacher counter:", self.equivalence_queries_count, "***")
+        if self._verbose: print("*** Equivalence Query - teacher counter:", self.equivalence_queries_count, "***")
 
         sample_size = self._calculate_sample_size()
-        print("Sample Size:", sample_size, "Epsilon:", self._epsilon, "Epsilon*:", self.epsilon_star, "Delta:", self._delta)
+        if self._verbose: print("Sample Size:", sample_size, "Epsilon:", self._epsilon, "Epsilon*:", self.epsilon_star, "Delta:", self._delta)
 
         errorCount = 0
         counterexample = None
