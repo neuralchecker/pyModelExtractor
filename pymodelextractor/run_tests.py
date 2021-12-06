@@ -17,8 +17,8 @@ def run():
                            TestLStarLearner,
                            TestPDFALStarColLearner,
                            TestPDFATeachersLStar,
-                           TestPDFATeachersLStarCol,
-                           TestPACBooleanModelTeachers]                      
+                           TestPDFATeachersLStarCol]#,
+                           #TestPACBooleanModelTeachers]                      
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

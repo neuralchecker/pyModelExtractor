@@ -109,17 +109,19 @@ class PDFALStarColLearner(PDFALearner):
                 self.__add_to_blue(new_blue_sequence)
             violating_sequence = self.observation_table.get_violating_closedness_sequence()
 
-    def _fill_hole_for(self, sequence: Sequence, suffix):
-        self.observation_table[sequence].append(self._teacher.last_token_weights(sequence, [suffix])[0])
+    def _fill_hole_for(self, sequence: Sequence, suffixes):
+        self.observation_table[sequence].extend(self._teacher.last_token_weights(sequence, suffixes))
 
     def __update_observation_table_with(self, counterexample):
+        all_suffixes = []
         for symbol in self.__symbols:
             count = counterexample + symbol
             suffixes = count.get_suffixes()
             for suffix in suffixes:
                 self.observation_table.add_suffix(suffix)
-                for sequence in self.observation_table.get_observed_sequences():
-                    self._fill_hole_for(sequence, suffix)
+                all_suffixes.append(suffix)
+        for sequence in self.observation_table.get_observed_sequences():
+            self._fill_hole_for(sequence, all_suffixes)
 
     # Helper methods
 
