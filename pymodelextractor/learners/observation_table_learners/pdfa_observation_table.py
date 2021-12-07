@@ -18,6 +18,7 @@ class PDFAObservationTable:
         self.__blue = set()
         self.__blue_queue = []
         self.__suffixes = []
+        self.__suffixes_set = set()
         self.__observations = {}
         self.__tolerance = tolerance
         self.symbols = alphabet.symbols
@@ -28,8 +29,14 @@ class PDFAObservationTable:
     def __setitem__(self, sequence: Sequence, observations_row):
         self.__observations[sequence] = observations_row
 
-    def add_suffix(self, sequence: Sequence) -> None:
-        self.__suffixes.append(sequence)
+    def add_suffix(self, sequence: Sequence) -> bool:
+        added = False
+        if sequence not in self.__suffixes_set:
+            self.__suffixes_set.add(sequence)
+            self.__suffixes.append(sequence)
+            added = True
+        return added
+
 
     def add_to_red(self, sequence: Sequence) -> None:
         self.red.add(sequence)

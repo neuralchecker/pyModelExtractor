@@ -119,8 +119,8 @@ class PDFALStarColLearner(PDFALearner):
             count = counterexample + symbol
             suffixes = count.get_suffixes()
             for suffix in suffixes:
-                self.observation_table.add_suffix(suffix)
-                all_suffixes.append(suffix)
+                added = self.observation_table.add_suffix(suffix)
+                if added: all_suffixes.append(suffix)
         for sequence in self.observation_table.get_observed_sequences():
             self._fill_hole_for(sequence, all_suffixes)
 
