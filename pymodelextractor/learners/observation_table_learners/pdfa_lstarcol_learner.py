@@ -8,6 +8,7 @@ from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstar
 from pymodelextractor.learners.pdfa_learner import PDFALearner
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
+from pymodelextractor.utilities import pdfa_utils
 
 
 class PDFALStarColLearner(PDFALearner):
@@ -46,7 +47,7 @@ class PDFALStarColLearner(PDFALearner):
                 ce_time = time.time() - start_time
                 if verbose: print("Found CounterExample after", ce_time, ":", counterexample)
                 counter_example_count += 1
-                self.__update_observation_table_with(counterexample)
+                self.__update_observation_table_with(counterexample, model)
 
             inter_time = time.time() - start_inter_time
             if verbose: print("*** Iter", counter, "finished after(secs):", inter_time, "- states:", len(model.weighted_states),
@@ -113,16 +114,31 @@ class PDFALStarColLearner(PDFALearner):
     def _fill_hole_for(self, sequence: Sequence, suffixes):
         self.observation_table[sequence].extend(self._teacher.last_token_weights(sequence, suffixes))
 
-    def __update_observation_table_with(self, counterexample):
+    def __update_observation_table_with(self, counterexample, proposed_model):
         all_suffixes = []
-        for symbol in self.__symbols:
-            count = counterexample + symbol
-            suffixes = count.get_suffixes()
-            for suffix in suffixes:
-                added = self.observation_table.add_suffix(suffix)
-                if added: all_suffixes.append(suffix)
+        differing_symbol = None
+        for symbol in self.__symbols:            
+            model_value = proposed_model.last_token_probabilities(counterexample, [symbol])[0]
+            teacher_value = self._teacher.last_token_weights(counterexample, [symbol])[0]
+            if not self._within_tolerance(teacher_value, model_value,self.tolerance):
+                differing_symbol = symbol
+                break
+        count = counterexample + differing_symbol
+        suffixes = count.get_suffixes()
+        for suffix in suffixes:
+            added = self.observation_table.add_suffix(suffix)
+            if added: all_suffixes.append(suffix)
         for sequence in self.observation_table.get_observed_sequences():
             self._fill_hole_for(sequence, all_suffixes)
+        # all_suffixes = []
+        # for symbol in self.__symbols:
+        #     count = counterexample + symbol
+        #     suffixes = count.get_suffixes()
+        #     for suffix in suffixes:
+        #         added = self.observation_table.add_suffix(suffix)
+        #         if added: all_suffixes.append(suffix)
+        # for sequence in self.observation_table.get_observed_sequences():
+        #     self._fill_hole_for(sequence, all_suffixes)
 
     # Helper methods
 
@@ -136,3 +152,6 @@ class PDFALStarColLearner(PDFALearner):
 
     def perform_equivalence_query(self, model):
         return self._teacher.equivalence_query(model)
+    
+    def _within_tolerance(self, value1, value2, tolerance):
+        return abs(value1 - value2) <= tolerance
