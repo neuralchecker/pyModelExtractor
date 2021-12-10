@@ -1,4 +1,5 @@
 import time
+import numpy as np
 
 from pythautomata.base_types.sequence import Sequence
 from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
@@ -50,14 +51,15 @@ class PDFALStarColLearner(PDFALearner):
                 self.__update_observation_table_with(counterexample, model)
 
             inter_time = time.time() - start_inter_time
-            if verbose: print("*** Iter", counter, "finished after(secs):", inter_time, "- states:", len(model.weighted_states),
-                  "- overall CE count:", counter_example_count, "***\n\n")
+            if verbose: print("*** Iter", counter, "finished after(secs):", inter_time, "- states:",
+                              len(model.weighted_states),
+                              "- overall CE count:", counter_example_count, "***\n\n")
 
         if verbose: print("***** Learning completed successfully *****\n\n")
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
-            'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,     
-            'observation_table_prefixes':self.observation_table              
+            'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,
+            'observation_table_prefixes': self.observation_table
         }
         learningResult = LearningResult(model, len(model.weighted_states), info)
         return learningResult
@@ -116,29 +118,35 @@ class PDFALStarColLearner(PDFALearner):
 
     def __update_observation_table_with(self, counterexample, proposed_model):
         all_suffixes = []
-        differing_symbol = None
-        for symbol in self.__symbols:            
-            model_value = proposed_model.last_token_probabilities(counterexample, [symbol])[0]
-            teacher_value = self._teacher.last_token_weights(counterexample, [symbol])[0]
-            if not self._within_tolerance(teacher_value, model_value,self.tolerance):
-                differing_symbol = symbol
-                break
-        count = counterexample + differing_symbol
+        count, differing_symbol = self.__get_shortest_counterexample_with_symbol(counterexample, proposed_model)
+        if differing_symbol != self.terminal_symbol:
+            count = count + differing_symbol
         suffixes = count.get_suffixes()
         for suffix in suffixes:
             added = self.observation_table.add_suffix(suffix)
-            if added: all_suffixes.append(suffix)
+            if added:
+                all_suffixes.append(suffix)
         for sequence in self.observation_table.get_observed_sequences():
             self._fill_hole_for(sequence, all_suffixes)
-        # all_suffixes = []
-        # for symbol in self.__symbols:
-        #     count = counterexample + symbol
-        #     suffixes = count.get_suffixes()
-        #     for suffix in suffixes:
-        #         added = self.observation_table.add_suffix(suffix)
-        #         if added: all_suffixes.append(suffix)
-        # for sequence in self.observation_table.get_observed_sequences():
-        #     self._fill_hole_for(sequence, all_suffixes)
+
+    def __get_shortest_counterexample_with_symbol(self, counterexample, proposed_model):
+        symbols = list(self.__symbols)
+        symbols.append(self.terminal_symbol)
+        suffixes = counterexample.get_suffixes()
+        suffixes.reverse()
+        for suffix in suffixes:
+            is_counterexample, symbol = self.__check_counterexample(suffix, symbols, proposed_model)
+            if is_counterexample:
+                return suffix, symbol
+        return None, None
+
+    def __check_counterexample(self, suffix, symbols, proposed_model):
+        model_values = np.array(proposed_model.last_token_probabilities(suffix, symbols))
+        teacher_values = np.array(self._teacher.last_token_weights(suffix, symbols))
+        diff = abs(model_values - teacher_values)
+        if max(diff) > self.tolerance:
+            return True, symbols[np.argmax(diff)]
+        return False, None
 
     # Helper methods
 
@@ -152,6 +160,6 @@ class PDFALStarColLearner(PDFALearner):
 
     def perform_equivalence_query(self, model):
         return self._teacher.equivalence_query(model)
-    
+
     def _within_tolerance(self, value1, value2, tolerance):
         return abs(value1 - value2) <= tolerance
