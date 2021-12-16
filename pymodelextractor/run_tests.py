@@ -1,6 +1,7 @@
 from unittest import TestLoader, TestSuite, TextTestRunner
 
 from pymodelextractor.tests.learners_tests.test_lstar_learner import TestLStarLearner
+from pymodelextractor.tests.learners_tests.test_lstarcol_learner import TestLStarColLearner
 from pymodelextractor.tests.learners_tests.test_kearns_vazirani_learner import TestKearnsVaziraniLearner
 from pymodelextractor.tests.learners_tests.test_pdfa_lstar_learner import TestPDFALStarLearner
 from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_learner import TestPDFALStarColLearner
@@ -12,6 +13,7 @@ from tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanMo
 
 def run():
     test_classes_to_run = [TestLStarLearner,
+                           TestLStarColLearner,
                            TestPDFALStarLearner,
                            TestKearnsVaziraniLearner,
                            TestLStarLearner,
