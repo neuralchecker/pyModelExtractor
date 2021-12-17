@@ -51,7 +51,12 @@ class KearnsVaziraniLearner(Learner):
                 are_equivalent, counterexample = self._teacher.equivalence_query(model)                
 
         numberOfStates = len(model.states) if model is not None else 0
-        return LearningResult(model, numberOfStates)
+        info = {
+            'equivalence_queries_count': self._teacher.equivalence_queries_count,
+            'last_token_weight_queries_count': self._teacher.membership_queries_count,
+            'observation_tree': self._tree
+        }
+        return LearningResult(model, numberOfStates, info)
 
     def tentative_hypothesis(self) -> DFA:
         states = {}

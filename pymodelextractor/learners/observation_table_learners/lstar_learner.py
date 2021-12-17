@@ -100,7 +100,12 @@ class LStarLearner(Learner):
 
     def _learning_results_for(self, model):
         numberOfStates = len(model.states) if model is not None else 0
-        return LearningResult(model, numberOfStates)
+        info = {
+            'equivalence_queries_count': self._teacher.equivalence_queries_count,
+            'last_token_weight_queries_count': self._teacher.membership_queries_count,
+            'observation_table': self._observation_table
+        }
+        return LearningResult(model, numberOfStates, info)
 
     # Helper methods
     @property
