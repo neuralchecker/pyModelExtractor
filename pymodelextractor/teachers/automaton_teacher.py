@@ -23,7 +23,7 @@ class DeterministicFiniteAutomatonTeacher(Teacher):
 
     @property
     def equivalence_queries_count(self) -> int:
-        return self.equivalence_queries_count
+        return self._equivalence_queries_count
 
     def membership_query(self, sequence: Sequence) -> bool:
         self._membership_queries_count += 1
