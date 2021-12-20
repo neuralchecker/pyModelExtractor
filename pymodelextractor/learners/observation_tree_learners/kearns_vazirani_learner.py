@@ -53,7 +53,7 @@ class KearnsVaziraniLearner(Learner):
         numberOfStates = len(model.states) if model is not None else 0
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
-            'last_token_weight_queries_count': self._teacher.membership_queries_count,
+            'membership_queries_count': self._teacher.membership_queries_count,
             'observation_tree': self._tree
         }
         return LearningResult(model, numberOfStates, info)
