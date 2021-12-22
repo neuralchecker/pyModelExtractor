@@ -1,6 +1,7 @@
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import Symbol
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
+from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.pdfa_learner import PDFALearner
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
@@ -54,14 +55,32 @@ class PDFAKearnsVaziraniLearner(PDFALearner):
         self._teacher = teacher
         self.tolerance = teacher.tolerance
         #self.reset()        
-
+        #DEBUG
+        models = []
+        
+        #END DEBUG
         is_target_DFA, model = self.initialization()
         if not is_target_DFA:
             model = self.tentative_hypothesis()
+            #DEBUG
+            models.append(model)
+            last_size = len(model.weighted_states)
+
+            #END DEBUG
             are_equivalent, counterexample = self._teacher.equivalence_query(model)
-            while not are_equivalent:
+            while not are_equivalent:                
                 self.update_tree(counterexample, model)
                 model = self.tentative_hypothesis()
+                #DEBUG
+                size = len(model.weighted_states)
+                #if size==last_size:
+                #    for m in models:
+                #        out = str('./runs/')
+                #        print(m._WeightedAutomaton__exporting_strategies[0])
+                #       m._WeightedAutomaton__exporting_strategies[0].export(m, out)
+                assert(size>last_size)
+                last_size = size
+                #END DEBUG
                 are_equivalent, counterexample = self._teacher.equivalence_query(model)                
 
         numberOfStates = len(model.weighted_states) if model is not None else 0
@@ -87,7 +106,8 @@ class PDFAKearnsVaziraniLearner(PDFALearner):
                 access_string_of_transition = self._tree.sift(access_string+symbol)
                 state.add_transition(symbol, states[access_string_of_transition], self._tree.leaves[access_string].probabilities[symbol])
         
-        return PDFA(self._alphabet, frozenset(states.values()), self.terminal_symbol)
+        comparator = WFAComparator()
+        return PDFA(self._alphabet, set(states.values()), self.terminal_symbol, comparator=comparator)
         
     def get_accessing_string(self, model: PDFA, sequence: Sequence):
         state = model.get_first_state()
@@ -113,8 +133,12 @@ class PDFAKearnsVaziraniLearner(PDFALearner):
                 distinguishing_string_found = True
                 break
             gamma_j_minus_1 = prefix
+        if not distinguishing_string_found:
+            #We should update left-most leaf
+            self._tree.update_leftmost_node(counterexample)
+
         #Some distinguishing string must have been found, if not an infinite loop occurs    
-        assert(distinguishing_string_found)
+        #assert(distinguishing_string_found)
 
     def create_single_state_PDFA(self, probabilities: OrderedDict[Symbol, float]):
         final_weight = probabilities[self.terminal_symbol]
@@ -129,7 +153,11 @@ class ClassificationTree():
         self._teacher = teacher
         self.root = root
         self.add_leaves_to_dict()
-  
+    
+    @property
+    def depth(self) -> int:
+        return max([x.depth for x in self.leaves.values()])
+
     def add_leaves_to_dict(self):
         q = [self.root]
         self.leaves = {}
@@ -196,6 +224,37 @@ class ClassificationTree():
             t2 = t2.parent
         return t1.string
 
+    def get_leftmost_node(self):
+        node = self.root
+        while node.left is not None:
+            node = node.left[0]
+        return self.leaves[node.string]
+
+    def update_leftmost_node(self, counterexample):
+        old_node = self.get_leftmost_node()
+        node1_str = old_node.string
+        node2_str = counterexample
+        old_node.string = epsilon
+
+        next_token_probabilities_node1 = self._next_token_probabilities(node1_str)
+        next_token_probabilities_node2 = self._next_token_probabilities(node2_str)
+
+        node_1 = ClassificationNode(node1_str, parent = old_node, probabilities = next_token_probabilities_node1)
+        node_2 = ClassificationNode(node2_str, parent = old_node, probabilities = next_token_probabilities_node2)
+
+        old_node.right = (node_1, next_token_probabilities_node1)
+        old_node.left = (node_2, next_token_probabilities_node2)
+        print("-----update_leftmost_node----")
+        print('Old Node (new Leaf)', node1_str)
+        print('New Leaf (counterexample)', node2_str)
+        print(self.leaves.keys())
+        self.leaves.update({
+        node1_str : node_1,
+        node2_str: node_2,
+        })
+        print(self.leaves.keys())
+        print("---------")
+
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
         old_node.string = distinguishing_string
@@ -216,11 +275,16 @@ class ClassificationTree():
         else:
             old_node.right = (node_2, next_token_probabilities_node2)
             old_node.left = (node_1, next_token_probabilities_node1)
-
+        print("----update_node----")
+        print('Old Node (new Leaf)', node_to_be_replaced)
+        print('New Leaf', leaf_1)
+        print(self.leaves.keys())
         self.leaves.update({
         leaf_1 : node_1,
         node_to_be_replaced: node_2,
         })
+        print(self.leaves.keys())
+        print("--------")
 
 class ClassificationNode():
     def __init__(self, string: Sequence, parent: 'ClassificationNode' = None, probabilities  = None):

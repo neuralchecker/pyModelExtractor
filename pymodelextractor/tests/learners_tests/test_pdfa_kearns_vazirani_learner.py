@@ -1,5 +1,7 @@
 import unittest
 from numpy import result_type
+from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton
+from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 
 from pythautomata.automata_definitions.weighted_tomitas_grammars import WeightedTomitasGrammars
 
@@ -8,6 +10,13 @@ from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
+from pythautomata.utilities import pdfa_generator
+from pythautomata.utilities import abbadingo_one_dfa_generator
+
+from pythautomata.base_types.alphabet import Alphabet
+from pythautomata.base_types.symbol import SymbolStr
+
+binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
 class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
 
@@ -76,3 +85,59 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result.info['equivalence_queries_count']>0)
+
+    def generate_ad_hoc_PDFA(self):
+        qeps = WeightedState("qeps", 1, 0.1)
+        q0 = WeightedState("q0", 0, 0.1)
+        q1 = WeightedState("q1", 0, 0.2)
+        zero = SymbolStr('0')
+        one = SymbolStr('1')
+        qeps.add_transition(zero, q0, 0.2)
+        qeps.add_transition(one, q1, 0.7)
+        q0.add_transition(zero, q0, 0.5)
+        q0.add_transition(one, q0, 0.4)
+        q1.add_transition(zero, q1, 0.4)
+        q1.add_transition(one, q1, 0.4)
+
+        states = {qeps, q0, q1}
+        comparator = PDFAComparator()
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "WeightedTomitas1")
+
+
+    def test_ad_hoc_PDFA(self):
+        model = self.generate_ad_hoc_PDFA()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
+
+    def generate_random_pdfas(self, sizes, n):
+        pdfas = []
+        
+        for size in sizes:
+            for i in range(n):
+                dfa = abbadingo_one_dfa_generator.generate_dfa(alphabet = binaryAlphabet, nominal_size= size, seed = i)
+                dfa.name = "random_DFA_nominal_size_"+str(size)+"_"+str(i)
+                pdfa = pdfa_generator.pdfa_from_dfa(dfa)
+                pdfa.name = "random_PDFA_nominal_size_"+str(size)+"_"+str(i)
+                pdfas.append(pdfa)
+        return pdfas
+
+
+    def test_against_random_PDFAs(self):
+        models = self.generate_random_pdfas(sizes = [3, 5, 7], n = 100)  
+        for model in models:
+            print('Extracting model:', model.name)
+            model.export('./runs/')
+            tolerance = 0.1
+            teacher = PDFATeacher(model, tolerance, PDFAComparator())
+            result = self.learner.learn(teacher)
+            extracted_model = result.model
+            extracted_model.name = 'extracted_model_'
+            extracted_model.export('./runs/')
+            comparator = PDFAComparator()
+            self.assertTrue(comparator.get_counterexample_between(model, extracted_model, tolerance) is None)
+            self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+            self.assertTrue(result.info['equivalence_queries_count']>0)
