@@ -68,16 +68,22 @@ class PDFAKearnsVaziraniLearner(PDFALearner):
 
             #END DEBUG
             are_equivalent, counterexample = self._teacher.equivalence_query(model)
-            while not are_equivalent:                
+            while not are_equivalent:             
+                
+                print('Size before update:',last_size)   
                 self.update_tree(counterexample, model)
                 model = self.tentative_hypothesis()
+                models.append(model)
                 #DEBUG
                 size = len(model.weighted_states)
+                print('Size after update:',size)
                 #if size==last_size:
                 #    for m in models:
                 #        out = str('./runs/')
                 #        print(m._WeightedAutomaton__exporting_strategies[0])
                 #       m._WeightedAutomaton__exporting_strategies[0].export(m, out)
+                if size <= last_size:
+                    print('ESTO SE CAE A LA MIERDA')
                 assert(size>last_size)
                 last_size = size
                 #END DEBUG
@@ -123,6 +129,7 @@ class PDFAKearnsVaziraniLearner(PDFALearner):
         s_i = epsilon
         gamma_j_minus_1 = epsilon
         distinguishing_string_found = False
+        print('CE:', counterexample)
         for prefix in counterexample.get_prefixes():
             s_i_minus_1 = s_i
             s_i = self._tree.sift(prefix)
@@ -242,8 +249,8 @@ class ClassificationTree():
         node_1 = ClassificationNode(node1_str, parent = old_node, probabilities = next_token_probabilities_node1)
         node_2 = ClassificationNode(node2_str, parent = old_node, probabilities = next_token_probabilities_node2)
 
-        old_node.right = (node_1, next_token_probabilities_node1)
-        old_node.left = (node_2, next_token_probabilities_node2)
+        old_node.left = (node_1, next_token_probabilities_node1)
+        old_node.right = (node_2, next_token_probabilities_node2)
         print("-----update_leftmost_node----")
         print('Old Node (new Leaf)', node1_str)
         print('New Leaf (counterexample)', node2_str)
@@ -265,16 +272,18 @@ class ClassificationTree():
         node_2 = ClassificationNode(node_to_be_replaced, parent = old_node, probabilities = next_token_probabilities_node2)
 
         node1_cont = leaf_1+distinguishing_string
-        node1_cont_probabilities = self._next_token_probabilities(node1_cont).values()
+        node1_cont_probabilities = self._next_token_probabilities(node1_cont)
         node2_cont = node_to_be_replaced+distinguishing_string
-        node2_cont_probabilities = self._next_token_probabilities(node2_cont).values()
+        node2_cont_probabilities = self._next_token_probabilities(node2_cont)
 
-        if pdfa_utils.are_within_tolerance_limit(list(next_token_probabilities_node1.values()),list(node1_cont_probabilities), self._teacher.tolerance):
-            old_node.right = (node_1, next_token_probabilities_node1)
-            old_node.left = (node_2, next_token_probabilities_node2)
-        else:
-            old_node.right = (node_2, next_token_probabilities_node2)
-            old_node.left = (node_1, next_token_probabilities_node1)
+        old_node.right = (node_1, node1_cont_probabilities)
+        old_node.left = (node_2, node2_cont_probabilities)
+        # if pdfa_utils.are_within_tolerance_limit(list(next_token_probabilities_node1.values()),list(node1_cont_probabilities), self._teacher.tolerance):
+        #     old_node.right = (node_1, node1_cont_probabilities)
+        #     old_node.left = (node_2, node2_cont_probabilities)
+        # else:
+        #     old_node.right = (node_2, node2_cont_probabilities)
+        #     old_node.left = (node_1, node1_cont_probabilities)
         print("----update_node----")
         print('Old Node (new Leaf)', node_to_be_replaced)
         print('New Leaf', leaf_1)

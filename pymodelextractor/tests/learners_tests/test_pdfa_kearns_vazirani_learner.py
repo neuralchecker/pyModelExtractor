@@ -86,7 +86,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    def generate_ad_hoc_PDFA(self):
+    def generate_ad_hoc_PDFA1(self):
         qeps = WeightedState("qeps", 1, 0.1)
         q0 = WeightedState("q0", 0, 0.1)
         q1 = WeightedState("q1", 0, 0.2)
@@ -103,10 +103,79 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
         comparator = PDFAComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "WeightedTomitas1")
 
+    def generate_ad_hoc_PDFA2(self):
+        
+        q0 = WeightedState("q0", 1, 0.8)
+        q1 = WeightedState("q1", 0, 0.1)
+        q2 = WeightedState("q2", 0, 0.4)
+        q3 = WeightedState("q3", 0, 0.4)
 
-    def test_ad_hoc_PDFA(self):
-        model = self.generate_ad_hoc_PDFA()
+        zero = SymbolStr('0')
+        one = SymbolStr('1')
+        q0.add_transition(zero, q2, 0.1)
+        q0.add_transition(one, q1, 0.1)
+        q1.add_transition(zero, q0, 0.8)
+        q1.add_transition(one, q3, 0.1)
+        q2.add_transition(zero, q0, 0.3)
+        q2.add_transition(one, q2, 0.3)
+        q3.add_transition(zero, q1, 0.3)
+        q3.add_transition(one, q3, 0.3)
+
+        states = {q0, q1, q2, q3}
+        comparator = PDFAComparator()
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "WeightedTomitas1")
+
+    def generate_ad_hoc_PDFA3(self):
+        
+        q0 = WeightedState("q0", 1, 0.8)
+        q1 = WeightedState("q1", 0, 0.1)
+        q2 = WeightedState("q2", 0, 0.4)
+        q3 = WeightedState("q3", 0, 0.4)
+        q4 = WeightedState("q3", 0, 0.1)
+
+        zero = SymbolStr('0')
+        one = SymbolStr('1')
+        q0.add_transition(zero, q0, 0.1)
+        q0.add_transition(one, q1, 0.1)
+        q1.add_transition(zero, q3, 0.8)
+        q1.add_transition(one, q2, 0.1)
+        q2.add_transition(zero, q4, 0.3)
+        q2.add_transition(one, q1, 0.3)
+        q3.add_transition(zero, q1, 0.3)
+        q3.add_transition(one, q3, 0.3)
+        q4.add_transition(zero, q4, 0.1)
+        q4.add_transition(one, q1, 0.8)
+
+        states = {q0, q1, q2, q3, q4}
+        comparator = PDFAComparator()
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "WeightedTomitas1")
+
+
+    def test_ad_hoc_PDFA1(self):
+        model = self.generate_ad_hoc_PDFA1()
         teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
+
+    def test_ad_hoc_PDFA2(self):
+        print('LEARNING IMPORTANT CASE----------------------------------')
+        
+        model = self.generate_ad_hoc_PDFA2()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
+
+    def test_ad_hoc_PDFA3(self):
+        print('LEARNING IMPORTANT CASE----------------------------------')
+        
+        model = self.generate_ad_hoc_PDFA3()
+        teacher = PDFATeacher(model, 0.1, PDFAComparator())
         result = self.learner.learn(teacher)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
@@ -127,7 +196,8 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
 
 
     def test_against_random_PDFAs(self):
-        models = self.generate_random_pdfas(sizes = [3, 5, 7], n = 100)  
+        models = self.generate_random_pdfas(sizes = [3, 5, 7,10], n = 100)  
+        #models = []
         for model in models:
             print('Extracting model:', model.name)
             model.export('./runs/')
@@ -136,7 +206,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
             result = self.learner.learn(teacher)
             extracted_model = result.model
             extracted_model.name = 'extracted_model_'
-            extracted_model.export('./runs/')
+            #extracted_model.export('./runs/')
             comparator = PDFAComparator()
             self.assertTrue(comparator.get_counterexample_between(model, extracted_model, tolerance) is None)
             self.assertTrue(result.info['last_token_weight_queries_count']>0)        
