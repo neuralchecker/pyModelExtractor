@@ -10,7 +10,7 @@ from tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerW
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
 from tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanModelTeachers
-
+from tests.learners_tests.test_pdfa_n_ary_tree_learner import TestPDFANAryTreeLearner
 
 def run():
     # test_classes_to_run = [TestLStarLearner,
@@ -22,7 +22,7 @@ def run():
     #                        TestPDFATeachersLStar,
     #                        TestPDFATeachersLStarCol]#,
                            #TestPACBooleanModelTeachers]  
-    test_classes_to_run = [ TestPDFAKearnsVaziraniLearner  ]                  
+    test_classes_to_run = [ TestPDFANAryTreeLearner  ]                  
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

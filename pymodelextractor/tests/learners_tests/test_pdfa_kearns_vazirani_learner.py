@@ -101,7 +101,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
 
         states = {qeps, q0, q1}
         comparator = PDFAComparator()
-        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "WeightedTomitas1")
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA1")
 
     def generate_ad_hoc_PDFA2(self):
         
@@ -123,7 +123,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
 
         states = {q0, q1, q2, q3}
         comparator = PDFAComparator()
-        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "WeightedTomitas1")
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA2")
 
     def generate_ad_hoc_PDFA3(self):
         
@@ -148,8 +148,29 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
 
         states = {q0, q1, q2, q3, q4}
         comparator = PDFAComparator()
-        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "WeightedTomitas1")
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA3")
 
+    def generate_ad_hoc_PDFA4(self):
+        
+        qeps = WeightedState("qeps", 1, 0.8)
+        q0 = WeightedState("q0", 0, 0.4)
+        q1 = WeightedState("q1", 0, 0.4)
+        q11 = WeightedState("q11", 0, 0.1)
+
+        zero = SymbolStr('0')
+        one = SymbolStr('1')
+        qeps.add_transition(zero, q0, 0.1)
+        qeps.add_transition(one, q1, 0.1)
+        q0.add_transition(zero, qeps, 0.3)
+        q0.add_transition(one, q1, 0.3)
+        q1.add_transition(zero, q0, 0.3)
+        q1.add_transition(one, q11, 0.3)        
+        q11.add_transition(zero, q0, 0.1)
+        q11.add_transition(one, q11, 0.8)
+
+        states = {qeps, q0, q1, q11}
+        comparator = PDFAComparator()
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA4")
 
     def test_ad_hoc_PDFA1(self):
         model = self.generate_ad_hoc_PDFA1()
@@ -160,8 +181,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    def test_ad_hoc_PDFA2(self):
-        print('LEARNING IMPORTANT CASE----------------------------------')
+    def test_ad_hoc_PDFA2(self):        
         
         model = self.generate_ad_hoc_PDFA2()
         teacher = PDFATeacher(model, 0, PDFAComparator())
@@ -171,9 +191,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    def test_ad_hoc_PDFA3(self):
-        print('LEARNING IMPORTANT CASE----------------------------------')
-        
+    def test_ad_hoc_PDFA3(self):     
         model = self.generate_ad_hoc_PDFA3()
         teacher = PDFATeacher(model, 0.1, PDFAComparator())
         result = self.learner.learn(teacher)
@@ -182,9 +200,19 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result.info['equivalence_queries_count']>0)
 
+    
+    def test_ad_hoc_PDFA4(self):     
+        model = self.generate_ad_hoc_PDFA4()
+        model.export('./')
+        teacher = PDFATeacher(model, 0.1, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
+
     def generate_random_pdfas(self, sizes, n):
-        pdfas = []
-        
+        pdfas = []        
         for size in sizes:
             for i in range(n):
                 dfa = abbadingo_one_dfa_generator.generate_dfa(alphabet = binaryAlphabet, nominal_size= size, seed = i)
@@ -196,7 +224,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
 
 
     def test_against_random_PDFAs(self):
-        models = self.generate_random_pdfas(sizes = [3, 5, 7,10], n = 100)  
+        models = self.generate_random_pdfas(sizes = [3, 5], n = 200)  
         #models = []
         for model in models:
             print('Extracting model:', model.name)
@@ -205,7 +233,7 @@ class TestPDFAKearnsVaziraniLearner(unittest.TestCase):
             teacher = PDFATeacher(model, tolerance, PDFAComparator())
             result = self.learner.learn(teacher)
             extracted_model = result.model
-            extracted_model.name = 'extracted_model_'
+            #extracted_model.name = 'extracted_model_'
             #extracted_model.export('./runs/')
             comparator = PDFAComparator()
             self.assertTrue(comparator.get_counterexample_between(model, extracted_model, tolerance) is None)
