@@ -23,68 +23,68 @@ class TestPDFANAryTreeLearner(unittest.TestCase):
     def setUp(self):
         self.learner = PDFANAryTreeLearner()
 
-    # def test_tomitas_1(self):
-    #     model = WeightedTomitasGrammars.get_automaton_1()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_tomitas_1(self):
+        model = WeightedTomitasGrammars.get_automaton_1()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_tomitas_2(self):
-    #     model = WeightedTomitasGrammars.get_automaton_2()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_tomitas_2(self):
+        model = WeightedTomitasGrammars.get_automaton_2()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_tomitas_3(self):
-    #     model = WeightedTomitasGrammars.get_automaton_3()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_tomitas_3(self):
+        model = WeightedTomitasGrammars.get_automaton_3()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_tomitas_4(self):
-    #     model = WeightedTomitasGrammars.get_automaton_4()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_tomitas_4(self):
+        model = WeightedTomitasGrammars.get_automaton_4()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_tomitas_5(self):
-    #     model = WeightedTomitasGrammars.get_automaton_5()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_tomitas_5(self):
+        model = WeightedTomitasGrammars.get_automaton_5()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_tomitas_6(self):
-    #     model = WeightedTomitasGrammars.get_automaton_6()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_tomitas_6(self):
+        model = WeightedTomitasGrammars.get_automaton_6()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_tomitas_7(self):
-    #     model = WeightedTomitasGrammars.get_automaton_7()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_tomitas_7(self):
+        model = WeightedTomitasGrammars.get_automaton_7()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
     def generate_ad_hoc_PDFA1(self):
         qeps = WeightedState("qeps", 1, 0.1)
@@ -216,54 +216,54 @@ class TestPDFANAryTreeLearner(unittest.TestCase):
         comparator = PDFAComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA6")
 
-    # def test_ad_hoc_PDFA1(self):
-    #     model = self.generate_ad_hoc_PDFA1()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_ad_hoc_PDFA1(self):
+        model = self.generate_ad_hoc_PDFA1()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_ad_hoc_PDFA2(self):        
+    def test_ad_hoc_PDFA2(self):        
         
-    #     model = self.generate_ad_hoc_PDFA2()
-    #     teacher = PDFATeacher(model, 0, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+        model = self.generate_ad_hoc_PDFA2()
+        teacher = PDFATeacher(model, 0, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_ad_hoc_PDFA3(self):     
-    #     model = self.generate_ad_hoc_PDFA3()
-    #     teacher = PDFATeacher(model, 0.1, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_ad_hoc_PDFA3(self):     
+        model = self.generate_ad_hoc_PDFA3()
+        teacher = PDFATeacher(model, 0.1, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
     
-    # def test_ad_hoc_PDFA4(self):     
-    #     model = self.generate_ad_hoc_PDFA4()
-    #     model.export('./')
-    #     teacher = PDFATeacher(model, 0.1, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_ad_hoc_PDFA4(self):     
+        model = self.generate_ad_hoc_PDFA4()
+        model.export('./')
+        teacher = PDFATeacher(model, 0.1, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    # def test_ad_hoc_PDFA5(self):     
-    #     model = self.generate_ad_hoc_PDFA5()
-    #     model.export('./')
-    #     teacher = PDFATeacher(model, 0.1, PDFAComparator())
-    #     result = self.learner.learn(teacher)
-    #     extracted_model = result.model
-    #     self.assertEqual(model, extracted_model)
-    #     self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-    #     self.assertTrue(result.info['equivalence_queries_count']>0)
+    def test_ad_hoc_PDFA5(self):     
+        model = self.generate_ad_hoc_PDFA5()
+        model.export('./')
+        teacher = PDFATeacher(model, 0.1, PDFAComparator())
+        result = self.learner.learn(teacher)
+        extracted_model = result.model
+        self.assertEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+        self.assertTrue(result.info['equivalence_queries_count']>0)
     
     def test_ad_hoc_PDFA6(self):     
         model = self.generate_ad_hoc_PDFA6()
@@ -288,8 +288,8 @@ class TestPDFANAryTreeLearner(unittest.TestCase):
 
 
     def test_against_random_PDFAs(self):
-        models = self.generate_random_pdfas(sizes = [3, 5], n = 1000)  
-        models = []
+        models = self.generate_random_pdfas(sizes = [7, 10, 20], n = 100)  
+        #models = []
         for model in models:
             print('Extracting model:', model.name)
             model.export('./runs/')

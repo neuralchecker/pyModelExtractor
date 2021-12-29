@@ -177,6 +177,7 @@ class ClassificationTree():
         self._teacher = teacher
         self.root = root
         self.add_leaves_to_dict()
+        self._equivalence_dict = dict()
     
     @property
     def depth(self) -> int:
@@ -216,6 +217,9 @@ class ClassificationTree():
     def _look_for_branch(self, childs, probabilities, tolerance):
         if tuple(probabilities) in childs:
             return probabilities
+        if tuple(probabilities) in self._equivalence_dict:
+            if self._equivalence_dict[tuple(probabilities)] in childs:
+                return self._equivalence_dict[tuple(probabilities)] 
         t_eq_probs = []
         for probs in childs.keys():
             probs = list(probs)
@@ -224,7 +228,11 @@ class ClassificationTree():
         if len(t_eq_probs) == 0:
             return None
         else:
-            return min(t_eq_probs, key=lambda x: x[1])[0]
+            equivalent = tuple(min(t_eq_probs, key=lambda x: x[1])[0])
+            if equivalent not in self._equivalence_dict: 
+                self._equivalence_dict[equivalent] = tuple(probabilities)
+            self._equivalence_dict[tuple(probabilities)] = equivalent
+            return equivalent
 
 
     #TODO: This should be inside the teacher abstraction or even inside the ProbabityModel abstraction
