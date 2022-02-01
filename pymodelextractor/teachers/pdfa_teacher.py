@@ -6,8 +6,8 @@ from typing import Union
 
 class PDFATeacher(ProbabilisticTeacher):
 
-    def __init__(self, model: PDFA, tolerance: float, comparison_strategy: PDFAComparator):
-        super().__init__(tolerance)
+    def __init__(self, model: PDFA, comparison_strategy: PDFAComparator):
+        super().__init__()
         self._comparison_strategy = comparison_strategy
         self.__target_pdfa_model = model
 
@@ -26,7 +26,7 @@ class PDFATeacher(ProbabilisticTeacher):
     
     def equivalence_query(self, aut: PDFA) -> tuple[bool, Union[Sequence,None]]:
         self._equivalence_queries_count += 1
-        counterexample = self._comparison_strategy.get_counterexample_between(aut, self.__target_pdfa_model, tolerance = self.tolerance)
+        counterexample = self._comparison_strategy.get_counterexample_between(aut, self.__target_pdfa_model)
         are_equivalent = counterexample is None
         return (are_equivalent, counterexample)
 
