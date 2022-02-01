@@ -237,7 +237,7 @@ class ClassificationTree():
         for probs in childs.keys():
             probs = list(probs)
             if pdfa_utils.are_in_same_partition(probs,probabilities, partitions):
-                return probabilities
+                return probs
         return None
         
 

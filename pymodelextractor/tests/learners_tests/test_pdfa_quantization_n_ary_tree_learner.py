@@ -61,7 +61,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_5(self):
         model = WeightedTomitasGrammars.get_automaton_5()
-        teacher = PDFATeacher(model, 0, PDFAComparator())
+        teacher = PDFATeacher(model, PDFAComparator())
         result = self.learner.learn(teacher, partitions = 10)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
@@ -293,14 +293,14 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         #models = []
         for model in models:
             print('Extracting model:', model.name)
-            model.export('./runs/')
+            #model.export('./runs/')
             tolerance = 0.1
-            teacher = PDFATeacher(model, tolerance, PDFAComparator())
-            result = self.learner.learn(teacher, partitions = 10)
+            teacher = PDFATeacher(model, PDFAComparator())
+            result = self.learner.learn(teacher, partitions = 20)
             extracted_model = result.model
             #extracted_model.name = 'extracted_model_'
             #extracted_model.export('./runs/')
-            comparator = PDFAComparator()
-            self.assertTrue(comparator.get_counterexample_between(model, extracted_model, tolerance) is None)
+            comparator = PDFAComparator(tolerance = tolerance)
+            self.assertTrue(comparator.get_counterexample_between(model, extracted_model) is None)
             self.assertTrue(result.info['last_token_weight_queries_count']>0)        
             self.assertTrue(result.info['equivalence_queries_count']>0)
