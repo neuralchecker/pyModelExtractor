@@ -289,7 +289,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
 
     def test_against_random_PDFAs(self):
-        models = self.generate_random_pdfas(sizes = [7, 10, 20], n = 100)  
+        models = self.generate_random_pdfas(sizes = [7, 10, 20], n = 1000)  
         #models = []
         for model in models:
             print('Extracting model:', model.name)
