@@ -121,7 +121,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
                 if updated_tree:
                         break
             
-        comparator = WFAComparator()
+        comparator = WFAToleranceComparator()
         return PDFA(self._alphabet, set(states.values()), self.terminal_symbol, comparator=comparator)
         
     def get_accessing_string(self, model: PDFA, sequence: Sequence):
@@ -166,7 +166,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         initialState = WeightedState(epsilon, 1, final_weight = final_weight)
         for symbol, probability in probabilities.items():
             initialState.add_transition(symbol, initialState, probability)
-        return PDFA(self._alphabet, set([initialState]), self.terminal_symbol)
+        return PDFA(self._alphabet, set([initialState]), self.terminal_symbol, comparator= WFAToleranceComparator())
 
 class ClassificationTree():
     def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int):

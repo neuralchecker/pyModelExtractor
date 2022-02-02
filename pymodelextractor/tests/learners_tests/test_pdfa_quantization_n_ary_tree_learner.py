@@ -26,8 +26,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_1(self):
         model = WeightedTomitasGrammars.get_automaton_1()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -35,8 +36,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_2(self):
         model = WeightedTomitasGrammars.get_automaton_2()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -44,8 +46,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_3(self):
         model = WeightedTomitasGrammars.get_automaton_3()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -53,8 +56,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_4(self):
         model = WeightedTomitasGrammars.get_automaton_4()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -62,8 +66,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_5(self):
         model = WeightedTomitasGrammars.get_automaton_5()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -71,8 +76,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_6(self):
         model = WeightedTomitasGrammars.get_automaton_6()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -80,8 +86,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_tomitas_7(self):
         model = WeightedTomitasGrammars.get_automaton_7()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -101,7 +108,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         q1.add_transition(one, q1, 0.4)
 
         states = {qeps, q0, q1}
-        comparator = PDFAComparator()
+        comparator = WFAToleranceComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA1")
 
     def generate_ad_hoc_PDFA2(self):
@@ -123,7 +130,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         q3.add_transition(one, q3, 0.3)
 
         states = {q0, q1, q2, q3}
-        comparator = PDFAComparator()
+        comparator = WFAToleranceComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA2")
 
     def generate_ad_hoc_PDFA3(self):
@@ -148,7 +155,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         q4.add_transition(one, q1, 0.8)
 
         states = {q0, q1, q2, q3, q4}
-        comparator = PDFAComparator()
+        comparator = WFAToleranceComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA3")
 
     def generate_ad_hoc_PDFA4(self):
@@ -170,7 +177,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         q11.add_transition(one, q11, 0.8)
 
         states = {qeps, q0, q1, q11}
-        comparator = PDFAComparator()
+        comparator = WFAToleranceComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA4")
 
     def generate_ad_hoc_PDFA5(self):
@@ -192,7 +199,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         q1.add_transition(one, q00, 0.13627)
 
         states = {qeps, q0, q00, q1}
-        comparator = PDFAComparator()
+        comparator = WFAToleranceComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA5")
     
     def generate_ad_hoc_PDFA6(self):
@@ -214,23 +221,24 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         q0.add_transition(one, q0, 0.54812)
 
         states = {qeps, q0, q10, q1}
-        comparator = PDFAComparator()
+        comparator = WFAToleranceComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "ad_hoc_PDFA6")
 
     def test_ad_hoc_PDFA1(self):
         model = self.generate_ad_hoc_PDFA1()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result.info['equivalence_queries_count']>0)
 
-    def test_ad_hoc_PDFA2(self):        
-        
+    def test_ad_hoc_PDFA2(self):   
         model = self.generate_ad_hoc_PDFA2()
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -238,9 +246,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_ad_hoc_PDFA3(self):     
         model = self.generate_ad_hoc_PDFA3()
-        #0.1
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -249,9 +257,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
     
     def test_ad_hoc_PDFA4(self):     
         model = self.generate_ad_hoc_PDFA4()
-        model.export('./')
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -259,9 +267,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_ad_hoc_PDFA5(self):     
         model = self.generate_ad_hoc_PDFA5()
-        model.export('./')
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -269,9 +277,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
     
     def test_ad_hoc_PDFA6(self):     
         model = self.generate_ad_hoc_PDFA6()
-        model.export('./')
-        teacher = PDFATeacher(model, PDFAComparator())
-        result = self.learner.learn(teacher, partitions = 10)
+        partitions = 10
+        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+        result = self.learner.learn(teacher, partitions)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
@@ -296,12 +304,13 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
             print('Extracting model:', model.name)
             #model.export('./runs/')
             tolerance = 0.1
-            teacher = PDFATeacher(model, PDFAComparator())
-            result = self.learner.learn(teacher, partitions = 20)
+            partitions = 20
+            teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+            result = self.learner.learn(teacher, partitions)
             extracted_model = result.model
             #extracted_model.name = 'extracted_model_'
             #extracted_model.export('./runs/')
-            comparator = PDFAComparator(tolerance = tolerance)
+            comparator = WFAQuantizationComparator(partitions)
             self.assertTrue(comparator.get_counterexample_between(model, extracted_model) is None)
             self.assertTrue(result.info['last_token_weight_queries_count']>0)        
             self.assertTrue(result.info['equivalence_queries_count']>0)
