@@ -3,7 +3,7 @@ from pythautomata.base_types.alphabet import Alphabet
 from collections import namedtuple
 from typing import Union
 import heapq
-from pymodelextractor.utilities import pdfa_utils
+from pythautomata.utilities import pdfa_utils
 
 epsilon = Sequence()
 

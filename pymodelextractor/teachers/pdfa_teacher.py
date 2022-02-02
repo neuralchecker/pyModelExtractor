@@ -1,12 +1,12 @@
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator as PDFAComparator
+from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from typing import Union
 
 class PDFATeacher(ProbabilisticTeacher):
 
-    def __init__(self, model: PDFA, comparison_strategy: PDFAComparator):
+    def __init__(self, model: PDFA, comparison_strategy: FiniteAutomataComparator):
         super().__init__()
         self._comparison_strategy = comparison_strategy
         self.__target_pdfa_model = model

@@ -1,6 +1,6 @@
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedState
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator as PDFAComparator
+from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
 from pythautomata.base_types.symbol import Symbol
 
 from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
@@ -9,7 +9,7 @@ from pymodelextractor.learners.observation_table_learners.translators.pdfa_obser
      PDFAObservationTableTranslator
 
 from collections import namedtuple
-from pymodelextractor.utilities import pdfa_utils
+from pythautomata.utilities import pdfa_utils
 import numpy as np
 
 

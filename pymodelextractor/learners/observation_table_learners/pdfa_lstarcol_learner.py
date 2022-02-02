@@ -9,7 +9,7 @@ from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstar
 from pymodelextractor.learners.pdfa_learner import PDFALearner
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
-from pymodelextractor.utilities import pdfa_utils
+from pythautomata.utilities import pdfa_utils
 
 
 class PDFALStarColLearner(PDFALearner):

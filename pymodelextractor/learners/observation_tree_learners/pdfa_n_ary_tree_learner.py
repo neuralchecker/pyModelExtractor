@@ -1,13 +1,13 @@
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import Symbol
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator
+from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as WFAComparator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.pdfa_learner import PDFALearner
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon #TODO: Fix this smelly smell https://i.pinimg.com/originals/b9/76/b7/b976b79635bf31c0d97e38297cb54db0.jpg
 from pymodelextractor.learners.learning_result import LearningResult
-from pymodelextractor.utilities import pdfa_utils
+from pythautomata.utilities import pdfa_utils
 from collections import OrderedDict
 import numpy as np
 

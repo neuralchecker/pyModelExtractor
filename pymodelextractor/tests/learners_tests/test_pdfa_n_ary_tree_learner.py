@@ -6,7 +6,7 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_state import 
 from pythautomata.automata_definitions.weighted_tomitas_grammars import WeightedTomitasGrammars
 
 from pymodelextractor.learners.observation_tree_learners.pdfa_n_ary_tree_learner import PDFANAryTreeLearner
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator as PDFAComparator
+from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
