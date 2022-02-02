@@ -4,7 +4,7 @@ from numpy import result_type
 from pythautomata.automata_definitions.weighted_tomitas_grammars import WeightedTomitasGrammars
 
 from pymodelextractor.learners.observation_table_learners.pdfa_lstar_learner import PDFALStarLearner
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator as PDFAComparator
+from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 from pymodelextractor.teachers.sample_probabilistic_teacher import SampleProbabilisticTeacher

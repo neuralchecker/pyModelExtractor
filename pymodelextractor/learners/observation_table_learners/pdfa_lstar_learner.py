@@ -18,10 +18,10 @@ class PDFALStarLearner(PDFALearner):
         self._teacher = None
         self.tolerance = None
 
-    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, tolerance, verbose: bool = False) -> LearningResult:
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
-        self.tolerance = teacher.tolerance
+        self.tolerance = tolerance
         start_time = time.time()
         self.reset()
         if verbose: print("\n\n***** Learning started at:", start_time, "*****\n\n")

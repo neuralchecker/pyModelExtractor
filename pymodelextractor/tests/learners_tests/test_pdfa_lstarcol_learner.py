@@ -1,7 +1,7 @@
 import unittest
 
 from pythautomata.automata_definitions.weighted_tomitas_grammars import WeightedTomitasGrammars
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator as PDFAComparator
+from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
 
 from pymodelextractor.learners.observation_table_learners.pdfa_lstarcol_learner import PDFALStarColLearner
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher

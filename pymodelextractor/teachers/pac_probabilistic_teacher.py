@@ -4,7 +4,7 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
-from pymodelextractor.utilities import pdfa_utils
+from pythautomata.utilities import pdfa_utils
 from math import ceil, log, factorial, comb
 from typing import Union
 import numpy as np

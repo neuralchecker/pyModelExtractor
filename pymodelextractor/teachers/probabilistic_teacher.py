@@ -8,8 +8,7 @@ from typing import Union
 
 class ProbabilisticTeacher(ABC):
 
-    def __init__(self, tolerance):
-        self.tolerance = tolerance
+    def __init__(self):        
         self._equivalence_queries_count = 0
         self._last_token_weight_queries_count = 0
 

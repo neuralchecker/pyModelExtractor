@@ -3,7 +3,7 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
-from pymodelextractor.utilities import pdfa_utils
+from pythautomata.utilities import pdfa_utils
 from typing import Union
 
 class SampleProbabilisticTeacher(ProbabilisticTeacher):
