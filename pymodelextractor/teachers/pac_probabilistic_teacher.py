@@ -4,16 +4,19 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
+from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from pythautomata.utilities import pdfa_utils
 from math import ceil, log, factorial, comb
 from typing import Union
 import numpy as np
 
+
 class PACProbabilisticTeacher(ProbabilisticTeacher):
 
     def __init__(self, model: ProbabilisticModel, epsilon: float, delta:float,
-     tolerance: float, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128, compute_epsilon_star: bool = True):
-        super().__init__(tolerance)
+     comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128, compute_epsilon_star: bool = True):        
+        super().__init__()
+        self._comparator = comparator
         self.__target_model = model
         self._epsilon = epsilon
         self._delta = delta
@@ -60,7 +63,7 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
             obs2 = aut.get_last_token_weights(word, suffixes)
             error = self.get_log_probability_error(word, aut)
             total_error += error
-            if not pdfa_utils.are_within_tolerance_limit(obs1, obs2, self.tolerance):
+            if not self._comparator.equivalent_output(obs1, obs2):
                 errorCount += 1
                 if counterexample is None:
                     counterexample = word 
