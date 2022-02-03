@@ -30,15 +30,15 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         return symbols
 
     def initialization(self) -> None:       
-        probabilities = self._next_token_probabilities(epsilon)
+        probabilities = self._teacher.next_token_probabilities(epsilon)
         starting_pdfa = self.create_single_state_PDFA(probabilities)
         are_equivalent, counterexample = self._teacher.equivalence_query(starting_pdfa)
         if are_equivalent:
             self._tree = None
             return (True, starting_pdfa)
 
-        next_token_probabilities_epsilon = self._next_token_probabilities(epsilon)
-        next_token_probabilities_counterexample = self._next_token_probabilities(counterexample)
+        next_token_probabilities_epsilon = self._teacher.next_token_probabilities(epsilon)
+        next_token_probabilities_counterexample = self._teacher.next_token_probabilities(counterexample)
         nodeRoot = ClassificationNode(epsilon)
         nodeEpsilon = ClassificationNode(epsilon, parent = nodeRoot, probabilities = next_token_probabilities_epsilon)
         nodeCounterexample = ClassificationNode(counterexample, parent = nodeRoot,  probabilities = next_token_probabilities_counterexample)
@@ -52,11 +52,11 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         self._tree = ClassificationTree(nodeRoot, self._teacher, self.partitions)
         return (False, starting_pdfa)
 
-    def _next_token_probabilities(self, sequence: Sequence):
-        symbols = self._all_symbols_sorted
-        probabilities = self._teacher.last_token_weights(sequence, symbols)
-        probabilities = OrderedDict(zip(symbols, probabilities))
-        return probabilities
+    #def _next_token_probabilities(self, sequence: Sequence):
+    #    symbols = self._all_symbols_sorted
+    #    probabilities = self._teacher.last_token_weights(sequence, symbols)
+    #    probabilities = OrderedDict(zip(symbols, probabilities))
+    #    return probabilities
 
     def learn(self, teacher: ProbabilisticTeacher, partitions: int, verbose: bool = False) -> LearningResult:
         self.partitions = partitions
@@ -176,6 +176,7 @@ class ClassificationTree():
         self.partitions = partitions
         self.add_leaves_to_dict()
         self._equivalence_dict = dict()
+        self._next_token_probabilities_cache = dict()
     
     @property
     def depth(self) -> int:
@@ -210,27 +211,8 @@ class ClassificationTree():
                 updated_tree = True                
                 node = new_node
 
-        return node.string, updated_tree
+        return node.string, updated_tree    
     
-    # def _look_for_branch(self, childs, probabilities, tolerance):
-    #     if tuple(probabilities) in childs:
-    #         return probabilities
-    #     if tuple(probabilities) in self._equivalence_dict:
-    #         if self._equivalence_dict[tuple(probabilities)] in childs:
-    #             return self._equivalence_dict[tuple(probabilities)] 
-    #     t_eq_probs = []
-    #     for probs in childs.keys():
-    #         probs = list(probs)
-    #         if pdfa_utils.are_within_tolerance_limit(probs,probabilities, tolerance):
-    #             t_eq_probs.append((probs, np.ma.sqrt(sum((np.array(probs) - np.array(probabilities)) ** 2))))
-    #     if len(t_eq_probs) == 0:
-    #         return None
-    #     else:
-    #         equivalent = tuple(min(t_eq_probs, key=lambda x: x[1])[0])
-    #         if equivalent not in self._equivalence_dict: 
-    #             self._equivalence_dict[equivalent] = tuple(probabilities)
-    #         self._equivalence_dict[tuple(probabilities)] = equivalent
-    #         return equivalent
     def _look_for_branch(self, childs, probabilities, partitions):
         if tuple(probabilities) in childs:
             return probabilities
@@ -240,31 +222,14 @@ class ClassificationTree():
             if pdfa_utils.are_in_same_partition(probs,probabilities, partitions):
                 return probs
         return None
-        
-
-
-    #TODO: This should be inside the teacher abstraction or even inside the ProbabityModel abstraction
-    def _next_token_probabilities(self, sequence: Sequence):
-        symbols = list(self._teacher.alphabet.symbols)
-        symbols.sort()
-        symbols = [self._teacher.terminal_symbol]+symbols
-        probabilities = self._teacher.last_token_weights(sequence, symbols)
-        probabilities = OrderedDict(zip(symbols, probabilities))
-        return probabilities
-    # def get_distinguishing_string(self, string1, string2):
-    #     queue = []
-    #     queue.append(self.root)
-    #     result = []
-    #     while queue:
-    #         element = queue.pop()
-    #         if element.is_distinguishing_string(string1, string2):
-    #             return element.string
-    #         else:
-    #             if element.right:
-    #                 queue.append(element.right)
-    #             if element.left:
-    #                 queue.append(element.left)        
-    #     return None 
+    
+    def _next_token_probabilities(self, sequence: Sequence):  
+        if sequence in self._next_token_probabilities_cache:
+            return self._next_token_probabilities_cache[sequence]
+        else:
+            value = self._teacher.next_token_probabilities(sequence)
+            self._next_token_probabilities_cache[sequence] = value
+            return value
     
     def lca(self, a:Sequence, b:Sequence) -> Sequence:
         ''' lca: lowest common ancestor '''

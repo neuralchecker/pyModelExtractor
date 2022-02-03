@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from collections import OrderedDict
+from symtable import Symbol
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
@@ -26,6 +28,14 @@ class ProbabilisticTeacher(ABC):
 
     def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence,None]]:
         raise NotImplementedError
+
+    def next_token_probabilities(self, sequence: Sequence)-> OrderedDict[Symbol, float]:
+        symbols = list(self.alphabet.symbols)
+        symbols.sort()
+        symbols = [self.terminal_symbol]+symbols
+        probabilities = self.last_token_weights(sequence, symbols)
+        probabilities = OrderedDict(zip(symbols, probabilities))
+        return probabilities
 
     def reset(self) -> None:
         self._equivalence_queries_count = 0
