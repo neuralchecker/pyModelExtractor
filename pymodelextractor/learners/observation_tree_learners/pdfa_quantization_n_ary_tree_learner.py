@@ -34,6 +34,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         starting_pdfa = self.create_single_state_PDFA(probabilities)
         are_equivalent, counterexample = self._teacher.equivalence_query(starting_pdfa)
         if are_equivalent:
+            self._tree = None
             return (True, starting_pdfa)
 
         next_token_probabilities_epsilon = self._next_token_probabilities(epsilon)
