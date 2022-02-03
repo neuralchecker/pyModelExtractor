@@ -3,14 +3,16 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
+from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from pythautomata.utilities import pdfa_utils
 from typing import Union
 
 class SampleProbabilisticTeacher(ProbabilisticTeacher):
-    def __init__(self, model: ProbabilisticModel, tolerance: float, sample_size: float, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128):
-        super().__init__(tolerance)
+    def __init__(self, model: ProbabilisticModel, comparator: FiniteAutomataComparator, sample_size: float, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128):
+        super().__init__()
         self._sample_size = sample_size
         self.__target_model = model
+        self._comparator = comparator
         if sequence_generator is None:
             self._sequence_generator = SequenceGenerator(self.__target_model.alphabet, max_seq_length= max_seq_length)
         else:
@@ -43,7 +45,7 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
                 if prefix not in tried:
                     obs1 = self.last_token_weights(prefix, suffixes)
                     obs2 = aut.get_last_token_weights(prefix, suffixes)
-                    if not pdfa_utils.are_within_tolerance_limit(obs1, obs2, self.tolerance):
+                    if not self._comparator.equivalent_output(obs1, obs2):
                         return False, prefix
                     tried.add(prefix)        
         return True, None
