@@ -247,7 +247,7 @@ class TestPDFANAryTreeLearner(unittest.TestCase):
     
     def test_ad_hoc_PDFA4(self):     
         model = self.generate_ad_hoc_PDFA4()
-        model.export('./')
+        #model.export('./')
         teacher = PDFATeacher(model, 0.1, PDFAComparator())
         result = self.learner.learn(teacher)
         extracted_model = result.model
@@ -257,7 +257,7 @@ class TestPDFANAryTreeLearner(unittest.TestCase):
 
     def test_ad_hoc_PDFA5(self):     
         model = self.generate_ad_hoc_PDFA5()
-        model.export('./')
+        #model.export('./')
         teacher = PDFATeacher(model, 0.1, PDFAComparator())
         result = self.learner.learn(teacher)
         extracted_model = result.model
@@ -267,7 +267,7 @@ class TestPDFANAryTreeLearner(unittest.TestCase):
     
     def test_ad_hoc_PDFA6(self):     
         model = self.generate_ad_hoc_PDFA6()
-        model.export('./')
+        #model.export('./')
         teacher = PDFATeacher(model, 0.1, PDFAComparator())
         result = self.learner.learn(teacher)
         extracted_model = result.model
@@ -292,7 +292,7 @@ class TestPDFANAryTreeLearner(unittest.TestCase):
         #models = []
         for model in models:
             print('Extracting model:', model.name)
-            model.export('./runs/')
+            #model.export('./runs/')
             tolerance = 0.1
             teacher = PDFATeacher(model, tolerance, PDFAComparator())
             result = self.learner.learn(teacher)
