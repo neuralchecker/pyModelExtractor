@@ -177,6 +177,7 @@ class ClassificationTree():
         self.add_leaves_to_dict()
         self._equivalence_dict = dict()
         self._next_token_probabilities_cache = dict()
+        self._partitions_cache = dict()
     
     @property
     def depth(self) -> int:
@@ -200,7 +201,7 @@ class ClassificationTree():
             d = node.string
             sd = sequence+d
             sd_probabilities = self._next_token_probabilities(sd).values()
-            child_key = self._look_for_branch(node.childs, list(sd_probabilities), self.partitions)
+            child_key = self._look_for_branch(node.childs, list(sd_probabilities))
             if child_key is not None:
                 node = node.childs[tuple(child_key)]
             else:
@@ -211,15 +212,28 @@ class ClassificationTree():
                 updated_tree = True                
                 node = new_node
 
-        return node.string, updated_tree    
+        return node.string, updated_tree 
+
+    def _get_partition(self, probabilities):
+        if tuple(probabilities) in self._partitions_cache:
+            return self._partitions_cache[tuple(probabilities)]
+        else:
+            partition = pdfa_utils.get_partitions(probabilities, self.partitions)
+            self._partitions_cache[tuple(probabilities)] = partition
+            return partition
+
+
+    def _are_in_same_partition(self, probs1, probs2):   
+        partition1 = self._get_partition(probs1)
+        partition2 = self._get_partition(probs2)
+        return pdfa_utils.are_same_partition(partition1, partition2)
     
-    def _look_for_branch(self, childs, probabilities, partitions):
+    def _look_for_branch(self, childs, probabilities):
         if tuple(probabilities) in childs:
-            return probabilities
-        t_eq_probs = []
+            return probabilities        
         for probs in childs.keys():
             probs = list(probs)
-            if pdfa_utils.are_in_same_partition(probs,probabilities, partitions):
+            if self._are_in_same_partition(probs, probabilities):
                 return probs
         return None
     

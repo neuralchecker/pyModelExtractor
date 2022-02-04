@@ -23,7 +23,7 @@ def run():
     #                        TestPDFATeachersLStar,
     #                        TestPDFATeachersLStarCol]#,
                            #TestPACBooleanModelTeachers]  
-    test_classes_to_run = [ TestPDFATeachersLStarCol, TestPDFATeachersLStar,  TestPDFALStarLearner, TestPDFALStarColLearner, TestPDFAQuantizantionNAryTreeLearner ]                  
+    test_classes_to_run = [ TestPDFAQuantizantionNAryTreeLearner ]                  
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
