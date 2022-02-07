@@ -10,8 +10,8 @@ from tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerW
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
 from tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanModelTeachers
-from tests.learners_tests.test_pdfa_n_ary_tree_learner import TestPDFANAryTreeLearner
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner import TestPDFAQuantizantionNAryTreeLearner
+from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_metrics import TestPDFAQuantizantionNAryTreeLearnerMetrics
 
 def run():
     # test_classes_to_run = [TestLStarLearner,
