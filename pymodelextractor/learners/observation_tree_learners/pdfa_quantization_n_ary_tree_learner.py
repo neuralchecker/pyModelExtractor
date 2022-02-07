@@ -1,3 +1,4 @@
+from re import I
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import Symbol
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
@@ -94,6 +95,10 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
                 are_equivalent, counterexample = self._teacher.equivalence_query(model)                
 
         numberOfStates = len(model.weighted_states) if model is not None else 0
+        
+        for count, state in enumerate(model.weighted_states):
+            state.name = 'q'+str(count)
+
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,
@@ -123,7 +128,8 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
                         break
             
         comparator = WFAToleranceComparator()
-        return PDFA(self._alphabet, set(states.values()), self.terminal_symbol, comparator=comparator)
+        states = set(states.values())
+        return PDFA(self._alphabet, states, self.terminal_symbol, comparator=comparator)
         
     def get_accessing_string(self, model: PDFA, sequence: Sequence):
         state = model.get_first_state()
