@@ -1,6 +1,7 @@
 from unittest import TestLoader, TestSuite, TextTestRunner
 
 from pymodelextractor.tests.learners_tests.test_lstar_learner import TestLStarLearner
+from pymodelextractor.tests.learners_tests.test_bounded_lstar_learner import TestBoundedLStarLearner
 from pymodelextractor.tests.learners_tests.test_lstarcol_learner import TestLStarColLearner
 from pymodelextractor.tests.learners_tests.test_kearns_vazirani_learner import TestKearnsVaziraniLearner
 from pymodelextractor.tests.learners_tests.test_pdfa_lstar_learner import TestPDFALStarLearner
@@ -23,7 +24,7 @@ def run():
     #                        TestPDFATeachersLStar,
     #                        TestPDFATeachersLStarCol]#,
                            #TestPACBooleanModelTeachers]  
-    test_classes_to_run = [ TestPDFAQuantizantionNAryTreeLearner ]                  
+    test_classes_to_run = [ TestBoundedLStarLearner ]                  
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
