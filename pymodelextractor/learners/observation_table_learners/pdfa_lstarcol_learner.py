@@ -55,7 +55,10 @@ class PDFALStarColLearner(PDFALearner):
                               len(model.weighted_states),
                               "- overall CE count:", counter_example_count, "***\n\n")
 
-        if verbose: print("***** Learning completed successfully *****\n\n")
+        if verbose: print("***** Learning completed successfully *****\n\n")       
+        return self._learning_results_for(model)
+    
+    def _learning_results_for(self, model):
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,

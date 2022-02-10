@@ -19,6 +19,7 @@ class PDFALStarLearner(PDFALearner):
         self.tolerance = None
 
     def learn(self, teacher: ProbabilisticTeacher, tolerance, verbose: bool = False) -> LearningResult:
+        assert(tolerance>=0 and tolerance <= 1)
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         self.tolerance = tolerance
@@ -58,6 +59,10 @@ class PDFALStarLearner(PDFALearner):
 
         if verbose: print("***** Learning completed successfully *****\n\n")
 
+        result = self._learning_results_for(model)        
+        return result
+
+    def _learning_results_for(self, model):
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,
@@ -65,6 +70,7 @@ class PDFALStarLearner(PDFALearner):
         }
         learningResult = LearningResult(model, len(model.weighted_states), info)
         return learningResult
+
 
     def reset(self):
         self.__build_observation_table()

@@ -5,6 +5,7 @@ from pymodelextractor.learners.learner import Learner
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
 from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import FAObservationTableTranslator
 from pymodelextractor.learners.learning_result import LearningResult
+from pythautomata.abstract.boolean_model import BooleanModel
 
 class LStarLearner(Learner):
 
@@ -23,12 +24,16 @@ class LStarLearner(Learner):
             self._close()
             self._make_consistent()
             model = self._model_translator.translate(self._observation_table, self._alphabet)
-            answer, counterexample = self._teacher.equivalence_query(model)
+            answer, counterexample = self._perform_equivalence_query(model)
             if not answer:                
                 self._update_observation_table_with(counterexample)
             counter += 1
 
         return self._learning_results_for(model)
+
+    def _perform_equivalence_query(self, model: BooleanModel) -> bool:
+        return self._teacher.equivalence_query(model)
+
 
     def _build_observation_table(self):
         self._observation_table = LStarObservationTable(self._alphabet)

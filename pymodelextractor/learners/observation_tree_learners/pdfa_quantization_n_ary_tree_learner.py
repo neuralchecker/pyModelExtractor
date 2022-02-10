@@ -9,8 +9,10 @@ from pymodelextractor.learners.pdfa_learner import PDFALearner
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon #TODO: Fix this smelly smell https://i.pinimg.com/originals/b9/76/b7/b976b79635bf31c0d97e38297cb54db0.jpg
 from pymodelextractor.learners.learning_result import LearningResult
+from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLengthExceededException
 from collections import OrderedDict
 import numpy as np
+import math
 
 class PDFAQuantizationNAryTreeLearner(PDFALearner):
     def __init__(self):        
@@ -30,10 +32,13 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         symbols = [self.terminal_symbol]+symbols
         return symbols
 
+    def _perform_equivalence_query(self, model):
+        return self._teacher.equivalence_query(model)
+
     def initialization(self) -> None:       
         probabilities = self._teacher.next_token_probabilities(epsilon)
         starting_pdfa = self.create_single_state_PDFA(probabilities)
-        are_equivalent, counterexample = self._teacher.equivalence_query(starting_pdfa)
+        are_equivalent, counterexample = self._perform_equivalence_query(starting_pdfa)
         if are_equivalent:
             self._tree = None
             return (True, starting_pdfa)
@@ -77,7 +82,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
             last_size = len(model.weighted_states)
 
             #END DEBUG
-            are_equivalent, counterexample = self._teacher.equivalence_query(model)
+            are_equivalent, counterexample = self._perform_equivalence_query(model)
             while not are_equivalent:             
                 
                 print('Size before update:',last_size)   
@@ -92,10 +97,13 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
                 assert(size>last_size)
                 last_size = size
                 #END DEBUG
-                are_equivalent, counterexample = self._teacher.equivalence_query(model)                
+                are_equivalent, counterexample = self._perform_equivalence_query(model)                
 
+        result = self._learning_results_for(model)        
+        return result
+
+    def _learning_results_for(self, model):        
         numberOfStates = len(model.weighted_states) if model is not None else 0
-        
         for count, state in enumerate(model.weighted_states):
             state.name = 'q'+str(count)
 
@@ -176,7 +184,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         return PDFA(self._alphabet, set([initialState]), self.terminal_symbol, comparator= WFAToleranceComparator())
 
 class ClassificationTree():
-    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int):
+    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int, max_query_length: int = math.inf):
         self._teacher = teacher
         self.root = root
         self.partitions = partitions
@@ -184,6 +192,7 @@ class ClassificationTree():
         self._equivalence_dict = dict()
         self._next_token_probabilities_cache = dict()
         self._partitions_cache = dict()
+        self.max_query_length = max_query_length
     
     @property
     def depth(self) -> int:
@@ -244,6 +253,8 @@ class ClassificationTree():
         return None
     
     def _next_token_probabilities(self, sequence: Sequence):  
+        if len(sequence) > self.max_query_length:
+            raise QueryLengthExceededException
         if sequence in self._next_token_probabilities_cache:
             return self._next_token_probabilities_cache[sequence]
         else:
