@@ -110,7 +110,7 @@ class PDFAObservationTable:
     def __max_difference(self, sequence1: Sequence, sequence2: Sequence):
         observations1 = self.__observations[sequence1]
         observations2 = self.__observations[sequence2]
-        assert len(observations1) == len(observations2)
+        assert len(observations1) == len(observations2) , 'Observations should have the same length'
         maxim = self.__tolerance
         max_i = 0
         for i in range(0, len(observations1)):

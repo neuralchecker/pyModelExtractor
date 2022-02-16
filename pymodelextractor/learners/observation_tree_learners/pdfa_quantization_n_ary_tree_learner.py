@@ -94,7 +94,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
                 print('Size after update:',size)               
                 if size <= last_size:
                     print('ESTO SE CAE A LA MIERDA')
-                assert(size>last_size)
+                assert(size>last_size, 'Possible infinite loop')
                 last_size = size
                 #END DEBUG
                 are_equivalent, counterexample = self._perform_equivalence_query(model)                

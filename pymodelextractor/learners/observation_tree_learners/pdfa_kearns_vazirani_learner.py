@@ -84,7 +84,7 @@ class PDFAKearnsVaziraniLearner(PDFALearner):
                 #       m._WeightedAutomaton__exporting_strategies[0].export(m, out)
                 if size <= last_size:
                     print('ESTO SE CAE A LA MIERDA')
-                assert(size>last_size)
+                assert(size>last_size, 'Possible infinite loop')
                 last_size = size
                 #END DEBUG
                 are_equivalent, counterexample = self._teacher.equivalence_query(model)                

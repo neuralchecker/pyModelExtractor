@@ -97,7 +97,7 @@ class KearnsVaziraniLearner(Learner):
                 break
             gamma_j_minus_1 = prefix
         #Some distinguishing string must have been found, if not an infinite loop occurs    
-        assert(distinguishing_string_found)
+        assert(distinguishing_string_found, 'Some distinguishing string must have been found, if not an infinite loop occurs')
 
     def create_single_state_DFA(self, is_final: bool):
         epsilonState = State(epsilon, is_final=is_final)
