@@ -36,10 +36,8 @@ class BoundedPDFALStarLearner(PDFALStarLearner):
             print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True
         result = self._learning_results_for(self._history[-1] if len(self._history) > 0 else None)
-        if self._exceeded_max_states: 
-            result.info['NumberOfStatesExceeded'] = True
-        if self._exceeded_max_mq_length: 
-            result.info['QueryLengthExceeded'] = True
+        result.info['NumberOfStatesExceeded'] = self._exceeded_max_states
+        result.info['QueryLengthExceeded'] = self._exceeded_max_mq_length
         return result
 
 
