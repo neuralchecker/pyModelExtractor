@@ -193,6 +193,7 @@ class ClassificationTree():
         self._next_token_probabilities_cache = dict()
         self._partitions_cache = dict()
         self.max_query_length = max_query_length
+        self.inner_nodes = 0
     
     @property
     def depth(self) -> int:
@@ -313,6 +314,7 @@ class ClassificationTree():
 
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
+        self.inner_nodes += 1 
         old_node.string = distinguishing_string
 
         next_token_probabilities_node1 = self._next_token_probabilities(leaf_1)
