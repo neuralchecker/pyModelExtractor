@@ -12,7 +12,7 @@ from pythautomata.model_comparators.wfa_quantization_comparison_strategy import 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
 from pythautomata.utilities import pdfa_generator
-from pythautomata.utilities import abbadingo_one_dfa_generator
+from pythautomata.utilities import nicaud_dfa_generator
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
@@ -289,7 +289,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         pdfas = []        
         for size in sizes:
             for i in range(n):
-                dfa = abbadingo_one_dfa_generator.generate_dfa(alphabet = binaryAlphabet, nominal_size= size, seed = i)
+                dfa = nicaud_dfa_generator.generate_dfa(alphabet = binaryAlphabet, nominal_size= size, seed = i)
                 dfa.name = "random_DFA_nominal_size_"+str(size)+"_"+str(i)
                 pdfa = pdfa_generator.pdfa_from_dfa(dfa)
                 pdfa.name = "random_PDFA_nominal_size_"+str(size)+"_"+str(i)
@@ -298,7 +298,8 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
 
     def test_against_random_PDFAs(self):
-        models = self.generate_random_pdfas(sizes = [7, 10, 20], n = 1000)  
+        models = self.generate_random_pdfas(sizes = [7, 10, 20], n = 1000) 
+        #models = self.generate_random_pdfas(sizes = [30, 50, 100], n = 10)  
         #models = []
         for model in models:
             print('Extracting model:', model.name)
