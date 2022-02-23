@@ -17,18 +17,19 @@ from tests.learners_tests.test_bounded_pdfa_quantization_n_ary_tree_learner impo
 from tests.learners_tests.test_bounded_pdfa_lstar_learner import TestBoundedPDFALStarLearner
 
 def run():
-    # test_classes_to_run = [TestLStarLearner,
-    #                        TestLStarColLearner,
-    #                        TestPDFALStarLearner,
-    #                        TestKearnsVaziraniLearner,
-    #                        TestLStarLearner,
-    #                        TestPDFALStarColLearner,
-    #                        TestPDFATeachersLStar,
-    #                        TestPDFATeachersLStarCol,
-    #                        TestPACBooleanModelTeachers, 
-    #                        TestBoundedPDFAQuantizantionNAryTreeLearner, 
-    #                        TestBoundedPDFALStarLearner ]   
-    test_classes_to_run = [TestPDFAQuantizantionNAryTreeLearner]               
+    test_classes_to_run = [TestLStarLearner,
+                           TestLStarColLearner,
+                           TestPDFALStarLearner,
+                           TestKearnsVaziraniLearner,
+                           TestLStarLearner,
+                           TestPDFALStarColLearner,
+                           TestPDFATeachersLStar,
+                           TestPDFATeachersLStarCol,
+                           TestPACBooleanModelTeachers, 
+                           TestBoundedPDFAQuantizantionNAryTreeLearner, 
+                           TestPDFAQuantizantionNAryTreeLearner,
+                           TestBoundedPDFALStarLearner ]             
+    #test_classes_to_run = [ TestPDFAQuantizantionNAryTreeLearner ]               
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
