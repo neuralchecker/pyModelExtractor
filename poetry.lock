@@ -175,7 +175,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "pythautomata"
-version = "0.16.9"
+version = "0.16.10"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -267,7 +267,7 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "f2f6122a46048faf24b79e51f774592ed226b7930db2d5e4b35bd02ba29b6721"
+content-hash = "cd6f3d44c909f53b7db4ed2ed899ae0ba19917dc5a2c249110b77cc5bc592f14"
 
 [metadata.files]
 atomicwrites = [
@@ -373,8 +373,8 @@ pytest = [
     {file = "pytest-6.2.5.tar.gz", hash = "sha256:131b36680866a76e6781d13f101efb86cf674ebb9762eb70d3082b6f29889e89"},
 ]
 pythautomata = [
-    {file = "pythautomata-0.16.9-py3-none-any.whl", hash = "sha256:b9e353c6d825a2bfd02c2e14f11294065f63caf027348c9c4aee22c96af662b2"},
-    {file = "pythautomata-0.16.9.tar.gz", hash = "sha256:681c2bd1e5f5c7e9d76f129810d8bc01ad170c3728d2ade86000145c114d7fd6"},
+    {file = "pythautomata-0.16.10-py3-none-any.whl", hash = "sha256:20171d9b47291379d9121795f39d8257ca308c5de5228894a71e57c34a90dce8"},
+    {file = "pythautomata-0.16.10.tar.gz", hash = "sha256:c942985fbbf5aee5dfac076e3491ed3868cd13b080111de377e911297031ddf5"},
 ]
 rope = [
     {file = "rope-0.19.0.tar.gz", hash = "sha256:64e6d747532e1f5c8009ec5aae3e5523a5bcedf516f39a750d57d8ed749d90da"},
