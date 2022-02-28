@@ -17,27 +17,27 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
      comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128, compute_epsilon_star: bool = True):        
         super().__init__()
         self._comparator = comparator
-        self.__target_model = model
+        self._target_model = model
         self._epsilon = epsilon
         self._delta = delta
         self.sample_size = 0
         self.epsilon_star = 0
         self._compute_epsilon_star = compute_epsilon_star
         if sequence_generator is None:
-            self._sequence_generator = SequenceGenerator(self.__target_model.alphabet, max_seq_length= max_seq_length)
+            self._sequence_generator = SequenceGenerator(self._target_model.alphabet, max_seq_length= max_seq_length)
         else:
             self._sequence_generator = sequence_generator
 
 
     def sequence_weight(self, sequence: Sequence):
-        return self.__target_model.sequence_weight(sequence)
+        return self._target_model.sequence_weight(sequence)
 
     def log_sequence_weight(self, sequence: Sequence):
-        return self.__target_model.log_sequence_weight(sequence)
+        return self._target_model.log_sequence_weight(sequence)
 
     def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]):
         self._last_token_weight_queries_count +=len(required_suffixes)        
-        return self.__target_model.get_last_token_weights(sequence, required_suffixes)
+        return self._target_model.get_last_token_weights(sequence, required_suffixes)
 
     def get_log_probability_error(self, seq, aut: WeightedAutomaton):
         return abs(aut.log_sequence_weight(seq) - self.log_sequence_weight(seq))
@@ -50,19 +50,18 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         suffixes = []
         
         suffixes.append(self.terminal_symbol)
-        total_error = 0
+        #total_error = 0
         for symbol in self.alphabet.symbols:
             suffixes.append(Sequence(symbol))
         
         rand_words = self._sequence_generator.generate_words(sample_size)
         np.sort(rand_words)
         counterexample = None
-        for word in rand_words:            
-            #print(prefix)
-            obs1 = self.__target_model.get_last_token_weights(word, suffixes)
+        for word in rand_words:  
+            obs1 = self._target_model.get_last_token_weights(word, suffixes)
             obs2 = aut.get_last_token_weights(word, suffixes)
-            error = self.get_log_probability_error(word, aut)
-            total_error += error
+            #error = self.get_log_probability_error(word, aut)
+            #total_error += error
             if not self._comparator.equivalent_output(obs1, obs2):
                 errorCount += 1
                 if counterexample is None:
@@ -76,11 +75,11 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
 
     @property
     def alphabet(self):
-        return self.__target_model.alphabet
+        return self._target_model.alphabet
 
     @property
     def terminal_symbol(self):
-        return self.__target_model.terminal_symbol
+        return self._target_model.terminal_symbol
 
     def _calculate_sample_size(self):
         numberOfCalls = self.equivalence_queries_count
