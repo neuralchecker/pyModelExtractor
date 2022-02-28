@@ -15,6 +15,7 @@ from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner import TestP
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_metrics import TestPDFAQuantizantionNAryTreeLearnerMetrics
 from tests.learners_tests.test_bounded_pdfa_quantization_n_ary_tree_learner import TestBoundedPDFAQuantizantionNAryTreeLearner
 from tests.learners_tests.test_bounded_pdfa_lstar_learner import TestBoundedPDFALStarLearner
+from tests.learners_tests.test_pac_batch_teacher_quant import TestPACBatchTeacherQuant
 
 def run():
     test_classes_to_run = [TestLStarLearner,
@@ -29,7 +30,7 @@ def run():
                            TestBoundedPDFAQuantizantionNAryTreeLearner, 
                            TestPDFAQuantizantionNAryTreeLearner,
                            TestBoundedPDFALStarLearner ]             
-    #test_classes_to_run = [ TestPDFAQuantizantionNAryTreeLearner ]               
+    test_classes_to_run = [ TestPACBatchTeacherQuant ]               
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
