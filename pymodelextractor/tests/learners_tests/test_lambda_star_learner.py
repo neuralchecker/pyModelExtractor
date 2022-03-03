@@ -11,6 +11,9 @@ from pythautomata.boolean_algebra_learner.equality_learner import \
     EqualityLearner
 from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
+from itertools import chain
+from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
+from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
 
 
 class TestLambdaStarLearnerWithEqualityAlgebra(unittest.TestCase):
@@ -47,3 +50,36 @@ class TestLambdaStarLearnerWithEqualityAlgebra(unittest.TestCase):
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar4)
+
+    def test_tomitas_5(self):
+        grammar5 = TomitasGrammars.get_automaton_5()
+        teacher = self.teacher(grammar5)
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, grammar5)
+
+    def test_tomitas_6(self):
+        grammar6 = TomitasGrammars.get_automaton_6()
+        teacher = self.teacher(grammar6)
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, grammar6)
+
+    def test_tomitas_7(self):
+        grammar7 = TomitasGrammars.get_automaton_7()
+        teacher = self.teacher(grammar7)
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, grammar7)
+
+    def test_against_many_DFAs(self):
+        mergedAutomata = list(chain(TomitasGrammars.get_all_automata(),
+                                    BolligHabermehlKernLeuckerAutomata.get_all_automata(),
+                                    OmlinGilesAutomata.get_all_automata()))
+        for automaton in mergedAutomata:
+            print(f'{automaton.name = }')
+            teacher = self.teacher(automaton)
+            result = self.learner.learn(teacher)
+            assert ComparisonStrategy().are_equivalent(
+                result.model, automaton)
+            print('done')
