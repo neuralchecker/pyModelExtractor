@@ -17,6 +17,7 @@ from pythautomata.utilities import abbadingo_one_dfa_generator
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
+from pymodelextractor.utils import time_bound_utilities
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
@@ -26,16 +27,19 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         self.learner = BoundedPDFAQuantizationNAryTreeLearner(max_states= 100, max_query_length=100)
 
     def test_time_bound(self):
-        models = WeightedTomitasGrammars.get_all_automata()        
-        learner = BoundedPDFAQuantizationNAryTreeLearner(max_states= 100, max_query_length=100, max_miliseconds_run=60000)
-        for model in models:
-            partitions = 10
-            teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
-            result = learner.learn(teacher, partitions)
-            extracted_model = result.model
-            self.assertEqual(model, extracted_model)
-            #self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-            #self.assertTrue(result.info['equivalence_queries_count']>0)
+        if time_bound_utilities.is_unix_system():
+            models = WeightedTomitasGrammars.get_all_automata()        
+            learner = BoundedPDFAQuantizationNAryTreeLearner(max_states= 100, max_query_length=100, max_seconds_run=60)
+            for model in models:
+                partitions = 10
+                teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+                result = learner.learn(teacher, partitions)
+                extracted_model = result.model
+                self.assertEqual(model, extracted_model)
+                #self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+                #self.assertTrue(result.info['equivalence_queries_count']>0)
+        else:
+            pass
 
     def test_tomitas_1(self):
         model = WeightedTomitasGrammars.get_automaton_1()
