@@ -32,19 +32,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             raise NumberOfStatesExceededException
         return super()._perform_equivalence_query(model)
 
-    def learn_aux(self, teacher, partitions, verbose):
-        return super().learn(teacher, partitions, verbose)
-
-    def run_learning_with_time_bound(self, teacher, partitions, verbose):
-        # p = multiprocessing.Process(target=self.learn_aux, args=(teacher, partitions, verbose))
-        # p.start()        
-        # p.join(self._max_seconds_run/1000)
-        # if p.is_alive():
-        #     print("Time Bound Reached")   
-        #     p.kill()
-        #     p.join()
-        #     print('Process Finished')                
-        #     self._exceded_time_bound = True
+    def run_learning_with_time_bound(self, teacher, partitions, verbose):        
         try:
             with timeout(self._max_seconds_run):
                 super().learn(teacher, partitions, verbose) 
