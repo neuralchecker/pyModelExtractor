@@ -31,7 +31,7 @@ def run():
                            TestBoundedPDFAQuantizantionNAryTreeLearner, 
                            TestPDFAQuantizantionNAryTreeLearner,
                            TestBoundedPDFALStarLearner ]             
-    test_classes_to_run = [ TestBoundedPDFAQuantizantionNAryTreeLearner ]               
+    test_classes_to_run = [ TestBoundedPDFALStarLearner ]               
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:

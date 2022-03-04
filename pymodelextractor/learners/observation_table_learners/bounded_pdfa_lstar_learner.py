@@ -11,24 +11,37 @@ from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLengthExceededException
 from pymodelextractor.exceptions.number_of_states_exceeded_exception import NumberOfStatesExceededException
+from pymodelextractor.utils.time_bound_utilities import timeout
 
 class BoundedPDFALStarLearner(PDFALStarLearner):
 
-    def __init__(self, max_states, max_query_length):
+    def __init__(self, max_states, max_query_length, max_seconds_run = None):
         super().__init__()
         self._max_states = max_states
         self._max_query_length = max_query_length
+        self._max_seconds_run = max_seconds_run
         self._exceeded_max_states = False
-        self._exceeded_max_mq_length = False
+        self._exceeded_max_mq_length = False        
+        self._exceded_time_bound = False    
         self._history = []
 
+    def run_learning_with_time_bound(self, teacher, partitions, verbose):        
+        try:
+            with timeout(self._max_seconds_run):
+                super().learn(teacher, partitions, verbose) 
+        except TimeoutError:
+            print("Time Bound Reached") 
+            self._exceded_time_bound = True
 
     def learn(self, teacher: ProbabilisticTeacher, tolerance, verbose: bool = False) -> LearningResult:
         try:
-            result = super().learn(teacher, tolerance)            
-            result.info['NumberOfStatesExceeded'] = False
-            result.info['QueryLengthExceeded'] = False
-            return result
+            if self._max_seconds_run is not None:
+                self.run_learning_with_time_bound(teacher, tolerance, verbose)
+            else:
+                super().learn(teacher, tolerance, verbose)            
+                #result.info['NumberOfStatesExceeded'] = False
+                #result.info['QueryLengthExceeded'] = False
+                #return result
         except NumberOfStatesExceededException:
             print("NumberOfStatesExceeded")
             self._exceeded_max_states = True

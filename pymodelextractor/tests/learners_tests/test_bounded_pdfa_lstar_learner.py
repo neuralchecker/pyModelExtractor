@@ -8,11 +8,27 @@ from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFA
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
+from pymodelextractor.utils.time_bound_utilities import is_unix_system
 
 class TestBoundedPDFALStarLearner(unittest.TestCase):
 
     def setUp(self):
         self.learner = BoundedPDFALStarLearner(max_query_length=20,max_states=20)
+
+    def test_time_bound(self):
+        if is_unix_system():
+            models = WeightedTomitasGrammars.get_all_automata()        
+            learner = BoundedPDFALStarLearner(max_states= 100, max_query_length=100, max_seconds_run=60)
+            for model in models:
+                tolerance = 0
+                teacher = PDFATeacher(model, PDFAComparator())
+                result = learner.learn(teacher, tolerance)
+                extracted_model = result.model
+                self.assertEqual(model, extracted_model)
+                #self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+                #self.assertTrue(result.info['equivalence_queries_count']>0)
+        else:
+            pass
 
     def test_tomitas_1(self):
         model = WeightedTomitasGrammars.get_automaton_1()
