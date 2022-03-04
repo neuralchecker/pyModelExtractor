@@ -15,7 +15,8 @@ import numpy as np
 import math
 
 class PDFAQuantizationNAryTreeLearner(PDFALearner):
-    def __init__(self):        
+    def __init__(self):   
+        self._verbose = False     
         pass
     
     @property
@@ -34,17 +35,21 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
 
     def _perform_equivalence_query(self, model):
         return self._teacher.equivalence_query(model)
+    
+    
+    def _perform_next_token_probabilities(self, value):
+        return self._teacher.next_token_probabilities(value)
 
-    def initialization(self) -> None:       
-        probabilities = self._teacher.next_token_probabilities(epsilon)
+    def initialization(self, verbose) -> None:       
+        probabilities = self._perform_next_token_probabilities(epsilon)
         starting_pdfa = self.create_single_state_PDFA(probabilities)
         are_equivalent, counterexample = self._perform_equivalence_query(starting_pdfa)
         if are_equivalent:
             self._tree = None
             return (True, starting_pdfa)
 
-        next_token_probabilities_epsilon = self._teacher.next_token_probabilities(epsilon)
-        next_token_probabilities_counterexample = self._teacher.next_token_probabilities(counterexample)
+        next_token_probabilities_epsilon = self._perform_next_token_probabilities(epsilon)
+        next_token_probabilities_counterexample = self._perform_next_token_probabilities(counterexample)
         nodeRoot = ClassificationNode(epsilon)
         nodeEpsilon = ClassificationNode(epsilon, parent = nodeRoot, probabilities = next_token_probabilities_epsilon)
         nodeCounterexample = ClassificationNode(counterexample, parent = nodeRoot,  probabilities = next_token_probabilities_counterexample)
@@ -55,7 +60,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         #nodeRoot.right = (nodeEpsilon, next_token_probabilities_epsilon)
         #nodeRoot.left = (nodeCounterexample, next_token_probabilities_counterexample)
         
-        self._tree = ClassificationTree(nodeRoot, self._teacher, self.partitions)
+        self._tree = ClassificationTree(nodeRoot, self._teacher, self.partitions, verbose=verbose)
         return (False, starting_pdfa)
 
     #def _next_token_probabilities(self, sequence: Sequence):
@@ -65,6 +70,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
     #    return probabilities
 
     def learn(self, teacher: ProbabilisticTeacher, partitions: int, verbose: bool = False) -> LearningResult:
+        self._verbose = verbose
         self.partitions = partitions
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
@@ -74,7 +80,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         models = []
         
         #END DEBUG
-        is_target_DFA, model = self.initialization()
+        is_target_DFA, model = self.initialization(verbose)
         if not is_target_DFA:
             model = self.tentative_hypothesis()
             #DEBUG
@@ -85,13 +91,13 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
             are_equivalent, counterexample = self._perform_equivalence_query(model)
             while not are_equivalent:             
                 
-                print('Size before update:',last_size)   
+                if verbose: print('Size before update:',last_size)   
                 self.update_tree(counterexample, model)
                 model = self.tentative_hypothesis()
                 models.append(model)
                 #DEBUG
                 size = len(model.weighted_states)
-                print('Size after update:',size)               
+                if verbose: print('Size after update:',size)               
                 if size <= last_size:
                     print('ESTO SE CAE A LA MIERDA')
                 assert size>last_size, 'Possible infinite loop'
@@ -153,7 +159,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         s_i = epsilon
         gamma_j_minus_1 = epsilon
         distinguishing_string_found = False
-        print('CE:', counterexample)
+        if self._verbose: print('CE:', counterexample)
         for prefix in counterexample.get_prefixes():
             s_i_minus_1 = s_i
             s_i, updated_tree = self._tree.sift(prefix)
@@ -184,7 +190,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         return PDFA(self._alphabet, set([initialState]), self.terminal_symbol, comparator= WFAToleranceComparator())
 
 class ClassificationTree():
-    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int, max_query_length: int = math.inf):
+    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int, max_query_length: int = math.inf, verbose = False):
         self._teacher = teacher
         self.root = root
         self.partitions = partitions
@@ -194,7 +200,7 @@ class ClassificationTree():
         self._partitions_cache = dict()
         self.max_query_length = max_query_length
         self.inner_nodes = 0
-    
+        self._verbose = verbose
     @property
     def depth(self) -> int:
         return max([x.depth for x in self.leaves.values()])
@@ -301,16 +307,18 @@ class ClassificationTree():
 
         old_node.left = (node_1, next_token_probabilities_node1)
         old_node.right = (node_2, next_token_probabilities_node2)
-        print("-----update_leftmost_node----")
-        print('Old Node (new Leaf)', node1_str)
-        print('New Leaf (counterexample)', node2_str)
-        print(self.leaves.keys())
+        if self._verbose:
+            print("-----update_leftmost_node----")
+            print('Old Node (new Leaf)', node1_str)
+            print('New Leaf (counterexample)', node2_str)
+            print(self.leaves.keys())
         self.leaves.update({
         node1_str : node_1,
         node2_str: node_2,
         })
-        print(self.leaves.keys())
-        print("---------")
+        if self._verbose:
+            print(self.leaves.keys())
+            print("---------")
 
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
@@ -335,16 +343,18 @@ class ClassificationTree():
         # else:
         #     old_node.right = (node_2, node2_cont_probabilities)
         #     old_node.left = (node_1, node1_cont_probabilities)
-        print("----update_node----")
-        print('Old Node (new Leaf)', node_to_be_replaced)
-        print('New Leaf', leaf_1)
-        print(self.leaves.keys())
+        if self._verbose: 
+            print("----update_node----")
+            print('Old Node (new Leaf)', node_to_be_replaced)
+            print('New Leaf', leaf_1)
+            print(self.leaves.keys())
         self.leaves.update({
         leaf_1 : node_1,
         node_to_be_replaced: node_2,
         })
-        print(self.leaves.keys())
-        print("--------")
+        if self._verbose: 
+            print(self.leaves.keys())
+            print("--------")
 
 class ClassificationNode():
     def __init__(self, string: Sequence, parent: 'ClassificationNode' = None, probabilities  = None):

@@ -1,3 +1,4 @@
+from tkinter import W
 import unittest
 from numpy import result_type
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton
@@ -23,6 +24,18 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def setUp(self):
         self.learner = BoundedPDFAQuantizationNAryTreeLearner(max_states= 100, max_query_length=100)
+
+    def test_time_bound(self):
+        models = WeightedTomitasGrammars.get_all_automata()        
+        learner = BoundedPDFAQuantizationNAryTreeLearner(max_states= 100, max_query_length=100, max_miliseconds_run=60000)
+        for model in models:
+            partitions = 10
+            teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
+            result = learner.learn(teacher, partitions)
+            extracted_model = result.model
+            self.assertEqual(model, extracted_model)
+            #self.assertTrue(result.info['last_token_weight_queries_count']>0)        
+            #self.assertTrue(result.info['equivalence_queries_count']>0)
 
     def test_tomitas_1(self):
         model = WeightedTomitasGrammars.get_automaton_1()

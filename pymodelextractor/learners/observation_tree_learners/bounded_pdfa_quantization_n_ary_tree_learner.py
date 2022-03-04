@@ -13,15 +13,20 @@ from collections import OrderedDict
 import numpy as np
 from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLengthExceededException
 from pymodelextractor.exceptions.number_of_states_exceeded_exception import NumberOfStatesExceededException
+import multiprocessing
+import time
 
 class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
-    def __init__(self, max_states, max_query_length):     
+    def __init__(self, max_states, max_query_length, max_miliseconds_run = None):     
         super().__init__()
         self._max_states = max_states
         self._max_query_length = max_query_length
+        self._max_miliseconds_run = max_miliseconds_run
         self._exceeded_max_states = False
         self._exceeded_max_mq_length = False
-        self._history = []
+        self._exceded_time_bound = False
+        manager = multiprocessing.Manager()
+        self._history = manager.list()
 
     def _perform_equivalence_query(self, model):
         self._history.append(model)
@@ -29,25 +34,59 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             raise NumberOfStatesExceededException
         return super()._perform_equivalence_query(model)
 
+    def learn_aux(self, teacher, partitions, verbose):
+        return super().learn(teacher, partitions, verbose)
+
+    def run_learning_with_time_bound(self, teacher, partitions, verbose):
+        p = multiprocessing.Process(target=self.learn_aux, args=(teacher, partitions, verbose))
+        p.start()        
+        p.join(self._max_miliseconds_run/1000)
+        if p.is_alive():
+            print("Time Bound Reached")   
+            p.kill()
+            p.join()
+            print('Process Finished')                
+            self._exceded_time_bound = True
 
     def learn(self, teacher: ProbabilisticTeacher, partitions: int, verbose: bool = False) -> LearningResult:
         try:
-            result = super().learn(teacher, partitions)            
-            result.info['NumberOfStatesExceeded'] = False
-            result.info['QueryLengthExceeded'] = False
-            return result
+            if self._max_miliseconds_run is not None:
+                self.run_learning_with_time_bound(teacher, partitions, verbose)
+            else:
+                super().learn(teacher, partitions) 
+            #result = super().learn(teacher, partitions)            
+            #result.info['NumberOfStatesExceeded'] = False
+            #result.info['QueryLengthExceeded'] = False
+            #return result
         except NumberOfStatesExceededException:
             print("NumberOfStatesExceeded")
             self._exceeded_max_states = True
         except QueryLengthExceededException:
             print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True
-        result = self._learning_results_for(self._history[-1] if len(self._history) > 0 else None)
+        hist = list(self._history)
+        result = self._learning_results_for(hist[-1] if len(hist) > 0 else None)
         result.info['NumberOfStatesExceeded'] = self._exceeded_max_states
-        result.info['QueryLengthExceeded'] = self._exceeded_max_mq_length
+        result.info['QueryLengthExceeded'] = self._exceeded_max_mq_length        
+        result.info['TimeExceeded'] = self._exceded_time_bound
         return result
+    
+    def _learning_results_for(self, model):
+        if self._max_miliseconds_run is not None:
+            numberOfStates = len(model.weighted_states) if model is not None else 0
+            for count, state in enumerate(model.weighted_states):
+                state.name = 'q'+str(count)
 
-    def initialization(self) -> None:
-        ret =  super().initialization()
+            info = {
+                'equivalence_queries_count': None,
+                'last_token_weight_queries_count': None,
+                'observation_tree': None
+            }
+            return LearningResult(model, numberOfStates, info)
+        else:
+            return super()._learning_results_for(model)
+
+    def initialization(self, verbose) -> None:
+        ret =  super().initialization(verbose)
         self._tree.max_query_length = self._max_query_length
         return ret
