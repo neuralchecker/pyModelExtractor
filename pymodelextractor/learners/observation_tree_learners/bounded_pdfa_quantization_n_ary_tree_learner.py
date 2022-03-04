@@ -92,5 +92,6 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
 
     def initialization(self, verbose) -> None:
         ret =  super().initialization(verbose)
-        self._tree.max_query_length = self._max_query_length
+        if not ret[0]:
+            self._tree.max_query_length = self._max_query_length
         return ret
