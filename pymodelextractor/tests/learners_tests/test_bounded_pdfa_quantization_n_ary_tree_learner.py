@@ -17,7 +17,7 @@ from pythautomata.utilities import abbadingo_one_dfa_generator
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
-from pymodelextractor.utils import time_bound_utilities
+from pymodelextractor.utils.time_bound_utilities import is_unix_system
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
@@ -27,7 +27,7 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         self.learner = BoundedPDFAQuantizationNAryTreeLearner(max_states= 100, max_query_length=100)
 
     def test_time_bound(self):
-        if time_bound_utilities.is_unix_system():
+        if is_unix_system():
             models = WeightedTomitasGrammars.get_all_automata()        
             learner = BoundedPDFAQuantizationNAryTreeLearner(max_states= 100, max_query_length=100, max_seconds_run=60)
             for model in models:
