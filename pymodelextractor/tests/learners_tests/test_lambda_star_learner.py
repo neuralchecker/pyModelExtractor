@@ -7,8 +7,7 @@ from pymodelextractor.teachers.automaton_teacher import \
 from pythautomata.automata.deterministic_finite_automaton import \
     DeterministicFiniteAutomaton
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars
-from pythautomata.boolean_algebra_learner.equality_learner import \
-    EqualityLearner
+from pythautomata.boolean_algebra_learner.closed_discrete_interval_learner import ClosedDiscreteIntervalLearner
 from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
 from itertools import chain
@@ -18,7 +17,7 @@ from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAut
 
 class TestLambdaStarLearnerWithEqualityAlgebra(unittest.TestCase):
     def setUp(self):
-        self.learner = LambdaStarLearner(EqualityLearner())
+        self.learner = LambdaStarLearner(ClosedDiscreteIntervalLearner())
 
     def teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, ComparisonStrategy())

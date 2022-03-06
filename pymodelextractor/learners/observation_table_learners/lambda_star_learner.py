@@ -19,6 +19,7 @@ from pythautomata.boolean_algebra_learner.boolean_algebra_learner import \
 from pythautomata.boolean_algebra_learner.closed_discrete_interval_learner import \
     ClosedDiscreteIntervalLearner as IntervalLearner
 from pythautomata.utilities.automata_converter import AutomataConverter
+import time
 
 
 class LambdaStarLearner(Learner):
@@ -31,6 +32,7 @@ class LambdaStarLearner(Learner):
         self._algebra_learner = boolean_algebra_learner
 
     def learn(self, teacher: Teacher) -> LearningResult:
+        start_time = time.time()
         answer: bool
         counter_example: Sequence
         observation_table: _ObservationTable = self._build_observation_table()
@@ -53,7 +55,10 @@ class LambdaStarLearner(Learner):
                 self._make_consistent(observation_table, teacher)
 
         # TODO add states counter
-        return LearningResult(model, 0)
+        return LearningResult(model, len(model.states),
+                              {'equivalence_queries_count': teacher.equivalence_queries_count,
+                               'membership_queries_count': teacher.membership_queries_count,
+                               'duration': time.time() - start_time})
 
     def _update_with_new_counterexample(self, observation_table: '_ObservationTable', teacher: Teacher,
                                         counter_example: Sequence) -> None:
