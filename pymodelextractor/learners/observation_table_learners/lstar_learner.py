@@ -1,3 +1,5 @@
+from .observation_table import ObservationTable
+from .observation_table import Inconsistency
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.alphabet import Alphabet
 from pymodelextractor.teachers.teacher import Teacher
@@ -6,13 +8,16 @@ from pymodelextractor.learners.observation_table_learners.observation_table impo
 from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import FAObservationTableTranslator
 from pymodelextractor.learners.learning_result import LearningResult
 from pythautomata.abstract.boolean_model import BooleanModel
+import time
+
 
 class LStarLearner(Learner):
 
     def __init__(self):
         self._model_translator = FAObservationTableTranslator()
 
-    def learn(self, teacher: Teacher) -> LearningResult:  
+    def learn(self, teacher: Teacher) -> LearningResult:
+        start_time = time.time()
         self._teacher = teacher
         self._build_observation_table()
         self._initialize_observation_table()
@@ -20,20 +25,20 @@ class LStarLearner(Learner):
         answer = False
         counter = 1
 
-        while not answer:   
+        while not answer:
             self._close()
             self._make_consistent()
-            model = self._model_translator.translate(self._observation_table, self._alphabet)
+            model = self._model_translator.translate(
+                self._observation_table, self._alphabet)
             answer, counterexample = self._perform_equivalence_query(model)
-            if not answer:                
+            if not answer:
                 self._update_observation_table_with(counterexample)
             counter += 1
 
-        return self._learning_results_for(model)
+        return self._learning_results_for(model, time.time() - start_time)
 
     def _perform_equivalence_query(self, model: BooleanModel) -> bool:
         return self._teacher.equivalence_query(model)
-
 
     def _build_observation_table(self):
         self._observation_table = LStarObservationTable(self._alphabet)
@@ -46,7 +51,8 @@ class LStarLearner(Learner):
 
     def _fill_hole_for(self, sequence: Sequence):
         suffix = self._observation_table.exp[-1]
-        self._observation_table[sequence].append(self._teacher.membership_query(sequence + suffix))
+        self._observation_table[sequence].append(
+            self._teacher.membership_query(sequence + suffix))
 
     def _close(self):
         while True:
@@ -88,12 +94,14 @@ class LStarLearner(Learner):
     def _add_to_red(self, sequence: Sequence):
         if sequence not in self._observation_table.red:
             self._observation_table.red.add(sequence)
-            self._observation_table[sequence] = self._get_filled_row_for(sequence)
+            self._observation_table[sequence] = self._get_filled_row_for(
+                sequence)
 
     def _add_to_blue(self, sequence: Sequence):
         if not sequence in self._observation_table.blue:
             self._observation_table.blue.add(sequence)
-            self._observation_table[sequence] = self._get_filled_row_for(sequence)
+            self._observation_table[sequence] = self._get_filled_row_for(
+                sequence)
 
     def _get_filled_row_for(self, sequence: Sequence) -> list:
         requiredSuffixes = self._observation_table.exp
@@ -103,12 +111,13 @@ class LStarLearner(Learner):
             row.append(result)
         return row
 
-    def _learning_results_for(self, model):
+    def _learning_results_for(self, model, duration):
         numberOfStates = len(model.states) if model is not None else 0
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'membership_queries_count': self._teacher.membership_queries_count,
-            'observation_table': self._observation_table
+            'observation_table': self._observation_table,
+            'duration': duration,
         }
         return LearningResult(model, numberOfStates, info)
 
@@ -126,11 +135,7 @@ class LStarLearner(Learner):
 
     def _move_from_blue_to_red(self, blueSequence: Sequence):
         self._observation_table.move_from_blue_to_red(blueSequence)
-    
 
-from pythautomata.base_types.sequence import Sequence
-from .observation_table import Inconsistency
-from .observation_table import ObservationTable
 
 class LStarObservationTable(ObservationTable):
     def __init__(self, alphabet: Alphabet):
@@ -155,7 +160,8 @@ class LStarObservationTable(ObservationTable):
                 red1 = redList[i]
                 red2 = redList[j]
                 if red1 != red2 and self.observations[red1] == self.observations[red2]:
-                    inconsistency = self._inconsistency_between(red1, red2, self.alphabet)
+                    inconsistency = self._inconsistency_between(
+                        red1, red2, self.alphabet)
                     if inconsistency is not None:
                         return inconsistency
         return None

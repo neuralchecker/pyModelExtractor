@@ -37,10 +37,8 @@ class LambdaStarLearner(Learner):
         counter_example: Sequence
         observation_table: _ObservationTable = self._build_observation_table()
         self._initialize_observation_table(observation_table, teacher)
-        eq_count = 0
         model = self._build_model(observation_table)
         answer, counter_example = teacher.equivalence_query(model)
-        eq_count += 1
         self._update_with_new_counterexample(
             observation_table, teacher, counter_example)
         self._make_consistent(observation_table, teacher)
@@ -48,7 +46,6 @@ class LambdaStarLearner(Learner):
         while not answer:
             model = self._build_model(observation_table)
             answer, counter_example = teacher.equivalence_query(model)
-            eq_count += 1
             if not answer:
                 self._update_with_new_counterexample(
                     observation_table, teacher, counter_example)
@@ -58,7 +55,10 @@ class LambdaStarLearner(Learner):
                 self._make_consistent(observation_table, teacher)
 
         # TODO add states counter
-        return LearningResult(model, len(model.states), {'equivalence_queries_count': eq_count, 'execution_time': time.time() - start_time})
+        return LearningResult(model, len(model.states),
+                              {'equivalence_queries_count': teacher.equivalence_queries_count,
+                               'membership_queries_count': teacher.membership_queries_count,
+                               'duration': time.time() - start_time})
 
     def _update_with_new_counterexample(self, observation_table: '_ObservationTable', teacher: Teacher,
                                         counter_example: Sequence) -> None:
