@@ -27,5 +27,5 @@ def timeout(time):
 #    t = Timer(time, raise_timeout)
 #    t.start()
 
-def raise_timeout():
+def raise_timeout(signum, frame):
     raise TimeoutError
