@@ -68,7 +68,8 @@ class PDFALStarLearner(PDFALearner):
             'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,
             'observation_table':self.observation_table               
         }
-        learningResult = LearningResult(model, len(model.weighted_states), info)
+        numberOfStates = len(model.weighted_states) if model is not None else 0
+        learningResult = LearningResult(model, numberOfStates, info)
         return learningResult
 
 
