@@ -19,7 +19,7 @@ class PDFALStarLearner(PDFALearner):
         self.tolerance = None
 
     def learn(self, teacher: ProbabilisticTeacher, tolerance: float, verbose: bool = False) -> LearningResult:
-        assert(tolerance>=0 and tolerance <= 1, 'Tolerance should be >= 0 and <= 1')
+        assert tolerance>=0 and tolerance <= 1, 'Tolerance should be >= 0 and <= 1'
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         self.tolerance = tolerance
