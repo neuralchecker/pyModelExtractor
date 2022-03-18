@@ -95,16 +95,16 @@ class TestWLStarVsQuant(unittest.TestCase):
         pdfa_teacher_QUANT = PDFATeacher(pdfa, partition_comparator)
 
         modelWLStar = WLStarLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
-        #modelWLStarCol = WLStarColLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
+        modelWLStarCol = WLStarColLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
         modelQUANT = QuantLearner.learn(pdfa_teacher_QUANT, partitions).model
 
         modelWLStar.name = 'WLSTAR_EXAMPLE'
-        #modelWLStarCol.name = 'WLSTAR_COL_EXAMPLE'
+        modelWLStarCol.name = 'WLSTAR_COL_EXAMPLE'
         modelQUANT.name = 'QUANT_EXAMPLE'
 
         models = [modelWLStar, modelQUANT]
-        #for model in models:
-        #    model.export("./")
+        for model in models:
+            model.export("./")
 
     def compute_stats(self, target_model, extracted_model, tolerance, partitions, test_sequences = None, sample_size = 1000, max_seq_length = 20, seed = 42):
         if test_sequences is None:
