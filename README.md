@@ -18,11 +18,13 @@ DFA
 - Observation Pack
 
 PDFA
--L*_{P}
--QuaNT
+- L*_{P}
+- QuaNT
+- BoundedL*_{P}
+- BoundedQuaNT
 
 SFA
--Lambda*
+- Lambda*
 
 ---
 ## **Installation**
