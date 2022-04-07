@@ -6,13 +6,11 @@ from pymodelextractor.learners.observation_table_learners.pdfa_observation_table
     epsilon
 from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstarcol_observation_table_translations import \
     PDFALStarColObservationTableTranslator
-from pymodelextractor.learners.pdfa_learner import PDFALearner
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
-from pythautomata.utilities import pdfa_utils
 
 
-class PDFALStarColLearner(PDFALearner):
+class PDFALStarColLearner:
 
     def __init__(self):
         self.model_translator = PDFALStarColObservationTableTranslator()
@@ -20,7 +18,7 @@ class PDFALStarColLearner(PDFALearner):
         self._teacher = None
         self.tolerance = None
 
-    def learn(self, teacher: ProbabilisticTeacher, tolerance,verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, tolerance, verbose: bool = False) -> LearningResult:
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         self.tolerance = tolerance

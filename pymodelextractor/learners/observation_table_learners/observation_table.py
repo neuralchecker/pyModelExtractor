@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from typing import Any, Union
+from typing import Union
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
@@ -66,7 +66,8 @@ class ObservationTable(ABC):
         self.blue.remove(sequence)
         self.red.add(sequence)
 
-    def _inconsistency_between(self, sequence1: Sequence, sequence2: Sequence, alphabet: Alphabet) -> Union[TableInconsistency, None]:
+    def _inconsistency_between(self, sequence1: Sequence, sequence2: Sequence, alphabet: Alphabet) -> \
+            Union[TableInconsistency, None]:
         for symbol in alphabet.symbols:
             suffixedSequence1 = sequence1 + symbol
             suffixedSequence2 = sequence2 + symbol

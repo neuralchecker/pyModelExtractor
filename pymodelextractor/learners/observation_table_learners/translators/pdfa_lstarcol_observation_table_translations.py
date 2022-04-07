@@ -1,5 +1,6 @@
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedState
-from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
+from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import \
+     ProbabilisticDeterministicFiniteAutomaton as PDFA
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
 from pythautomata.base_types.symbol import Symbol
 

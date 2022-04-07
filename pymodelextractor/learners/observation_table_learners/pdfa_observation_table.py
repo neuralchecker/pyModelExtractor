@@ -37,7 +37,6 @@ class PDFAObservationTable:
             added = True
         return added
 
-
     def add_to_red(self, sequence: Sequence) -> None:
         self.red.add(sequence)
 

@@ -18,8 +18,8 @@ class TestPDFALStarColLearner(unittest.TestCase):
         result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-        self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_2(self):
         model = WeightedTomitasGrammars.get_automaton_2()
@@ -27,8 +27,8 @@ class TestPDFALStarColLearner(unittest.TestCase):
         result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model, PDFAComparator())
-        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-        self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_3(self):
         model = WeightedTomitasGrammars.get_automaton_3()
@@ -36,8 +36,8 @@ class TestPDFALStarColLearner(unittest.TestCase):
         result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-        self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_4(self):
         model = WeightedTomitasGrammars.get_automaton_4()
@@ -45,8 +45,8 @@ class TestPDFALStarColLearner(unittest.TestCase):
         result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-        self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_5(self):
         model = WeightedTomitasGrammars.get_automaton_5()
@@ -54,8 +54,8 @@ class TestPDFALStarColLearner(unittest.TestCase):
         result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-        self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_6(self):
         model = WeightedTomitasGrammars.get_automaton_6()
@@ -63,8 +63,8 @@ class TestPDFALStarColLearner(unittest.TestCase):
         result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-        self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_7(self):
         model = WeightedTomitasGrammars.get_automaton_7()
@@ -72,5 +72,5 @@ class TestPDFALStarColLearner(unittest.TestCase):
         result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-        self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)

@@ -5,6 +5,7 @@ from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLen
 from pymodelextractor.exceptions.number_of_states_exceeded_exception import NumberOfStatesExceededException
 from pythautomata.abstract.boolean_model import BooleanModel
 
+
 class BoundedLStarLearner(LStarLearner):
 
     def __init__(self, max_states, max_mq_length):
@@ -24,7 +25,7 @@ class BoundedLStarLearner(LStarLearner):
         except QueryLengthExceededException:
             print("QueryLengthExceededException")
             self._exceeded_max_mq_length = True
-        return self._learning_results_for(self._history[-1] if len(self._history) > 0 else None)
+        return self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, None)
 
     def _perform_equivalence_query(self, model: BooleanModel) -> bool:
         self._history.append(model)

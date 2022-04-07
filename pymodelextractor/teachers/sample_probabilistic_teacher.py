@@ -4,11 +4,12 @@ from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
-from pythautomata.utilities import pdfa_utils
-from typing import Union
+from typing import Union, Sized
+
 
 class SampleProbabilisticTeacher(ProbabilisticTeacher):
-    def __init__(self, model: ProbabilisticModel, comparator: FiniteAutomataComparator, sample_size: float, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128):
+    def __init__(self, model: ProbabilisticModel, comparator: FiniteAutomataComparator, sample_size: float,
+                 sequence_generator: SequenceGenerator = None, max_seq_length: int = 128):
         super().__init__()
         self._sample_size = sample_size
         self.__target_model = model
@@ -31,7 +32,7 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
     def get_log_probability_error(self, seq, aut: WeightedAutomaton):
         return abs(aut.log_sequence_weight(seq) - self.log_sequence_weight(seq))
     
-    def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence,None]]:        
+    def equivalence_query(self, aut: WeightedAutomaton) -> Union[tuple[bool, Sized], tuple[bool, None]]:
         self._equivalence_queries_count += 1
         tried = set()
         suffixes = list()

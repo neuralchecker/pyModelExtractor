@@ -1,16 +1,15 @@
 import time
 
-from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
 from pythautomata.base_types.sequence import Sequence
 from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
     epsilon
 from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstar_observation_table_translator import \
-     PDFALStarObservationTableTranslation
-from pymodelextractor.learners.pdfa_learner import PDFALearner
+    PDFALStarObservationTableTranslation
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
 
-class PDFALStarLearner(PDFALearner):
+
+class PDFALStarLearner:
 
     def __init__(self):
         self.model_translator = PDFALStarObservationTableTranslation()
@@ -19,7 +18,7 @@ class PDFALStarLearner(PDFALearner):
         self.tolerance = None
 
     def learn(self, teacher: ProbabilisticTeacher, tolerance: float, verbose: bool = False) -> LearningResult:
-        assert tolerance>=0 and tolerance <= 1, 'Tolerance should be >= 0 and <= 1'
+        assert 0 <= tolerance <= 1, 'Tolerance should be >= 0 and <= 1'
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         self.tolerance = tolerance
@@ -54,24 +53,24 @@ class PDFALStarLearner(PDFALearner):
                 self.__update_observation_table_with(counterexample)
 
             inter_time = time.time() - start_inter_time
-            if verbose: print("*** Iter", counter, "finished after(secs):", inter_time, "- states:", len(model.weighted_states),
-                  "- overall CE count:", counter_example_count, "***\n\n")
+            if verbose: print("*** Iter", counter, "finished after(secs):",
+                              inter_time, "- states:", len(model.weighted_states),
+                              "- overall CE count:", counter_example_count, "***\n\n")
 
         if verbose: print("***** Learning completed successfully *****\n\n")
 
-        result = self._learning_results_for(model)        
+        result = self._learning_results_for(model)
         return result
 
     def _learning_results_for(self, model):
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,
-            'observation_table':self.observation_table               
+            'observation_table': self.observation_table
         }
         numberOfStates = len(model.weighted_states) if model is not None else 0
         learningResult = LearningResult(model, numberOfStates, info)
         return learningResult
-
 
     def reset(self):
         self.__build_observation_table()

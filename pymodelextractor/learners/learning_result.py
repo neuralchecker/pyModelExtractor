@@ -3,7 +3,7 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 from typing import Union
 
 
-class LearningResult():
+class LearningResult:
     model: Union[FA, WA]
     state_count: int
     info: dict
