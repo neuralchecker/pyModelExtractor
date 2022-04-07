@@ -139,7 +139,6 @@ class PDFAQuantizationNAryTreeLearner:
     def update_tree(self, counterexample: Sequence, model: PDFA) -> None:
         s_i = epsilon
         gamma_j_minus_1 = epsilon
-        distinguishing_string_found = False
         if self._verbose: print('CE:', counterexample)
         for prefix in counterexample.get_prefixes():
             s_i_minus_1 = s_i
@@ -148,13 +147,8 @@ class PDFAQuantizationNAryTreeLearner:
             if not s_i == s_hat_i:
                 internal_node_string = prefix[-1] + self._tree.lca(s_i, s_hat_i)
                 self._tree.update_node(s_i_minus_1, gamma_j_minus_1, internal_node_string)
-                distinguishing_string_found = True
                 break
             gamma_j_minus_1 = prefix
-        if not distinguishing_string_found:
-            assert False
-            internal_node_string = epsilon
-            self._tree.update_node(s_i, counterexample, internal_node_string)
 
     def create_single_state_PDFA(self, probabilities: OrderedDict[Symbol, float]):
         final_weight = probabilities[self.terminal_symbol]
