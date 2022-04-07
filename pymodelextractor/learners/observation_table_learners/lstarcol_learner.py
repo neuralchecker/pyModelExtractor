@@ -1,11 +1,12 @@
 from pythautomata.base_types.sequence import Sequence
-from pythautomata.base_types.alphabet import Alphabet
 from pymodelextractor.teachers.teacher import Teacher
 from pymodelextractor.learners.learner import Learner
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
-from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import FAObservationTableTranslator
+from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import\
+     FAObservationTableTranslator
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.learners.observation_table_learners.lstar_learner import LStarObservationTable
+
 
 class LStarColLearner(Learner):
 
@@ -65,7 +66,7 @@ class LStarColLearner(Learner):
             self._observation_table.exp.append(sequence)
             self._fill_last_column()
 
-    def _fill_last_column(self) -> list:
+    def _fill_last_column(self):
         for sequence in self._observation_table.observations:
             self._fill_hole_for(sequence)
 

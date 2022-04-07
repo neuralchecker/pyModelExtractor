@@ -33,7 +33,7 @@ class DeterministicFiniteAutomatonTeacher(Teacher):
         self._equivalence_queries_count += 1
         counterexample = self._comparison_strategy.get_counterexample_between(model, self.automaton)
         are_equivalent = counterexample is None
-        return (are_equivalent, counterexample)
+        return are_equivalent, counterexample
 
     def reset_statistics(self) -> None:
         self._membership_queries_count = 0

@@ -35,8 +35,7 @@ class FAObservationTableTranslator(ObservationTableTranslator):
         sequences = [self.epsilon]
         # might thorw error on set of list, easily solved by casting list to tuple
 
-        added_rows: set[tuple[bool, ...]] = set(
-            [tuple(observation_table[self.epsilon])])
+        added_rows: set[tuple[bool, ...]] = {tuple(observation_table[self.epsilon])}
         for sequence in red:
             if tuple(observation_table[sequence]) not in added_rows:
                 sequences.append(sequence)

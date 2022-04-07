@@ -3,7 +3,7 @@ from pythautomata.base_types.state import State
 from pymodelextractor.teachers.teacher import Teacher
 from pymodelextractor.learners.learner import Learner
 from pythautomata.automata.deterministic_finite_automaton import DeterministicFiniteAutomaton as DFA
-from pymodelextractor.learners.observation_table_learners.observation_table import epsilon #TODO: Fix this smelly smell https://i.pinimg.com/originals/b9/76/b7/b976b79635bf31c0d97e38297cb54db0.jpg
+from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
 from pymodelextractor.learners.learning_result import LearningResult
 
 

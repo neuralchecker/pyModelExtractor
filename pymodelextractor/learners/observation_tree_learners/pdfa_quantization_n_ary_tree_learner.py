@@ -1,24 +1,24 @@
-from re import I
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import Symbol
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
 from pythautomata.utilities import pdfa_utils
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
-from pymodelextractor.learners.pdfa_learner import PDFALearner
-from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import ProbabilisticDeterministicFiniteAutomaton as PDFA
-from pymodelextractor.learners.observation_table_learners.observation_table import epsilon #TODO: Fix this smelly smell https://i.pinimg.com/originals/b9/76/b7/b976b79635bf31c0d97e38297cb54db0.jpg
+from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import \
+    ProbabilisticDeterministicFiniteAutomaton as PDFA, ProbabilisticDeterministicFiniteAutomaton
+from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLengthExceededException
 from collections import OrderedDict
-import numpy as np
 import math
 
-class PDFAQuantizationNAryTreeLearner(PDFALearner):
-    def __init__(self):   
-        self._verbose = False     
+
+class PDFAQuantizationNAryTreeLearner:
+    def __init__(self):
+        self._verbose = False
+        self._tree = None
         pass
-    
+
     @property
     def _alphabet(self):
         return self._teacher.alphabet
@@ -26,92 +26,72 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
     @property
     def _symbols(self):
         return self._teacher.alphabet.symbols
-    
+
     @property
     def _all_symbols_sorted(self):
         symbols = sorted(list(self._alphabet.symbols))
-        symbols = [self.terminal_symbol]+symbols
+        symbols = [self.terminal_symbol] + symbols
         return symbols
 
     def _perform_equivalence_query(self, model):
         return self._teacher.equivalence_query(model)
-    
-    
+
     def _perform_next_token_probabilities(self, value):
         return self._teacher.next_token_probabilities(value)
 
-    def initialization(self, verbose) -> None:       
+    def initialization(self, verbose) -> tuple[bool, ProbabilisticDeterministicFiniteAutomaton]:
         probabilities = self._perform_next_token_probabilities(epsilon)
         starting_pdfa = self.create_single_state_PDFA(probabilities)
         are_equivalent, counterexample = self._perform_equivalence_query(starting_pdfa)
         if are_equivalent:
             self._tree = None
-            return (True, starting_pdfa)
+            return True, starting_pdfa
 
         next_token_probabilities_epsilon = self._perform_next_token_probabilities(epsilon)
         next_token_probabilities_counterexample = self._perform_next_token_probabilities(counterexample)
         nodeRoot = ClassificationNode(epsilon)
-        nodeEpsilon = ClassificationNode(epsilon, parent = nodeRoot, probabilities = next_token_probabilities_epsilon)
-        nodeCounterexample = ClassificationNode(counterexample, parent = nodeRoot,  probabilities = next_token_probabilities_counterexample)
-        
-        nodeRoot.childs[tuple(next_token_probabilities_epsilon.values())] = nodeEpsilon         
-        nodeRoot.childs[tuple(next_token_probabilities_counterexample.values())] = nodeCounterexample 
+        nodeEpsilon = ClassificationNode(epsilon, parent=nodeRoot, probabilities=next_token_probabilities_epsilon)
+        nodeCounterexample = ClassificationNode(counterexample, parent=nodeRoot,
+                                                probabilities=next_token_probabilities_counterexample)
 
-        #nodeRoot.right = (nodeEpsilon, next_token_probabilities_epsilon)
-        #nodeRoot.left = (nodeCounterexample, next_token_probabilities_counterexample)
-        
+        nodeRoot.childs[tuple(next_token_probabilities_epsilon.values())] = nodeEpsilon
+        nodeRoot.childs[tuple(next_token_probabilities_counterexample.values())] = nodeCounterexample
+
         self._tree = ClassificationTree(nodeRoot, self._teacher, self.partitions, verbose=verbose)
-        return (False, starting_pdfa)
-
-    #def _next_token_probabilities(self, sequence: Sequence):
-    #    symbols = self._all_symbols_sorted
-    #    probabilities = self._teacher.last_token_weights(sequence, symbols)
-    #    probabilities = OrderedDict(zip(symbols, probabilities))
-    #    return probabilities
+        return False, starting_pdfa
 
     def learn(self, teacher: ProbabilisticTeacher, partitions: int, verbose: bool = False) -> LearningResult:
         self._verbose = verbose
         self.partitions = partitions
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
-        #self.tolerance = teacher.tolerance
-        #self.reset()        
-        #DEBUG
         models = []
-        
-        #END DEBUG
         is_target_DFA, model = self.initialization(verbose)
         if not is_target_DFA:
             model = self.tentative_hypothesis()
-            #DEBUG
             models.append(model)
             last_size = len(model.weighted_states)
-
-            #END DEBUG
             are_equivalent, counterexample = self._perform_equivalence_query(model)
-            while not are_equivalent:             
-                
-                if verbose: print('Size before update:',last_size)   
+
+            while not are_equivalent:
+
+                if verbose: print('Size before update:', last_size)
                 self.update_tree(counterexample, model)
                 model = self.tentative_hypothesis()
                 models.append(model)
-                #DEBUG
                 size = len(model.weighted_states)
-                if verbose: print('Size after update:',size)               
-                if size <= last_size:
-                    print('ESTO SE CAE A LA MIERDA')
-                assert size>last_size, 'Possible infinite loop'
+                if verbose: print('Size after update:', size)
+                assert size > last_size, 'Possible infinite loop'
                 last_size = size
-                #END DEBUG
-                are_equivalent, counterexample = self._perform_equivalence_query(model)                
+                are_equivalent, counterexample = self._perform_equivalence_query(model)
 
-        result = self._learning_results_for(model)        
+        result = self._learning_results_for(model)
         return result
 
-    def _learning_results_for(self, model):        
+    def _learning_results_for(self, model):
         numberOfStates = len(model.weighted_states) if model is not None else 0
         for count, state in enumerate(model.weighted_states):
-            state.name = 'q'+str(count)
+            state.name = 'q' + str(count)
 
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
@@ -128,34 +108,35 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         while updated_tree:
             for leaf_str, leaf in self._tree.leaves.items():
                 initial_weight = 1 if leaf_str == epsilon else 0
-                terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]             
+                terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
                 state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability)
                 states[leaf_str] = state
-            
+
             for access_string, state in states.items():
                 for symbol in symbols:
-                    access_string_of_transition, updated_tree = self._tree.sift(access_string+symbol)
+                    access_string_of_transition, updated_tree = self._tree.sift(access_string + symbol)
                     if updated_tree:
                         break
-                    state.add_transition(symbol, states[access_string_of_transition], self._tree.leaves[access_string].probabilities[symbol])
+                    state.add_transition(symbol, states[access_string_of_transition],
+                                         self._tree.leaves[access_string].probabilities[symbol])
                 if updated_tree:
-                        break
-            
+                    break
+
         comparator = WFAToleranceComparator()
         states = set(states.values())
         return PDFA(self._alphabet, states, self.terminal_symbol, comparator=comparator)
-        
+
     def get_accessing_string(self, model: PDFA, sequence: Sequence):
         state = model.get_first_state()
-        if sequence == epsilon: 
+        if sequence == epsilon:
             return state.name
-            
-        while len(sequence)>0:
+
+        while len(sequence) > 0:
             state = list(state.next_states_for(sequence[0]))[0]
             sequence = sequence[1:]
         return state.name
-        
-    def update_tree(self, counterexample: Sequence, model: PDFA)-> None:        
+
+    def update_tree(self, counterexample: Sequence, model: PDFA) -> None:
         s_i = epsilon
         gamma_j_minus_1 = epsilon
         distinguishing_string_found = False
@@ -163,7 +144,7 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
         for prefix in counterexample.get_prefixes():
             s_i_minus_1 = s_i
             s_i, updated_tree = self._tree.sift(prefix)
-            s_hat_i = self.get_accessing_string(model,prefix)
+            s_hat_i = self.get_accessing_string(model, prefix)
             if not s_i == s_hat_i:
                 internal_node_string = prefix[-1] + self._tree.lca(s_i, s_hat_i)
                 self._tree.update_node(s_i_minus_1, gamma_j_minus_1, internal_node_string)
@@ -171,26 +152,23 @@ class PDFAQuantizationNAryTreeLearner(PDFALearner):
                 break
             gamma_j_minus_1 = prefix
         if not distinguishing_string_found:
-            #assert(False)
-            #We should update left-most leaf
-            #self._tree.update_leftmost_node(counterexample)
-            #we should update the node s_i_minus_1
+            assert False
             internal_node_string = epsilon
             self._tree.update_node(s_i, counterexample, internal_node_string)
-
-        #Some distinguishing string must have been found, if not an infinite loop occurs    
-        #assert(distinguishing_string_found)
 
     def create_single_state_PDFA(self, probabilities: OrderedDict[Symbol, float]):
         final_weight = probabilities[self.terminal_symbol]
         probabilities.pop(self.terminal_symbol)
-        initialState = WeightedState(epsilon, 1, final_weight = final_weight)
+        initialState = WeightedState(epsilon, 1, final_weight=final_weight)
         for symbol, probability in probabilities.items():
             initialState.add_transition(symbol, initialState, probability)
-        return PDFA(self._alphabet, set([initialState]), self.terminal_symbol, comparator= WFAToleranceComparator())
+        return PDFA(self._alphabet, {initialState}, self.terminal_symbol, comparator=WFAToleranceComparator())
 
-class ClassificationTree():
-    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int, max_query_length: int = math.inf, verbose = False):
+
+class ClassificationTree:
+    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int,
+                 max_query_length: int = math.inf, verbose=False):
+        self.leaves = None
         self._teacher = teacher
         self.root = root
         self.partitions = partitions
@@ -201,6 +179,7 @@ class ClassificationTree():
         self.max_query_length = max_query_length
         self.inner_nodes = 0
         self._verbose = verbose
+
     @property
     def depth(self) -> int:
         return max([x.depth for x in self.leaves.values()])
@@ -211,7 +190,7 @@ class ClassificationTree():
         while q:
             node = q.pop()
             if node.is_leaf():
-                self.leaves.update({node.string:node})
+                self.leaves.update({node.string: node})
                 continue
             for child in node.childs.values():
                 q.append(child)
@@ -221,20 +200,20 @@ class ClassificationTree():
         updated_tree = False
         while not node.is_leaf():
             d = node.string
-            sd = sequence+d
+            sd = sequence + d
             sd_probabilities = self._next_token_probabilities(sd).values()
             child_key = self._look_for_branch(node.childs, list(sd_probabilities))
             if child_key is not None:
                 node = node.childs[tuple(child_key)]
             else:
                 node_probabilities = self._next_token_probabilities(sequence)
-                new_node = ClassificationNode(sequence, parent = node, probabilities = node_probabilities)
+                new_node = ClassificationNode(sequence, parent=node, probabilities=node_probabilities)
                 node.childs[tuple(sd_probabilities)] = new_node
-                self.leaves.update({new_node.string:new_node})
-                updated_tree = True                
+                self.leaves.update({new_node.string: new_node})
+                updated_tree = True
                 node = new_node
 
-        return node.string, updated_tree 
+        return node.string, updated_tree
 
     def _get_partition(self, probabilities):
         if tuple(probabilities) in self._partitions_cache:
@@ -244,22 +223,21 @@ class ClassificationTree():
             self._partitions_cache[tuple(probabilities)] = partition
             return partition
 
-
-    def _are_in_same_partition(self, probs1, probs2):   
+    def _are_in_same_partition(self, probs1, probs2):
         partition1 = self._get_partition(probs1)
         partition2 = self._get_partition(probs2)
         return pdfa_utils.are_same_partition(partition1, partition2)
-    
+
     def _look_for_branch(self, childs, probabilities):
         if tuple(probabilities) in childs:
-            return probabilities        
+            return probabilities
         for probs in childs.keys():
             probs = list(probs)
             if self._are_in_same_partition(probs, probabilities):
                 return probs
         return None
-    
-    def _next_token_probabilities(self, sequence: Sequence):  
+
+    def _next_token_probabilities(self, sequence: Sequence):
         if len(sequence) > self.max_query_length:
             raise QueryLengthExceededException
         if sequence in self._next_token_probabilities_cache:
@@ -268,8 +246,8 @@ class ClassificationTree():
             value = self._teacher.next_token_probabilities(sequence)
             self._next_token_probabilities_cache[sequence] = value
             return value
-    
-    def lca(self, a:Sequence, b:Sequence) -> Sequence:
+
+    def lca(self, a: Sequence, b: Sequence) -> Sequence:
         ''' lca: lowest common ancestor '''
         if not a in self.leaves:
             print('recorcholis batman')
@@ -302,8 +280,8 @@ class ClassificationTree():
         next_token_probabilities_node1 = self._next_token_probabilities(node1_str)
         next_token_probabilities_node2 = self._next_token_probabilities(node2_str)
 
-        node_1 = ClassificationNode(node1_str, parent = old_node, probabilities = next_token_probabilities_node1)
-        node_2 = ClassificationNode(node2_str, parent = old_node, probabilities = next_token_probabilities_node2)
+        node_1 = ClassificationNode(node1_str, parent=old_node, probabilities=next_token_probabilities_node1)
+        node_2 = ClassificationNode(node2_str, parent=old_node, probabilities=next_token_probabilities_node2)
 
         old_node.left = (node_1, next_token_probabilities_node1)
         old_node.right = (node_2, next_token_probabilities_node2)
@@ -313,8 +291,8 @@ class ClassificationTree():
             print('New Leaf (counterexample)', node2_str)
             print(self.leaves.keys())
         self.leaves.update({
-        node1_str : node_1,
-        node2_str: node_2,
+            node1_str: node_1,
+            node2_str: node_2,
         })
         if self._verbose:
             print(self.leaves.keys())
@@ -322,74 +300,46 @@ class ClassificationTree():
 
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
-        self.inner_nodes += 1 
+        self.inner_nodes += 1
         old_node.string = distinguishing_string
 
         next_token_probabilities_node1 = self._next_token_probabilities(leaf_1)
         next_token_probabilities_node2 = self._next_token_probabilities(node_to_be_replaced)
-        node_1 = ClassificationNode(leaf_1, parent = old_node, probabilities = next_token_probabilities_node1)
-        node_2 = ClassificationNode(node_to_be_replaced, parent = old_node, probabilities = next_token_probabilities_node2)
+        node_1 = ClassificationNode(leaf_1, parent=old_node, probabilities=next_token_probabilities_node1)
+        node_2 = ClassificationNode(node_to_be_replaced, parent=old_node, probabilities=next_token_probabilities_node2)
 
-        node1_cont = leaf_1+distinguishing_string
+        node1_cont = leaf_1 + distinguishing_string
         node1_cont_probabilities = self._next_token_probabilities(node1_cont)
-        node2_cont = node_to_be_replaced+distinguishing_string
+        node2_cont = node_to_be_replaced + distinguishing_string
         node2_cont_probabilities = self._next_token_probabilities(node2_cont)
 
         old_node.childs[tuple(node1_cont_probabilities.values())] = node_1
         old_node.childs[tuple(node2_cont_probabilities.values())] = node_2
-        # if pdfa_utils.are_within_tolerance_limit(list(next_token_probabilities_node1.values()),list(node1_cont_probabilities), self._teacher.tolerance):
-        #     old_node.right = (node_1, node1_cont_probabilities)
-        #     old_node.left = (node_2, node2_cont_probabilities)
-        # else:
-        #     old_node.right = (node_2, node2_cont_probabilities)
-        #     old_node.left = (node_1, node1_cont_probabilities)
-        if self._verbose: 
+        if self._verbose:
             print("----update_node----")
             print('Old Node (new Leaf)', node_to_be_replaced)
             print('New Leaf', leaf_1)
             print(self.leaves.keys())
         self.leaves.update({
-        leaf_1 : node_1,
-        node_to_be_replaced: node_2,
+            leaf_1: node_1,
+            node_to_be_replaced: node_2,
         })
-        if self._verbose: 
+        if self._verbose:
             print(self.leaves.keys())
             print("--------")
 
-class ClassificationNode():
-    def __init__(self, string: Sequence, parent: 'ClassificationNode' = None, probabilities  = None):
+
+class ClassificationNode:
+    def __init__(self, string: Sequence, parent: 'ClassificationNode' = None, probabilities=None):
         self.parent = parent
-        #self.right = None
-        #self.left = None
         self.childs = OrderedDict()
-        self.string = string        
+        self.string = string
         self.probabilities = probabilities
-        self._depth = parent.depth+1 if parent else 0
-    
+        self._depth = parent.depth + 1 if parent else 0
+
     @property
     def depth(self) -> int:
         return self._depth
 
     def is_leaf(self) -> bool:
         return len(self.childs) == 0
-    
-    # def is_distinguishing_string(self, string1: Sequence, string2: Sequence) -> bool:
-    #     if self.right is None or self.left is None: 
-    #         return False
-    #     else:
-    #         return self.left.has_leaf(string1) and self.right.has_leaf(string2) or self.left.has_leaf(string2) and self.right.has_leaf(string1) 
-
-    # def has_leaf(self, string: Sequence) -> bool:    
-    #     queue = []
-    #     queue.append(self)
-    #     while queue:
-    #         element = queue.pop()
-    #         if element.is_leaf() and element.string == string:
-    #             return True
-    #         else:
-    #             if element.right:
-    #                 queue.append(element.right)[0]
-    #             if element.left:
-    #                 queue.append(element.left)[0]
-    #     return False 
-          

@@ -1,12 +1,10 @@
-from random import sample
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
-from pythautomata.utilities import pdfa_utils
-from math import ceil, log, factorial, comb
+from math import ceil, log, comb
 from typing import Union
 import numpy as np
 
@@ -14,7 +12,8 @@ import numpy as np
 class PACProbabilisticTeacher(ProbabilisticTeacher):
 
     def __init__(self, model: ProbabilisticModel, epsilon: float, delta:float,
-     comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None, max_seq_length: float = 128, compute_epsilon_star: bool = True):        
+                 comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None,
+                 max_seq_length: int = 128, compute_epsilon_star: bool = True):
         super().__init__()
         self._comparator = comparator
         self._target_model = model
@@ -60,8 +59,6 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         for word in rand_words:  
             obs1 = self._target_model.get_last_token_weights(word, suffixes)
             obs2 = aut.get_last_token_weights(word, suffixes)
-            #error = self.get_log_probability_error(word, aut)
-            #total_error += error
             if not self._comparator.equivalent_output(obs1, obs2):
                 errorCount += 1
                 if counterexample is None:
@@ -88,7 +85,6 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         return sample_size
 
     def _calculate_epsilon_star_with(self, errorCount: int):
-        #combinations = factorial(self.last_sample_size) // factorial(errorCount) // factorial(self.last_sample_size - errorCount)
         combinations = comb(self.last_sample_size, errorCount)
         if (self.last_sample_size - errorCount) == 0:
             self.epsilon_star = float('inf')

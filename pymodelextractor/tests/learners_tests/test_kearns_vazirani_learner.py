@@ -11,8 +11,8 @@ from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
 from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
 from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
-from pythautomata.automata_definitions.other_automata import OtherAutomata
 from itertools import chain
+
 
 class TestKearnsVaziraniLearner(unittest.TestCase):
     def setUp(self):

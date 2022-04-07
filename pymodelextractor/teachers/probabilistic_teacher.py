@@ -8,9 +8,10 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 
 from typing import Union
 
+
 class ProbabilisticTeacher(ABC):
 
-    def __init__(self):        
+    def __init__(self):
         self._equivalence_queries_count = 0
         self._last_token_weight_queries_count = 0
 
@@ -23,16 +24,16 @@ class ProbabilisticTeacher(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]) -> list[float]:        
+    def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]) -> list[float]:
         raise NotImplementedError
 
-    def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence,None]]:
+    def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence, None]]:
         raise NotImplementedError
 
-    def next_token_probabilities(self, sequence: Sequence)-> OrderedDict[Symbol, float]:
+    def next_token_probabilities(self, sequence: Sequence) -> OrderedDict[Symbol, float]:
         symbols = list(self.alphabet.symbols)
         symbols.sort()
-        symbols = [self.terminal_symbol]+symbols
+        symbols = [self.terminal_symbol] + symbols
         probabilities = self.last_token_weights(sequence, symbols)
         probabilities = OrderedDict(zip(symbols, probabilities))
         return probabilities
@@ -51,7 +52,7 @@ class ProbabilisticTeacher(ABC):
 
     @property
     @abstractmethod
-    def terminal_symbol(self) -> Sequence:
+    def terminal_symbol(self) -> Symbol:
         raise NotImplementedError
 
     @property

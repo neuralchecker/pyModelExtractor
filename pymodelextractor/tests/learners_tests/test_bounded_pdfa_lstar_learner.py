@@ -1,5 +1,4 @@
 import unittest
-from numpy import result_type
 
 from pythautomata.automata_definitions.weighted_tomitas_grammars import WeightedTomitasGrammars
 
@@ -9,6 +8,7 @@ from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFA
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
 from pymodelextractor.utils.time_bound_utilities import is_unix_system
+
 
 class TestBoundedPDFALStarLearner(unittest.TestCase):
 
@@ -25,8 +25,6 @@ class TestBoundedPDFALStarLearner(unittest.TestCase):
                 result = learner.learn(teacher, tolerance)
                 extracted_model = result.model
                 self.assertEqual(model, extracted_model)
-                #self.assertTrue(result.info['last_token_weight_queries_count']>0)        
-                #self.assertTrue(result.info['equivalence_queries_count']>0)
         else:
             pass
 

@@ -1,11 +1,13 @@
-from .observation_table import ObservationTable
-from .observation_table import Inconsistency
+from typing import Union
+
+from .observation_table import ObservationTable, TableInconsistency
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.alphabet import Alphabet
 from pymodelextractor.teachers.teacher import Teacher
 from pymodelextractor.learners.learner import Learner
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
-from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import FAObservationTableTranslator
+from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import \
+     FAObservationTableTranslator
 from pymodelextractor.learners.learning_result import LearningResult
 from pythautomata.abstract.boolean_model import BooleanModel
 import time
@@ -37,7 +39,7 @@ class LStarLearner(Learner):
 
         return self._learning_results_for(model, time.time() - start_time)
 
-    def _perform_equivalence_query(self, model: BooleanModel) -> bool:
+    def _perform_equivalence_query(self, model: BooleanModel) -> tuple[bool, Sequence]:
         return self._teacher.equivalence_query(model)
 
     def _build_observation_table(self):
@@ -152,7 +154,7 @@ class LStarObservationTable(ObservationTable):
     def is_consistent(self) -> bool:
         return self.find_inconsistency() is not None
 
-    def find_inconsistency(self) -> tuple:
+    def find_inconsistency(self) -> Union[tuple, None, TableInconsistency]:
         redList = list(self.red)
         redListLength = len(redList)
         for i in range(redListLength):

@@ -1,11 +1,4 @@
-import time
-
-from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
 from pythautomata.base_types.sequence import Sequence
-from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
-    epsilon
-from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstar_observation_table_translator import \
-     PDFALStarObservationTableTranslation
 from pymodelextractor.learners.observation_table_learners.pdfa_lstar_learner import PDFALStarLearner
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
@@ -13,9 +6,10 @@ from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLen
 from pymodelextractor.exceptions.number_of_states_exceeded_exception import NumberOfStatesExceededException
 from pymodelextractor.utils.time_bound_utilities import timeout
 
+
 class BoundedPDFALStarLearner(PDFALStarLearner):
 
-    def __init__(self, max_states, max_query_length, max_seconds_run = None):
+    def __init__(self, max_states, max_query_length, max_seconds_run=None):
         super().__init__()
         self._max_states = max_states
         self._max_query_length = max_query_length
@@ -38,10 +32,7 @@ class BoundedPDFALStarLearner(PDFALStarLearner):
             if self._max_seconds_run is not None:
                 self.run_learning_with_time_bound(teacher, tolerance, verbose)
             else:
-                super().learn(teacher, tolerance, verbose)            
-                #result.info['NumberOfStatesExceeded'] = False
-                #result.info['QueryLengthExceeded'] = False
-                #return result
+                super().learn(teacher, tolerance, verbose)
         except NumberOfStatesExceededException:
             print("NumberOfStatesExceeded")
             self._exceeded_max_states = True

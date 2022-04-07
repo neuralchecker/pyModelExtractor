@@ -9,7 +9,6 @@ from pythautomata.automata.deterministic_finite_automaton import \
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars
 from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
 from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
-from pythautomata.automata_definitions.other_automata import OtherAutomata
 from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
 from itertools import chain

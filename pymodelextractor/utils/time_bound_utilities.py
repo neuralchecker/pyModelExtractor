@@ -1,6 +1,5 @@
 import signal
 from contextlib import contextmanager
-from threading import Timer
 import platform
 
 def is_unix_system():
@@ -22,10 +21,6 @@ def timeout(time):
         # Unregister the signal so it won't be triggered
         # if the timeout is not reached.
         signal.signal(signal.SIGALRM, signal.SIG_IGN)
-
-#def timeout(time):
-#    t = Timer(time, raise_timeout)
-#    t.start()
 
 def raise_timeout(signum, frame):
     raise TimeoutError

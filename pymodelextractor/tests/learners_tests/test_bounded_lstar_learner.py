@@ -9,7 +9,6 @@ from pythautomata.automata.deterministic_finite_automaton import \
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars
 from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
 from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
-from pythautomata.automata_definitions.other_automata import OtherAutomata
 from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
 from itertools import chain
@@ -19,9 +18,10 @@ from pythautomata.utilities import abbadingo_one_dfa_generator
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
+
 class TestBoundedLStarLearner(unittest.TestCase):
     def setUp(self):
-        self.learner = BoundedLStarLearner(max_mq_length=10,max_states=10)
+        self.learner = BoundedLStarLearner(max_mq_length=10, max_states=10)
 
     def teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, ComparisonStrategy())
@@ -53,9 +53,9 @@ class TestBoundedLStarLearner(unittest.TestCase):
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar4)
-        
+
     def test_big_DFA(self):
-        dfa = abbadingo_one_dfa_generator.generate_dfa(alphabet = binaryAlphabet, nominal_size= 30, seed = 10)              
+        dfa = abbadingo_one_dfa_generator.generate_dfa(alphabet=binaryAlphabet, nominal_size=30, seed=10)
         teacher = self.teacher(dfa)
         result = self.learner.learn(teacher)
         self.assertFalse(ComparisonStrategy().are_equivalent(
