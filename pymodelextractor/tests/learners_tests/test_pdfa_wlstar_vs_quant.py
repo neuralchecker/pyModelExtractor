@@ -81,6 +81,7 @@ class TestWLStarVsQuant(unittest.TestCase):
 
     def test_1(self):
         tolerance = 0.1
+        tolerance2 = 0.15
         partitions = 10
         pdfa = self.get_example_1()
 
@@ -89,20 +90,24 @@ class TestWLStarVsQuant(unittest.TestCase):
         QuantLearner = PDFAQuantizationNAryTreeLearner()
 
         tolerance_comparator = WFAToleranceComparator(tolerance)
+        tolerance_comparator2 = WFAToleranceComparator(tolerance2)
         partition_comparator = WFAQuantizationComparator(partitions)
 
         pdfa_teacher_WLSTAR = PDFATeacher(pdfa, tolerance_comparator)
+        
+        pdfa_teacher_WLSTAR_COL = PDFATeacher(pdfa, tolerance_comparator2)
         pdfa_teacher_QUANT = PDFATeacher(pdfa, partition_comparator)
 
         modelWLStar = WLStarLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
-        modelWLStarCol = WLStarColLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
+        
+        modelWLStarCol = WLStarColLearner.learn(pdfa_teacher_WLSTAR_COL, tolerance2).model
         modelQUANT = QuantLearner.learn(pdfa_teacher_QUANT, partitions).model
 
         modelWLStar.name = 'WLSTAR_EXAMPLE'
         modelWLStarCol.name = 'WLSTAR_COL_EXAMPLE'
         modelQUANT.name = 'QUANT_EXAMPLE'
 
-        models = [modelWLStar, modelQUANT]
+        models = [modelWLStar, modelQUANT, modelWLStarCol]
         for model in models:
             model.export("./")
 
@@ -137,24 +142,24 @@ class TestWLStarVsQuant(unittest.TestCase):
         pdfa_teacher_QUANT = PDFATeacher(pdfa, partition_comparator)
 
         modelWLStar = WLStarLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
-        #modelWLStarCol = WLStarColLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
+        modelWLStarCol = WLStarColLearner.learn(pdfa_teacher_WLSTAR, tolerance).model
         modelQUANT = QuantLearner.learn(pdfa_teacher_QUANT, partitions).model
 
         modelWLStar.name = 'WLSTAR_EXAMPLE_2'
-        #modelWLStarCol.name = 'WLSTAR_COL_EXAMPLE'
+        modelWLStarCol.name = 'WLSTAR_COL_EXAMPLE2'
         modelQUANT.name = 'QUANT_EXAMPLE_2'
 
-        models = [modelWLStar, modelQUANT]
+        models = [modelWLStar, modelQUANT, modelWLStarCol]
         #for model in models:
-            #model.export("./")
+        #    model.export("./")
 
         max_seq_length = 100
         sample_size = 1000
         seed = 42
         sg = SequenceGenerator(pdfa.alphabet, max_seq_length, seed)
         test_sequences = sg.generate_words(sample_size)    
-        log_probability_errorQ, werQ,ndcgQ, out_of_partitionQ, out_of_toleranceQ, absolute_error_avgQ = self.compute_stats(pdfa,modelQUANT, tolerance, partitions, test_sequences,None, None, 42)
-        log_probability_errorW, werW,ndcgW, out_of_partitionW, out_of_toleranceW, absolute_error_avgW = self.compute_stats(pdfa,modelWLStar, tolerance, partitions, test_sequences,None, None, 42)
+        #log_probability_errorQ, werQ,ndcgQ, out_of_partitionQ, out_of_toleranceQ, absolute_error_avgQ = self.compute_stats(pdfa,modelQUANT, tolerance, partitions, test_sequences,None, None, 42)
+        #log_probability_errorW, werW,ndcgW, out_of_partitionW, out_of_toleranceW, absolute_error_avgW = self.compute_stats(pdfa,modelWLStar, tolerance, partitions, test_sequences,None, None, 42)
         print(".")
 
     def test_3(self):
