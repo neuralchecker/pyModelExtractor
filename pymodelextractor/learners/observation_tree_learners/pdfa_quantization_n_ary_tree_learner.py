@@ -81,7 +81,26 @@ class PDFAQuantizationNAryTreeLearner:
                 models.append(model)
                 size = len(model.weighted_states)
                 if verbose: print('Size after update:', size)
-                assert size > last_size, 'Possible infinite loop'
+                if size <= last_size:
+                    print('Possible infinite loop')
+                    print('Last Size:', last_size)
+                    print('Current Size:', size)
+                    print('Counterexample:', counterexample)
+                    print('Counterexample evaluated on target system:', self._teacher.next_token_probabilities(counterexample))                        
+                    symbols = self._all_symbols_sorted
+                    model_probabilities = model.get_last_token_weights(counterexample, symbols)
+                    model_probabilities = OrderedDict(zip(symbols, model_probabilities))                
+                    print('Counterexample evaluated on hypothesis:',model_probabilities)
+                    are_equivalent_d, counterexample_d = self._perform_equivalence_query(model)
+                    print('Are Equivalent New Model:', are_equivalent_d)
+                    print('NEW CE:', counterexample_d)
+                    if counterexample_d is not None:
+                        print('NEW Counterexample evaluated on target system:', self._teacher.next_token_probabilities(counterexample_d))                        
+                        symbols = self._all_symbols_sorted
+                        model_probabilities = model.get_last_token_weights(counterexample_d, symbols)
+                        model_probabilities = OrderedDict(zip(symbols, model_probabilities))                
+                        print('NEW Counterexample evaluated on hypothesis:',model_probabilities)
+                    #assert size > last_size, 'Possible infinite loop'
                 last_size = size
                 are_equivalent, counterexample = self._perform_equivalence_query(model)
 

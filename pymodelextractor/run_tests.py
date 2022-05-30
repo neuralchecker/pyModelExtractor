@@ -19,6 +19,8 @@ from tests.learners_tests.test_bounded_pdfa_lstar_learner import TestBoundedPDFA
 from tests.learners_tests.test_pac_batch_teacher_quant import TestPACBatchTeacherQuant
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_running_example \
      import TestPDFAQuantizantionNAryTreeLearnerRunningExample
+from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_on_similar_distributions \
+     import TestPDFAQuantizantionNAryTreeLearnerOnSimilarDistributions
 
 
 def run():
@@ -39,6 +41,8 @@ def run():
                            TestPDFAQuantizantionNAryTreeLearnerMetrics,
                            TestPACBatchTeacherQuant,
                            TestPDFAQuantizantionNAryTreeLearnerRunningExample]
+     
+    test_classes_to_run = [TestPDFAQuantizantionNAryTreeLearnerOnSimilarDistributions]
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
