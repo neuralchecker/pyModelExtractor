@@ -175,7 +175,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "pythautomata"
-version = "0.19.3"
+version = "0.19.4"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
