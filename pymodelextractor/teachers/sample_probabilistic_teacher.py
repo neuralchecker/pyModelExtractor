@@ -22,6 +22,7 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
             self._sequence_generator = SequenceGenerator(self._target_model.alphabet, max_seq_length= max_seq_length)
         else:
             self._sequence_generator = sequence_generator
+        self.__rand_words = None
 
     def sequence_weight(self, sequence: Sequence):
         return self._target_model.sequence_weight(sequence)
@@ -39,7 +40,9 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
     def generate_words(self):
         rand_words = None
         if self._full_prefix_set:
-            rand_words = sorted(self._sequence_generator.generate_all_words_up_to_max_length())
+            if self.__rand_words is None:
+                self.__rand_words = sorted(self._sequence_generator.generate_all_words_up_to_max_length())
+            rand_words = self.__rand_words
         else:  
             rand_words = sorted(self._sequence_generator.generate_words(self._sample_size))
         return rand_words
