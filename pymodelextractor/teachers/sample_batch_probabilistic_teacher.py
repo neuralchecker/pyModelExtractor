@@ -4,8 +4,8 @@ from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
+from pymodelextractor.teachers.sample_probabilistic_teacher import SampleProbabilisticTeacher
 from typing import Union, Sized
-from teachers.sample_probabilistic_teacher import SampleProbabilisticTeacher
 
 
 class SampleBatchProbabilisticTeacher(SampleProbabilisticTeacher):
