@@ -20,7 +20,8 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, WFAToleranceComparator())
         teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(), sample_size=500, 
                                               max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, comparator=WFAToleranceComparator(), max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(), epsilon=0.05, delta=0.01,
+                                           max_seq_length=20)
         result1 = self.learner.learn(teacher1, tolerance=0, verbose=True)
         result2 = self.learner.learn(teacher2, tolerance=0, verbose=True)
         result3 = self.learner.learn(teacher3, tolerance=0, verbose=True)
@@ -37,7 +38,8 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, WFAToleranceComparator())
         teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(), sample_size=500, 
                                               max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, comparator=WFAToleranceComparator(), max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(), epsilon=0.05, delta=0.01,
+                                           max_seq_length=20)
         result1 = self.learner.learn(teacher1, tolerance=0, verbose=True)
         result2 = self.learner.learn(teacher2, tolerance=0, verbose=True)
         result3 = self.learner.learn(teacher3, tolerance=0, verbose=True)
@@ -55,8 +57,8 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))
         teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500,
                                               max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, comparator = WFAToleranceComparator(tolerance),
-                                           max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
         result1 = self.learner.learn(teacher1, tolerance=tolerance, verbose=True)
         result2 = self.learner.learn(teacher2, tolerance=tolerance, verbose=True)
         result3 = self.learner.learn(teacher3, tolerance=tolerance, verbose=True)
@@ -73,8 +75,8 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
         teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), sample_size=500,
                                               max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, comparator=WFAToleranceComparator(tolerance),
-                                           max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
         result1 = self.learner.learn(teacher1, tolerance=tolerance, verbose=True)
         result2 = self.learner.learn(teacher2, tolerance=tolerance, verbose=True)
         result3 = self.learner.learn(teacher3, tolerance=tolerance, verbose=True)
@@ -92,8 +94,8 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
         teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), sample_size=500,
                                               max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, comparator=WFAToleranceComparator(tolerance),
-                                           max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
         result1 = self.learner.learn(teacher1, tolerance=tolerance, verbose=True)
         result2 = self.learner.learn(teacher2, tolerance=tolerance, verbose=True)
         result3 = self.learner.learn(teacher3, tolerance=tolerance, verbose=True)
@@ -110,8 +112,8 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
         teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), sample_size=500,
                                               max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, comparator = WFAToleranceComparator(tolerance),
-                                           max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
         result1 = self.learner.learn(teacher1, tolerance=tolerance, verbose=True)
         result2 = self.learner.learn(teacher2, tolerance=tolerance, verbose=True)
         result3 = self.learner.learn(teacher3, tolerance=tolerance, verbose=True)
@@ -128,8 +130,8 @@ class TestPDFATeachersLStar(unittest.TestCase):
         teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
         teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), sample_size=500,
                                               max_seq_length=20)
-        teacher3 = PACProbabilisticTeacher(model, 0.05, 0.01, comparator = WFAToleranceComparator(tolerance),
-                                           max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
         result1 = self.learner.learn(teacher1, tolerance=tolerance, verbose=True)
         result2 = self.learner.learn(teacher2, tolerance=tolerance, verbose=True)
         result3 = self.learner.learn(teacher3, tolerance=tolerance, verbose=True)
