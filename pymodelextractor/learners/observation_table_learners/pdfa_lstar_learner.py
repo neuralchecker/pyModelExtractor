@@ -1,27 +1,38 @@
 import time
 
 from pythautomata.base_types.sequence import Sequence
+from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator
+from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
+
 from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
     epsilon
 from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstar_observation_table_translator import \
     PDFALStarObservationTableTranslation
+from pymodelextractor.learners.observation_table_learners.translators.pdfa_observation_table_translator import \
+    PDFAObservationTableTranslator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
 
 
 class PDFALStarLearner:
 
-    def __init__(self):
-        self.model_translator = PDFALStarObservationTableTranslation()
+    def __init__(self, comparator: WFAComparator = None, model_translator: PDFAObservationTableTranslator = None):
         self.terminal_symbol = None
         self._teacher = None
         self.tolerance = None
+        if comparator is None:
+            self.comparator = WFAToleranceComparator()
+        else:
+            self.comparator = comparator
+        if model_translator is None:
+            self.model_translator = PDFALStarObservationTableTranslation()
+        else:
+            self.model_translator = model_translator
 
-    def learn(self, teacher: ProbabilisticTeacher, tolerance: float, verbose: bool = False) -> LearningResult:
-        assert 0 <= tolerance <= 1, 'Tolerance should be >= 0 and <= 1'
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
+        # assert 0 <= tolerance <= 1, 'Tolerance should be >= 0 and <= 1'
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
-        self.tolerance = tolerance
         start_time = time.time()
         self.reset()
         if verbose: print("\n\n***** Learning started at:", start_time, "*****\n\n")
@@ -43,7 +54,7 @@ class PDFALStarLearner:
             self.__make_consistent()
 
             if verbose: print("Translating...")
-            model = self.model_translator.translate(self.observation_table, self.tolerance, self.terminal_symbol)
+            model = self.model_translator.translate(self.observation_table, self.terminal_symbol, self.comparator)
             if verbose: print("Performing Equivalence Query...")
             model_learned, counterexample = self.perform_equivalence_query(model)
             if not model_learned:
@@ -78,7 +89,7 @@ class PDFALStarLearner:
         self._teacher.reset()
 
     def __build_observation_table(self):
-        self.observation_table = PDFAObservationTable(self.__alphabet, self.tolerance)
+        self.observation_table = PDFAObservationTable(self.__alphabet, self.comparator)
 
     def __initialize_observation_table(self):
         self.observation_table.add_suffix(Sequence([self.terminal_symbol]))
