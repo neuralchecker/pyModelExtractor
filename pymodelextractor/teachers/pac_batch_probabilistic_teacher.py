@@ -13,7 +13,7 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
     def __init__(self, model: ProbabilisticModel, epsilon: float, delta: float,
                  comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None,
                  max_seq_length: float = 128, compute_epsilon_star: bool = True):
-        super().__init__(model, comparator, epsilon, delta, sequence_generator, max_seq_length, compute_epsilon_star)
+        super().__init__(model, epsilon, delta, comparator, sequence_generator, max_seq_length, compute_epsilon_star)
         assert (hasattr(model, 'get_last_token_weights_batch'))
 
     def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence, None]]:

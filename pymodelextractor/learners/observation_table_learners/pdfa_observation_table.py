@@ -1,12 +1,9 @@
-from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.alphabet import Alphabet
 from collections import namedtuple
 from typing import Union
 import heapq
-
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator
-from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
+from pythautomata.utilities import pdfa_utils
 
 epsilon = Sequence()
 
@@ -15,7 +12,7 @@ Inconsistency = namedtuple('Inconsistency', 'sequence1 sequence2 symbol differen
 
 class PDFAObservationTable:
 
-    def __init__(self, alphabet: Alphabet, comparator: WFAComparator):
+    def __init__(self, alphabet: Alphabet, tolerance: float):
         self.alphabet = alphabet
         self.red = set()
         self.__blue = set()
@@ -23,8 +20,8 @@ class PDFAObservationTable:
         self.__suffixes = []
         self.__suffixes_set = set()
         self.__observations = {}
+        self.__tolerance = tolerance
         self.symbols = alphabet.symbols
-        self.comparator = comparator
 
     def __getitem__(self, element):
         return self.__observations[element]
@@ -82,7 +79,7 @@ class PDFAObservationTable:
         return violating_sequence
 
     def __same_observation_exists_in_red(self, blue_sequence):
-        return any(self.comparator.equivalent_output(observation1=self[blue_sequence], observation2=self[sequence])
+        return any(pdfa_utils.are_within_tolerance_limit(self[blue_sequence], self[sequence], self.__tolerance)
                    for sequence in self.red)
 
     def find_inconsistency(self) -> Union[Inconsistency, None]:
@@ -93,7 +90,8 @@ class PDFAObservationTable:
                 red1 = red_list[i]
                 red2 = red_list[j]
                 if red1 != red2 and \
-                        self.comparator.equivalent_output(self.__observations[red1], self.__observations[red2]):
+                        pdfa_utils.are_within_tolerance_limit(self.__observations[red1], self.__observations[red2],
+                                                              self.__tolerance):
                     inconsistency = self.__inconsistency_between(red1, red2)
                     if inconsistency is not None:
                         return inconsistency
@@ -111,24 +109,18 @@ class PDFAObservationTable:
     def __max_difference(self, sequence1: Sequence, sequence2: Sequence):
         observations1 = self.__observations[sequence1]
         observations2 = self.__observations[sequence2]
-        assert len(observations1) == len(observations2), 'Observations should have the same length'
-        if isinstance(self.comparator, WFAToleranceComparator):
-            maxim = self.comparator.tolerance
-            max_i = 0
-            for i in range(0, len(observations1)):
-                diff = abs(observations1[i] - observations2[i])
-                if diff > maxim:
-                    maxim = diff
-                    max_i = i
-            if maxim == self.comparator.tolerance:
-                return None
-            else:
-                return self.__suffixes[max_i]
-        else:
-            for i in range(0, len(observations1)):
-                if not self.comparator.equivalent_values(observations1[i], observations2[i]):
-                    return self.__suffixes[i]
+        assert len(observations1) == len(observations2) , 'Observations should have the same length'
+        maxim = self.__tolerance
+        max_i = 0
+        for i in range(0, len(observations1)):
+            diff = abs(observations1[i] - observations2[i])
+            if diff > maxim:
+                maxim = diff
+                max_i = i
+        if maxim == self.__tolerance:
             return None
+        else:
+            return self.__suffixes[max_i]
 
     def get_red_observations(self) -> dict[Sequence, list[float]]:
         return {key: self.__observations[key] for key in list(self.red)}
