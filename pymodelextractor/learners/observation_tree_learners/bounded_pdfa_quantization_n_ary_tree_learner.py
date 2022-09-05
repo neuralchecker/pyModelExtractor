@@ -56,21 +56,6 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         result.info['TimeExceeded'] = self._exceded_time_bound
         return result
 
-    def _learning_results_for(self, model):
-        if self._max_seconds_run is not None:
-            numberOfStates = len(model.weighted_states) if model is not None else 0
-            for count, state in enumerate(model.weighted_states):
-                state.name = 'q' + str(count)
-
-            info = {
-                'equivalence_queries_count': None,
-                'last_token_weight_queries_count': None,
-                'observation_tree': None
-            }
-            return LearningResult(model, numberOfStates, info)
-        else:
-            return super()._learning_results_for(model)
-
     def initialization(self, verbose) -> tuple[bool, ProbabilisticDeterministicFiniteAutomaton]:
         ret = super().initialization(verbose)
         if not ret[0]:
