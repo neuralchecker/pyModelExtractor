@@ -2,7 +2,6 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import \
      ProbabilisticDeterministicFiniteAutomaton as PDFA
 from pythautomata.base_types.symbol import Symbol
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
 from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
      epsilon
@@ -10,6 +9,7 @@ from pymodelextractor.learners.observation_table_learners.translators.pdfa_obser
      PDFAObservationTableTranslator
 
 from collections import namedtuple
+from pythautomata.utilities import pdfa_utils
 import numpy as np
 
 
@@ -18,12 +18,12 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
 
         Transition = namedtuple('Transition', 'prefix weight')
 
-        def __init__(self, comparator: WFAComparator):
+        def __init__(self, tolerance):
             self.centroid = None
             self.obs_count = 0
             self.observations = dict()
             self.transitions = dict()
-            self.comparator = comparator
+            self.tolerance = tolerance
 
         def remove_observation(self, key):
             self.observations.pop(key)
@@ -43,7 +43,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
             self.obs_count += 1
 
         def belongs_to_state(self, value, criterion):
-            return criterion(self.comparator.equivalent_output(value, obs)
+            return criterion(pdfa_utils.are_within_tolerance_limit(value, obs, self.tolerance)
                              for obs in self.observations.values())
 
         def distance_to_centroid(self, value):
@@ -69,28 +69,28 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
         def __new_centroid(self, value):
             return (self.centroid * self.obs_count + value) / (self.obs_count + 1)
 
-    def translate(self, observation_table: PDFAObservationTable, terminal_symbol: Symbol, comparator) \
+    def translate(self, observation_table: PDFAObservationTable, tolerance: float, terminal_symbol: Symbol) \
             -> PDFA:
-        states = self.__make_states(observation_table.get_red_observations(), comparator)
+        states = self.__make_states(observation_table.get_red_observations(), tolerance)
         self.__add_transitions(observation_table, states)
-        was_deterministic = self.__make_deterministic(states, comparator)
+        was_deterministic = self.__make_deterministic(states, tolerance)
         while not was_deterministic:
             self.__reset_states(states)
             self.__add_transitions(observation_table, states)
-            was_deterministic = self.__make_deterministic(states, comparator)
+            was_deterministic = self.__make_deterministic(states, tolerance)
         wfa_states = self.__make_wfa_states(states)
         self.__add_wfa_transitions(states, wfa_states)
         wfa_states = set(wfa_states)
         return PDFA(observation_table.alphabet, wfa_states, terminal_symbol, PDFAComparator())
 
-    def __make_states(self, red, comparator):
+    def __make_states(self, red, tolerance):
         intermediate_states = list()
         red_prefixes = list(sorted(red.keys()))
         for key in red_prefixes:
-            self.__add_to_state(intermediate_states, (key, red[key]), comparator)
+            self.__add_to_state(intermediate_states, (key, red[key]), tolerance)
         return intermediate_states
 
-    def __add_to_state(self, intermediate_states, red_obs, comparator):
+    def __add_to_state(self, intermediate_states, red_obs, tolerance):
         i = 0
         membership_values = np.array([])
         belongs = np.array([])
@@ -101,7 +101,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
             membership_values = np.append(membership_values, membership_value)
             i += 1
         if np.sum(belongs) == 0:
-            new_intermediate_state = self.IntermediateState(comparator)
+            new_intermediate_state = self.IntermediateState(tolerance)
             new_intermediate_state.add_observation(red_obs[0], red_obs[1])
             intermediate_states.append(new_intermediate_state)
         else:
@@ -162,7 +162,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
                     wfa_state.add_transition(symbol, wfa_states[next_state_pos], transition[0].weight)
             state_pos += 1
 
-    def __make_deterministic(self, states, comparator):
+    def __make_deterministic(self, states, tolerance):
         was_deterministic = True
         new_states = list()
         for state in states:
@@ -173,7 +173,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
                     keep = True
                     for next_state_pos, transition_list in transitions.items():
                         if not keep:
-                            intermediate_state = self.IntermediateState(comparator)
+                            intermediate_state = self.IntermediateState(tolerance)
                             for transition in transition_list:
                                 if transition.prefix not in obs_to_remove:
                                     prefix = transition.prefix

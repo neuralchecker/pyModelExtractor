@@ -9,13 +9,14 @@ from pymodelextractor.learners.observation_table_learners.pdfa_observation_table
 
 class PDFAObservationTableTranslator(ABC):
     @abstractmethod
-    def translate(self, observation_table: PDFAObservationTable, terminal_symbol: Symbol, obs_comparator) \
+    def translate(self, observation_table: PDFAObservationTable, tolerance: float, terminal_symbol: Symbol) \
             -> WeightedAutomaton:
         """
         Function to translate from a PDFAObservation table into a Probabilistic Deterministic Finite Automaton
         Parameters
         ----------
         observation_table : PDFAObservation
+        tolerance : float
         terminal_symbol : Sequence
 
         Returns
