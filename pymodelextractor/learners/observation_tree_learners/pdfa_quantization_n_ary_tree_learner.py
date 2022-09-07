@@ -16,7 +16,7 @@ import math
 
 class PDFAQuantizationNAryTreeLearner:
     def __init__(self, comparator: WFAQuantizationComparator):
-        self._comparator = comparator
+        self.comparator = comparator
         self.partitions = comparator.partitions
         self._verbose = False
         self._tree = None
