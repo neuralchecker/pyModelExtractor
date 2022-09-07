@@ -20,17 +20,19 @@ binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 class TestPDFAQuantizantionNAryTreeLearnerMetrics(unittest.TestCase):
 
     def setUp(self):
-        self.QuaNTLearner = PDFAQuantizationNAryTreeLearner()
-        self.WLSstarLearner = PDFALStarLearner()
+        self.partitions = 10
+        self.quant_comparator = WFAQuantizationComparator(self.partitions)
+        self.tolerance_comparator = WFAToleranceComparator(1/self.partitions)
+
+        self.QuaNTLearner = PDFAQuantizationNAryTreeLearner(self.quant_comparator)
+        self.WLSstarLearner = PDFALStarLearner(self.tolerance_comparator)
 
     def test_tomitas_1(self):
-        model = WeightedTomitasGrammars.get_automaton_1()
-        partitions = 10
-        tolerance = 1/partitions
-        teacher1 = PDFATeacher(model, WFAQuantizationComparator(partitions))        
-        teacher2 = PDFATeacher(model, WFAToleranceComparator(tolerance))
-        result1 = self.QuaNTLearner.learn(teacher1, partitions)
-        result2 = self.WLSstarLearner.learn(teacher2, tolerance)
+        model = WeightedTomitasGrammars.get_automaton_1()        
+        teacher1 = PDFATeacher(model, self.quant_comparator)        
+        teacher2 = PDFATeacher(model, self.tolerance_comparator)
+        result1 = self.QuaNTLearner.learn(teacher1)
+        result2 = self.WLSstarLearner.learn(teacher2)
         model1 = result1.model
         model2 = result2.model
         model1.name = 'res1'
