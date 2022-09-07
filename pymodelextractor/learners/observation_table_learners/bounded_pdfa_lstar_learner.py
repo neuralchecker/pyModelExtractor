@@ -9,8 +9,8 @@ from pymodelextractor.utils.time_bound_utilities import timeout
 
 class BoundedPDFALStarLearner(PDFALStarLearner):
 
-    def __init__(self, max_states, max_query_length, max_seconds_run=None):
-        super().__init__()
+    def __init__(self, comparator, max_states, max_query_length, max_seconds_run=None):
+        super().__init__(comparator=comparator)
         self._max_states = max_states
         self._max_query_length = max_query_length
         self._max_seconds_run = max_seconds_run
@@ -19,20 +19,20 @@ class BoundedPDFALStarLearner(PDFALStarLearner):
         self._exceded_time_bound = False    
         self._history = []
 
-    def run_learning_with_time_bound(self, teacher, partitions, verbose):        
+    def run_learning_with_time_bound(self, teacher, verbose):        
         try:
             with timeout(self._max_seconds_run):
-                super().learn(teacher, partitions, verbose) 
+                super().learn(teacher, verbose) 
         except TimeoutError:
             print("Time Bound Reached") 
             self._exceded_time_bound = True
 
-    def learn(self, teacher: ProbabilisticTeacher, tolerance, verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
         try:
             if self._max_seconds_run is not None:
-                self.run_learning_with_time_bound(teacher, tolerance, verbose)
+                self.run_learning_with_time_bound(teacher, verbose)
             else:
-                super().learn(teacher, tolerance, verbose)
+                super().learn(teacher, verbose)
         except NumberOfStatesExceededException:
             print("NumberOfStatesExceeded")
             self._exceeded_max_states = True

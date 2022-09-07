@@ -19,7 +19,9 @@ binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 class TestPDFAQuantizantionNAryTreeLearnerRunningExample(unittest.TestCase):
 
     def setUp(self):
-        self.learner = PDFAQuantizationNAryTreeLearner()
+        self.partitions = 10
+        self.comparator = WFAQuantizationComparator(self.partitions)
+        self.learner = PDFAQuantizationNAryTreeLearner(self.comparator)
 
     def generate_running_example(self):
         qlambda = WeightedState("qlambda", 1, 0.0)
@@ -48,9 +50,8 @@ class TestPDFAQuantizantionNAryTreeLearnerRunningExample(unittest.TestCase):
 
     def test_1(self):
         model = self.generate_running_example()
-        partitions = 10
-        teacher = PDFATeacher(model, WFAQuantizationComparator(partitions))
-        result = self.learner.learn(teacher, partitions)
+        teacher = PDFATeacher(model, self.comparator)
+        result = self.learner.learn(teacher)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count'] > 0)

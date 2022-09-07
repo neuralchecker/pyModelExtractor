@@ -2,6 +2,7 @@ from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import Symbol
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
+from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
 from pythautomata.utilities import pdfa_utils
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import \
@@ -14,7 +15,9 @@ import math
 
 
 class PDFAQuantizationNAryTreeLearner:
-    def __init__(self):
+    def __init__(self, comparator: WFAQuantizationComparator):
+        self._comparator = comparator
+        self.partitions = comparator.partitions
         self._verbose = False
         self._tree = None
         pass
@@ -60,9 +63,8 @@ class PDFAQuantizationNAryTreeLearner:
         self._tree = ClassificationTree(nodeRoot, self._teacher, self.partitions, verbose=verbose)
         return False, starting_pdfa
 
-    def learn(self, teacher: ProbabilisticTeacher, partitions: int, verbose: bool = False) -> LearningResult:
-        self._verbose = verbose
-        self.partitions = partitions
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
+        self._verbose = verbose        
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         models = []
