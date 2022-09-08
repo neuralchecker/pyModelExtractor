@@ -175,7 +175,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "pythautomata"
-version = "0.19.6"
+version = "0.19.7"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -267,7 +267,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "dfbf1711b8973b0f09f45340d7b4ecf4995b11b12a326050b44f8c6e03c6d698"
+content-hash = "ace0bbfdd06acd73326ba5ac86a9cd6123b954c835865eada2092f6dc5e13909"
 
 [metadata.files]
 atomicwrites = []
