@@ -40,7 +40,7 @@ class PDFALStarColLearner:
         model_learned = False
         counter = 0
         counter_example_count = 0
-
+        last_size = 0
         while not model_learned:
             if verbose: print("*** Start Iter", counter, "***")
             counter += 1
@@ -50,6 +50,9 @@ class PDFALStarColLearner:
             self.__close()
             if verbose: print("Translating...")
             model = self.model_translator.translate(self.observation_table, self.terminal_symbol, self.comparator)
+            size = len(model.weighted_states)
+            assert size > last_size, 'Possible infinite loop'
+            last_size = size
             if verbose: print("Performing Equivalence Query...")
             model_learned, counterexample = self.perform_equivalence_query(model)
             if not model_learned:
