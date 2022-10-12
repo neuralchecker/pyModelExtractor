@@ -130,8 +130,7 @@ class PDFALStarColLearner:
     def __update_observation_table_with(self, counterexample, proposed_model):
         all_suffixes = []
         count, differing_symbol = self.__get_shortest_counterexample_with_symbol(counterexample, proposed_model)
-        if differing_symbol != self.terminal_symbol:
-            count = count + differing_symbol
+        count = count + differing_symbol
         suffixes = count.get_suffixes()
         for suffix in suffixes:
             added = self.observation_table.add_suffix(suffix)
