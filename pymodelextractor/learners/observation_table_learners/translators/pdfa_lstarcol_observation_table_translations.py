@@ -10,20 +10,32 @@ from pymodelextractor.learners.observation_table_learners.translators.pdfa_obser
      PDFAObservationTableTranslator
 
 from collections import namedtuple
+from pythautomata.utilities import pdfa_utils
+import numpy as np
 
 
-class PDFALStarColQuantObservationTableTranslator(PDFAObservationTableTranslator):
+class PDFALStarColObservationTableTranslator(PDFAObservationTableTranslator):
     class IntermediateState:
 
         Transition = namedtuple('Transition', 'prefix weight')
 
-        def __init__(self, observation, comparator):
+        def __init__(self, observation, tolerance):
             self.observation = observation
             self.transitions = dict()
-            self.comparator = comparator
+            self.tolerance = tolerance
 
         def belongs_to_state(self, value):
-            return self.comparator.equivalent_output(value, self.observation[1])
+            return pdfa_utils.are_within_tolerance_limit(value, self.observation[1], self.tolerance)
+
+        def distance_to_value(self, value):
+            np_value = np.array(value)
+            return np.ma.sqrt(sum((np_value - self.observation[1]) ** 2))
+
+        def membership_value(self, value):
+            if self.belongs_to_state(value):
+                return True, self.distance_to_value(value)
+            else:
+                return False, float('Inf')
 
         def has_sequence(self, sequence):
             return sequence == self.observation[0]
@@ -35,20 +47,20 @@ class PDFALStarColQuantObservationTableTranslator(PDFAObservationTableTranslator
                 self.transitions[symbol][next_state_pos] = list()
             self.transitions[symbol][next_state_pos].append(self.Transition(prefix, weight))
 
-    def translate(self, observation_table: PDFAObservationTable, terminal_symbol: Symbol, comparator) \
+    def translate(self, observation_table: PDFAObservationTable, tolerance: float, terminal_symbol: Symbol) \
             -> PDFA:
-        states = self.__make_states(observation_table.get_red_observations(), comparator)
+        states = self.__make_states(observation_table.get_red_observations(), tolerance)
         self.__add_transitions(observation_table, states)
         wfa_states = self.__make_wfa_states(states)
         self.__add_wfa_transitions(states, wfa_states)
         wfa_states = set(wfa_states)
         return PDFA(observation_table.alphabet, wfa_states, terminal_symbol, PDFAComparator())
 
-    def __make_states(self, red, comparator):
+    def __make_states(self, red, tolerance):
         intermediate_states = list()
         red_prefixes = list(sorted(red.keys()))
         for key in red_prefixes:
-            new_intermediate_state = self.IntermediateState((key, red[key]), comparator)
+            new_intermediate_state = self.IntermediateState((key, red[key]), tolerance)
             intermediate_states.append(new_intermediate_state)
         return intermediate_states
 
@@ -62,11 +74,24 @@ class PDFALStarColQuantObservationTableTranslator(PDFAObservationTableTranslator
                 added = False
                 while next_state_pos < len(intermediate_states) and not added:
                     next_state = intermediate_states[next_state_pos]
-                    if next_state.has_sequence(new_sequence) or \
-                            next_state.belongs_to_state(observation_table[new_sequence]):
+                    if next_state.has_sequence(new_sequence):
                         state.add_transition(prefix, symbol.value[0], next_state_pos, obs[symbol_pos])
                         added = True
                     next_state_pos += 1
+                if not added:
+                    next_state_pos = 0
+                    belongs = np.array([])
+                    membership_values = np.array([])
+                    while next_state_pos < len(intermediate_states):
+                        next_state = intermediate_states[next_state_pos]
+                        belong, membership_value = \
+                            next_state.membership_value(observation_table[new_sequence])
+                        belongs = np.append(belongs, belong)
+                        membership_values = np.append(membership_values, membership_value)
+                        next_state_pos += 1
+                    if np.sum(belongs) > 0:
+                        min_dist_arg = np.argmin(membership_values)
+                        state.add_transition(prefix, symbol.value[0], min_dist_arg, obs[symbol_pos])
 
     def __make_wfa_states(self, intermediate_states):
         wfa_states = list()

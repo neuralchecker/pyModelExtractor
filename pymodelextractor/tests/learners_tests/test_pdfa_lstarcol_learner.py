@@ -1,74 +1,76 @@
 import unittest
 
 from pythautomata.automata_definitions.weighted_tomitas_grammars import WeightedTomitasGrammars
+from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
 
-from pymodelextractor.factories.pdfa_extraction_factory import PDFAExtractionFactory
+from pymodelextractor.learners.observation_table_learners.pdfa_lstarcol_learner import PDFALStarColLearner
+from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
 
 class TestPDFALStarColLearner(unittest.TestCase):
 
     def setUp(self):
-        self.factory = PDFAExtractionFactory()
+        self.learner = PDFALStarColLearner()
 
     def test_tomitas_1(self):
         model = WeightedTomitasGrammars.get_automaton_1()
-        learner, teacher = self.factory.probabilistic_lstarcol_tolerance_extraction(model, 0.1)
-        result = learner.learn(teacher)
+        teacher = PDFATeacher(model, PDFAComparator())
+        result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_2(self):
         model = WeightedTomitasGrammars.get_automaton_2()
-        learner, teacher = self.factory.probabilistic_lstarcol_tolerance_extraction(model, 0.1)
-        result = learner.learn(teacher)
+        teacher = PDFATeacher(model, PDFAComparator())
+        result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
-        self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertEqual(model, extracted_model, PDFAComparator())
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_3(self):
         model = WeightedTomitasGrammars.get_automaton_3()
-        learner, teacher = self.factory.probabilistic_lstarcol_tolerance_extraction(model, 0.1)
-        result = learner.learn(teacher)
+        teacher = PDFATeacher(model, PDFAComparator())
+        result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_4(self):
         model = WeightedTomitasGrammars.get_automaton_4()
-        learner, teacher = self.factory.probabilistic_lstarcol_tolerance_extraction(model, 0.1)
-        result = learner.learn(teacher)
+        teacher = PDFATeacher(model, PDFAComparator())
+        result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_5(self):
         model = WeightedTomitasGrammars.get_automaton_5()
-        learner, teacher = self.factory.probabilistic_lstarcol_tolerance_extraction(model, 0.1)
-        result = learner.learn(teacher)
+        teacher = PDFATeacher(model, PDFAComparator())
+        result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_6(self):
         model = WeightedTomitasGrammars.get_automaton_6()
-        learner, teacher = self.factory.probabilistic_lstarcol_tolerance_extraction(model, 0.1)
-        result = learner.learn(teacher)
+        teacher = PDFATeacher(model, PDFAComparator())
+        result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_tomitas_7(self):
         model = WeightedTomitasGrammars.get_automaton_7()
-        learner, teacher = self.factory.probabilistic_lstarcol_tolerance_extraction(model, 0.1)
-        result = learner.learn(teacher)
+        teacher = PDFATeacher(model, PDFAComparator())
+        result = self.learner.learn(teacher, tolerance = 0)
         extracted_model = result.model
         self.assertEqual(model, extracted_model)
-        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)

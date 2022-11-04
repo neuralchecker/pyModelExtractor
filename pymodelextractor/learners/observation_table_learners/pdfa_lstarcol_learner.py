@@ -2,36 +2,26 @@ import time
 import numpy as np
 
 from pythautomata.base_types.sequence import Sequence
-from pythautomata.model_comparators.wfa_comparison_strategy import WFAComparator
-from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
-
 from pymodelextractor.learners.observation_table_learners.pdfa_observation_table import PDFAObservationTable, \
     epsilon
-from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstarcol_observation_table_translator import \
+from pymodelextractor.learners.observation_table_learners.translators.pdfa_lstarcol_observation_table_translations import \
     PDFALStarColObservationTableTranslator
-from pymodelextractor.learners.observation_table_learners.translators.pdfa_observation_table_translator import \
-    PDFAObservationTableTranslator
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pymodelextractor.learners.learning_result import LearningResult
 
 
 class PDFALStarColLearner:
 
-    def __init__(self, comparator: WFAComparator = None, model_translator: PDFAObservationTableTranslator = None):
+    def __init__(self):
+        self.model_translator = PDFALStarColObservationTableTranslator()
         self.terminal_symbol = None
         self._teacher = None
-        if comparator is None:
-            self.comparator = WFAToleranceComparator()
-        else:
-            self.comparator = comparator
-        if model_translator is None:
-            self.model_translator = PDFALStarColObservationTableTranslator()
-        else:
-            self.model_translator = model_translator
+        self.tolerance = None
 
-    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, tolerance, verbose: bool = False) -> LearningResult:
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
+        self.tolerance = tolerance
         start_time = time.time()
         self.reset()
         if verbose: print("\n\n***** Learning started at:", start_time, "*****\n\n")
@@ -84,7 +74,7 @@ class PDFALStarColLearner:
         self._teacher.reset()
 
     def __build_observation_table(self):
-        self.observation_table = PDFAObservationTable(self.__alphabet, self.comparator)
+        self.observation_table = PDFAObservationTable(self.__alphabet, self.tolerance)
 
     def __initialize_observation_table(self):
         self.observation_table.add_suffix(Sequence([self.terminal_symbol]))
@@ -154,20 +144,12 @@ class PDFALStarColLearner:
         return None, None
 
     def __check_counterexample(self, suffix, symbols, proposed_model):
-        if isinstance(self.comparator, WFAToleranceComparator):
-            model_values = np.array(proposed_model.last_token_probabilities(suffix, symbols))
-            teacher_values = np.array(self._teacher.last_token_weights(suffix, symbols))
-            diff = abs(model_values - teacher_values)
-            if max(diff) > self.comparator.tolerance:
-                return True, symbols[np.argmax(diff)]
-            return False, None
-        else:
-            model_values = proposed_model.last_token_probabilities(suffix, symbols)
-            teacher_values = self._teacher.last_token_weights(suffix, symbols)
-            for i, value in enumerate(model_values):
-                if not self.comparator.equivalent_values(value, teacher_values[i]):
-                    return True, symbols[i]
-            return False, None
+        model_values = np.array(proposed_model.last_token_probabilities(suffix, symbols))
+        teacher_values = np.array(self._teacher.last_token_weights(suffix, symbols))
+        diff = abs(model_values - teacher_values)
+        if max(diff) > self.tolerance:
+            return True, symbols[np.argmax(diff)]
+        return False, None
 
     # Helper methods
 
