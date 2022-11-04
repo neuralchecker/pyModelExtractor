@@ -13,8 +13,8 @@ from pymodelextractor.utils.time_bound_utilities import timeout
 
 
 class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
-    def __init__(self, max_states, max_query_length, max_seconds_run=None):
-        super().__init__()
+    def __init__(self, comparator, max_states, max_query_length, max_seconds_run=None):
+        super().__init__(comparator)
         self._max_states = max_states
         self._max_query_length = max_query_length
         self._max_seconds_run = max_seconds_run
@@ -29,20 +29,20 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             raise NumberOfStatesExceededException
         return super()._perform_equivalence_query(model)
 
-    def run_learning_with_time_bound(self, teacher, partitions, verbose):
+    def run_learning_with_time_bound(self, teacher, verbose):
         try:
             with timeout(self._max_seconds_run):
-                super().learn(teacher, partitions, verbose)
+                super().learn(teacher, verbose)
         except TimeoutError:
             print("Time Bound Reached")
             self._exceded_time_bound = True
 
-    def learn(self, teacher: ProbabilisticTeacher, partitions: int, verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
         try:
             if self._max_seconds_run is not None:
-                self.run_learning_with_time_bound(teacher, partitions, verbose)
+                self.run_learning_with_time_bound(teacher, verbose)
             else:
-                super().learn(teacher, partitions, verbose)
+                super().learn(teacher, verbose)
         except NumberOfStatesExceededException:
             print("NumberOfStatesExceeded")
             self._exceeded_max_states = True
@@ -55,21 +55,6 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         result.info['QueryLengthExceeded'] = self._exceeded_max_mq_length
         result.info['TimeExceeded'] = self._exceded_time_bound
         return result
-
-    def _learning_results_for(self, model):
-        if self._max_seconds_run is not None:
-            numberOfStates = len(model.weighted_states) if model is not None else 0
-            for count, state in enumerate(model.weighted_states):
-                state.name = 'q' + str(count)
-
-            info = {
-                'equivalence_queries_count': None,
-                'last_token_weight_queries_count': None,
-                'observation_tree': None
-            }
-            return LearningResult(model, numberOfStates, info)
-        else:
-            return super()._learning_results_for(model)
 
     def initialization(self, verbose) -> tuple[bool, ProbabilisticDeterministicFiniteAutomaton]:
         ret = super().initialization(verbose)

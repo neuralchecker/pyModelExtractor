@@ -30,7 +30,7 @@ class PDFALStarColLearner:
         model_learned = False
         counter = 0
         counter_example_count = 0
-
+        last_size = 0
         while not model_learned:
             if verbose: print("*** Start Iter", counter, "***")
             counter += 1
@@ -39,7 +39,10 @@ class PDFALStarColLearner:
             if verbose: print("Closing table...")
             self.__close()
             if verbose: print("Translating...")
-            model = self.model_translator.translate(self.observation_table, self.tolerance, self.terminal_symbol)
+            model = self.model_translator.translate(self.observation_table, self.terminal_symbol, self.comparator)
+            size = len(model.weighted_states)
+            assert size > last_size, 'Possible infinite loop'
+            last_size = size
             if verbose: print("Performing Equivalence Query...")
             model_learned, counterexample = self.perform_equivalence_query(model)
             if not model_learned:
@@ -120,8 +123,7 @@ class PDFALStarColLearner:
     def __update_observation_table_with(self, counterexample, proposed_model):
         all_suffixes = []
         count, differing_symbol = self.__get_shortest_counterexample_with_symbol(counterexample, proposed_model)
-        if differing_symbol != self.terminal_symbol:
-            count = count + differing_symbol
+        count = count + differing_symbol
         suffixes = count.get_suffixes()
         for suffix in suffixes:
             added = self.observation_table.add_suffix(suffix)
