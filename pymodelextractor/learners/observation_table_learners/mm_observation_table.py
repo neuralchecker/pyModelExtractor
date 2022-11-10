@@ -10,6 +10,15 @@ class MMObservationTable:
     red: set[Sequence]
     blue: set[Sequence]
     observations: dict[Sequence, list[Symbol]]
+    exp: list[Sequence]
+
+    def __init__(self):
+        self.red = set()
+        self.blue = set()
+        self.observations = {}
+        self.exp = []
+
+        self.redValues = set()
 
     def __getitem__(self, sequence: Sequence) -> list[bool]:
         return self.observations[sequence]
@@ -17,21 +26,20 @@ class MMObservationTable:
     def __setitem__(self, sequence: Sequence, observationsRow: list[bool]):
         self.observations[sequence] = observationsRow
 
-    def is_closed(self) -> bool:
-        red_values = self._get_red_values()
+    def is_closed(self) -> Union[Sequence, None]:
         for sequence in self.blue:
             blue_symbol = self.observations[sequence]
-            if red_values.get(blue_symbol) == None:
-                return False
-        return True
+            if self.red_values.get(blue_symbol) == None:
+                return blue_symbol
+        return None
 
-    def _get_red_values(self) -> dict[list[Symbol], int]:
-        redValues: dict[list[Symbol], int]
+    def _get_red_values(self) -> set[list[Symbol]]:
+        redValues: set(list[Symbol])
         redValues = {}
         for sequence in self.red: 
             redSymbol = self.observations[sequence]
-            if redValues.get(redSymbol) == None:
-                redValues[redSymbol] = 1
+            if not (redValues in redSymbol):
+                redValues.add(redSymbol)
         return redValues
 
     def find_inconsistency(self, alphabet: Alphabet) -> Union[TableInconsistency, None]:
@@ -54,16 +62,19 @@ class MMObservationTable:
             suffixedSequence1 = sequence1 + symbol
             suffixedSequence2 = sequence2 + symbol
             if self.observations[suffixedSequence1] != self.observations[suffixedSequence2]:
-                differenceSequence = None 
-                    # TODO FIND WHAT IS DIFFERENCE SEQUENCE
-                
-                return TableInconsistency(sequence1, sequence2, symbol, differenceSequence)
+                return TableInconsistency(sequence1, sequence2, symbol, None)
         return None
     
     def move_from_blue_to_red(self, sequence: Sequence):
         self.blue.remove(sequence)
-        self.red.add(sequence)
+        self.add_to_red(sequence, self.observations[sequence])
 
+    def add_to_red(self, sequence: Sequence, values: list):
+        self.red.add(sequence)
+        self.redValues.add(values)
+    
+    def add_to_blue(self, sequence: Sequence):
+        self.blue.add(sequence)
 
     def __str__(self):
         lines = ["\nObservation Table:",
