@@ -1,7 +1,7 @@
 from typing import Tuple, Union
 from pythautomata.base_types.sequence import Sequence
 from pymodelextractor.teachers.teacher import Teacher
-from pythautomata.automata.moore_machines_automaton import MooreMachineAutomaton as MM
+from pythautomata.automata.moore_machine_automaton import MooreMachineAutomaton as MM
 from pythautomata.model_comparators.moore_machine_comparison_strategy import MooreMachineComparisonStrategy
 from pythautomata.base_types.alphabet import Alphabet
 
@@ -17,7 +17,7 @@ class MooreMachineTeacher(Teacher):
         return self._membership_queries_count
 
     @property
-    def input_alphabet(self) -> Alphabet:
+    def alphabet(self) -> Alphabet:
         return self.moore_machine._input_alphabet
 
     @property

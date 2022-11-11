@@ -1,4 +1,4 @@
-from ctypes import Union
+from typing import Union
 from symtable import Symbol
 from typing import Sequence
 from pythautomata.base_types.alphabet import Alphabet
@@ -20,30 +20,29 @@ class MMObservationTable:
 
         self.redValues = set()
 
-    def __getitem__(self, sequence: Sequence) -> list[bool]:
+    def __getitem__(self, sequence: Sequence) -> list[Symbol]:
         return self.observations[sequence]
 
-    def __setitem__(self, sequence: Sequence, observationsRow: list[bool]):
+    def __setitem__(self, sequence: Sequence, observationsRow: list[Symbol]):
         self.observations[sequence] = observationsRow
 
-    def is_closed(self) -> Union[Sequence, None]:
+    def is_closed(self) -> Union[list[Symbol], None]:
         for sequence in self.blue:
             blue_symbol = self.observations[sequence]
-            if self.red_values.get(blue_symbol) == None:
+            if self.redValues.get(blue_symbol) == None:
                 return blue_symbol
         return None
 
     def _get_red_values(self) -> set[list[Symbol]]:
-        redValues: set(list[Symbol])
-        redValues = {}
+        self.redValues = set()
         for sequence in self.red: 
             redSymbol = self.observations[sequence]
-            if not (redValues in redSymbol):
-                redValues.add(redSymbol)
-        return redValues
+            if not (self.redValues in redSymbol):
+                self.redValues.add(redSymbol)
+        return self.redValues
 
     def find_inconsistency(self, alphabet: Alphabet) -> Union[TableInconsistency, None]:
-        redValues: dict(list[Symbol], Sequence)
+        redValues: dict[list[Symbol], Sequence]
         redValues = {}
         for row in self.red:
             rowSymbols = self.observations[row]
@@ -56,7 +55,7 @@ class MMObservationTable:
                 redValues[rowSymbols] = row
         return None
 
-    def _are_inconsistent(self, sequence1: Sequence, sequence2: Sequence, alphabet: Alphabet)-> \
+    def _are_inconsistent(self, sequence1, sequence2, alphabet: Alphabet)-> \
             Union[TableInconsistency, None]:
         for symbol in alphabet:
             suffixedSequence1 = sequence1 + symbol
@@ -69,7 +68,7 @@ class MMObservationTable:
         self.blue.remove(sequence)
         self.add_to_red(sequence, self.observations[sequence])
 
-    def add_to_red(self, sequence: Sequence, values: list):
+    def add_to_red(self, sequence: Sequence, values: list[Symbol]):
         self.red.add(sequence)
         self.redValues.add(values)
     

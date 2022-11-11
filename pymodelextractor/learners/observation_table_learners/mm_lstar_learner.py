@@ -44,7 +44,7 @@ class MMLStarLearner(Learner):
     def learn(self, teacher: Teacher) -> LearningResult:
         start_time = time.time()
         self._teacher = teacher
-        self.symbols = self._teacher.input_alphabet.symbols
+        self.symbols = self._teacher.alphabet.symbols
         self._build_observation_table()
         self._initialize_observation_table()
         model = None
@@ -55,13 +55,32 @@ class MMLStarLearner(Learner):
             self._close()
             self._make_consistent()
             model = self._model_translator.translate(
-                self._observation_table, self._alphabet)
+                self._observation_table, self._teacher.alphabet)
             answer, counterexample = self._teacher.equivalence_query(model)
             if not answer:
                 self._update_observation_table_with(counterexample)
             counter += 1
 
         return self._learning_results_for(model, time.time() - start_time)
+
+    def _update_observation_table_with(self, counterexample):
+        prefixes = counterexample.get_prefixes()
+        for sequence in prefixes:
+            self._add_to_red(sequence)
+            for symbol in self._symbols:
+                suffixedSequence = sequence + symbol
+                if suffixedSequence not in prefixes:
+                    self._add_to_blue(suffixedSequence)
+
+    def _learning_results_for(self, model, duration):
+        numberOfStates = len(model.states) if model is not None else 0
+        info = {
+            'equivalence_queries_count': self._teacher.equivalence_queries_count,
+            'membership_queries_count': self._teacher.membership_queries_count,
+            'observation_table': self._observation_table,
+            'duration': duration,
+        }
+        return LearningResult(model, numberOfStates, info)
 
     def _close(self):
         while True:
@@ -75,7 +94,7 @@ class MMLStarLearner(Learner):
         for symbol in self.symbols:
             self._add_to_blue(sequence + symbol)
 
-    def _make_consisitent(self):
+    def _make_consistent(self):
         while True:
             inconsistency = self._observation_table.find_inconsistency()
             if inconsistency == None:
@@ -83,7 +102,7 @@ class MMLStarLearner(Learner):
             self._resolve_inconsitency(inconsistency)
             self._close()
     
-    def _resolve_inconsistency(self, inconsistency: tuple):
+    def _resolve_inconsistency(self, inconsistency):
         symbol = inconsistency.symbol
         self._observation_table.exp.append(symbol)
         for sequence in self._observation_table.observations:
