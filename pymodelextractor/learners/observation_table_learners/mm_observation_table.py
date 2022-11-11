@@ -29,30 +29,30 @@ class MMObservationTable:
     def is_closed(self) -> Union[list[Symbol], None]:
         for sequence in self.blue:
             blue_symbol = self.observations[sequence]
-            if self.redValues.get(blue_symbol) == None:
+            if tuple(blue_symbol) in self.redValues:
                 return blue_symbol
         return None
 
     def _get_red_values(self) -> set[list[Symbol]]:
         self.redValues = set()
         for sequence in self.red: 
-            redSymbol = self.observations[sequence]
+            redSymbol = tuple(self.observations[sequence])
             if not (self.redValues in redSymbol):
                 self.redValues.add(redSymbol)
         return self.redValues
 
     def find_inconsistency(self, alphabet: Alphabet) -> Union[TableInconsistency, None]:
-        redValues: dict[list[Symbol], Sequence]
+        redValues: dict[tuple, Sequence]
         redValues = {}
         for row in self.red:
             rowSymbols = self.observations[row]
-            redValue = redValues.get(rowSymbols)
+            redValue = redValues.get(tuple(rowSymbols))
             if redValue != None:
                 inconsistency = self._are_inconsistent(redValue, row, alphabet)
                 if inconsistency != None:
                     return inconsistency
             else:
-                redValues[rowSymbols] = row
+                redValues[tuple(rowSymbols)] = row
         return None
 
     def _are_inconsistent(self, sequence1, sequence2, alphabet: Alphabet)-> \
@@ -70,7 +70,7 @@ class MMObservationTable:
 
     def add_to_red(self, sequence: Sequence, values: list[Symbol]):
         self.red.add(sequence)
-        self.redValues.add(values)
+        self.redValues.add(tuple(values))
     
     def add_to_blue(self, sequence: Sequence):
         self.blue.add(sequence)

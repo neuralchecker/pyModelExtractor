@@ -44,7 +44,7 @@ class MMLStarLearner(Learner):
     def learn(self, teacher: Teacher) -> LearningResult:
         start_time = time.time()
         self._teacher = teacher
-        self.symbols = self._teacher.alphabet.symbols
+        self._symbols = self._teacher.alphabet.symbols
         self._build_observation_table()
         self._initialize_observation_table()
         model = None
@@ -91,12 +91,12 @@ class MMLStarLearner(Learner):
             self._add_suffixes_to_blue(closedCounterExample)
 
     def _add_suffixes_to_blue(self, sequence: Sequence):
-        for symbol in self.symbols:
+        for symbol in self._symbols:
             self._add_to_blue(sequence + symbol)
 
     def _make_consistent(self):
         while True:
-            inconsistency = self._observation_table.find_inconsistency()
+            inconsistency = self._observation_table.find_inconsistency(self._teacher.alphabet)
             if inconsistency == None:
                 return
             self._resolve_inconsitency(inconsistency)
