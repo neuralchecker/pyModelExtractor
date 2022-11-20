@@ -3,12 +3,12 @@ from pythautomata.base_types.sequence import Sequence
 from pymodelextractor.learners.observation_table_learners.translators.mm_observation_table_translator import MMObservationTableTranslator
 from pymodelextractor.learners.observation_table_learners.mm_observation_table import MMObservationTable
 from pymodelextractor.learners.learning_result import LearningResult
-from pymodelextractor.teachers.teacher import Teacher
+from pymodelextractor.teachers.moore_machines_teacher import MooreMachineTeacher as MMTeacher
 import time
 
 lamda = Sequence()
 
-class MMLStarLearner(Learner):
+class MMLStarLearner:
     def __init__(self):
         self._model_translator = MMObservationTableTranslator()
 
@@ -41,7 +41,7 @@ class MMLStarLearner(Learner):
             row.append(result)
         return row
 
-    def learn(self, teacher: Teacher) -> LearningResult:
+    def learn(self, teacher: MMTeacher) -> LearningResult:
         start_time = time.time()
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
@@ -55,7 +55,7 @@ class MMLStarLearner(Learner):
             self._close()
             self._make_consistent()
             model = self._model_translator.translate(
-                self._observation_table, self._teacher.alphabet)
+                self._observation_table, self._teacher.alphabet, self._teacher.output_alphabet)
             answer, counterexample = self._teacher.equivalence_query(model)
             if not answer:
                 self._update_observation_table_with(counterexample)
@@ -99,7 +99,7 @@ class MMLStarLearner(Learner):
             inconsistency = self._observation_table.find_inconsistency(self._teacher.alphabet)
             if inconsistency == None:
                 return
-            self._resolve_inconsitency(inconsistency)
+            self._resolve_inconsistency(inconsistency)
             self._close()
     
     def _resolve_inconsistency(self, inconsistency):

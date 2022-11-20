@@ -25,26 +25,26 @@ from tests.learners_tests.test_mm_lstar_learner import TestMMLStarLearner
 
 
 def run():
-     test_classes_to_run = [#TestLStarLearner,
-     #                       TestLStarColLearner,
-     #                       TestPDFALStarQuantLearner,
-     #                       TestPDFALStarToleranceLearner,
-     #                       TestPDFALStarColQuantLearner,
-     #                       TestPDFALStarColLearner,
-     #                       TestKearnsVaziraniLearner,
-     #                       TestLStarLearner,
-     #                       TestPDFATeachersLStar,
-     #                       TestPDFATeachersLStarCol,
-     #                       TestPACBooleanModelTeachers, 
-     #                       TestBoundedPDFAQuantizantionNAryTreeLearner, 
-     #                       TestPDFAQuantizantionNAryTreeLearner,
-     #                       TestBoundedPDFALStarLearner,
-     #                       TestBoundedLStarLearner,
-     #                       TestLambdaStarLearnerWithEqualityAlgebra,
-     #                       TestPDFAQuantizantionNAryTreeLearnerMetrics,
-     #                       TestPACBatchTeacherQuant,
-     #                       TestPDFAQuantizantionNAryTreeLearnerRunningExample,
-                           TestMMLStarLearner]
+     test_classes_to_run = [TestLStarLearner,
+                            TestLStarColLearner,
+                            TestPDFALStarQuantLearner,
+                            TestPDFALStarToleranceLearner,
+                            TestPDFALStarColQuantLearner,
+                            TestPDFALStarColLearner,
+                            TestKearnsVaziraniLearner,
+                            TestLStarLearner,
+                            TestPDFATeachersLStar,
+                            TestPDFATeachersLStarCol,
+                            TestPACBooleanModelTeachers, 
+                            TestBoundedPDFAQuantizantionNAryTreeLearner, 
+                            TestPDFAQuantizantionNAryTreeLearner,
+                            TestBoundedPDFALStarLearner,
+                            TestBoundedLStarLearner,
+                            TestLambdaStarLearnerWithEqualityAlgebra,
+                            TestPDFAQuantizantionNAryTreeLearnerMetrics,
+                            TestPACBatchTeacherQuant,
+                            TestPDFAQuantizantionNAryTreeLearnerRunningExample,
+                            TestMMLStarLearner]
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:

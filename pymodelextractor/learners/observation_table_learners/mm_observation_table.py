@@ -2,6 +2,7 @@ from typing import Union
 from symtable import Symbol
 from typing import Sequence
 from pythautomata.base_types.alphabet import Alphabet
+import time
 
 from pymodelextractor.learners.observation_table_learners.observation_table import TableInconsistency
 
@@ -26,11 +27,11 @@ class MMObservationTable:
     def __setitem__(self, sequence: Sequence, observationsRow: list[Symbol]):
         self.observations[sequence] = observationsRow
 
-    def is_closed(self) -> Union[list[Symbol], None]:
+    def is_closed(self) -> Union[Sequence, None]:
         for sequence in self.blue:
             blue_symbol = self.observations[sequence]
-            if tuple(blue_symbol) in self.redValues:
-                return blue_symbol
+            if not(tuple(blue_symbol) in self.redValues):
+                return sequence
         return None
 
     def _get_red_values(self) -> set[list[Symbol]]:
@@ -47,9 +48,9 @@ class MMObservationTable:
         for row in self.red:
             rowSymbols = self.observations[row]
             redValue = redValues.get(tuple(rowSymbols))
-            if redValue != None:
+            if not (redValue is None):
                 inconsistency = self._are_inconsistent(redValue, row, alphabet)
-                if inconsistency != None:
+                if not (inconsistency is None):
                     return inconsistency
             else:
                 redValues[tuple(rowSymbols)] = row
@@ -57,7 +58,7 @@ class MMObservationTable:
 
     def _are_inconsistent(self, sequence1, sequence2, alphabet: Alphabet)-> \
             Union[TableInconsistency, None]:
-        for symbol in alphabet:
+        for symbol in alphabet.symbols:
             suffixedSequence1 = sequence1 + symbol
             suffixedSequence2 = sequence2 + symbol
             if self.observations[suffixedSequence1] != self.observations[suffixedSequence2]:
