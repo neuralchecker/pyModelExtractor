@@ -61,10 +61,21 @@ class MMObservationTable:
         for symbol in alphabet.symbols:
             suffixedSequence1 = sequence1 + symbol
             suffixedSequence2 = sequence2 + symbol
+            differenceSequence = self._observation_difference_between(
+                suffixedSequence1, suffixedSequence2)
             if self.observations[suffixedSequence1] != self.observations[suffixedSequence2]:
-                return TableInconsistency(sequence1, sequence2, symbol, None)
+                return TableInconsistency(sequence1, sequence2, symbol, differenceSequence)
         return None
-    
+
+    def _observation_difference_between(self, sequence1: Sequence, sequence2: Sequence) -> Union[Sequence, None]:
+        observations1 = self.observations[sequence1]
+        observations2 = self.observations[sequence2]
+        assert len(observations1) == len(observations2)
+        for i in range(0, len(observations1)):
+            if observations1[i] != observations2[i]:
+                return self.exp[i]
+        return None
+
     def move_from_blue_to_red(self, sequence: Sequence):
         self.blue.remove(sequence)
         self.add_to_red(sequence, self.observations[sequence])

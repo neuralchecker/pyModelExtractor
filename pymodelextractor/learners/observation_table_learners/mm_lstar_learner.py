@@ -101,9 +101,10 @@ class MMLStarLearner:
                 return
             self._resolve_inconsistency(inconsistency)
             self._close()
+            time.sleep(2)
     
     def _resolve_inconsistency(self, inconsistency):
-        symbol = inconsistency.symbol
+        symbol = inconsistency.symbol + inconsistency.differenceSequence
         self._observation_table.exp.append(symbol)
         for sequence in self._observation_table.observations:
             self._fill_hole_for(sequence, symbol)
