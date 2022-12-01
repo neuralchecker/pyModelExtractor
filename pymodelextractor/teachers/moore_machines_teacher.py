@@ -1,4 +1,5 @@
 from typing import Tuple, Union
+import time
 from pythautomata.base_types.sequence import Sequence
 from pymodelextractor.teachers.teacher import Teacher
 from pythautomata.automata.moore_machine_automaton import MooreMachineAutomaton as MM
@@ -33,9 +34,17 @@ class MooreMachineTeacher(Teacher):
         return self.moore_machine.last_symbol(sequence)
 
     def equivalence_query(self, model: MM) -> Tuple[bool, Union[Sequence, None]]:
+        start_eq_time = time.time()
         self._equivalence_queries_count += 1
         counterexample = self._comparison_strategy.get_counterexample_between(model, self.moore_machine)
         are_equivalent = counterexample is None
+
+        duration = time.time() - start_eq_time
+        if (not are_equivalent):
+            print("    - Found counterexample in " + str(duration) + "s -> " + str(counterexample))
+        else:
+            print("    - Made equivalence query in " + str(duration) + "s")
+        
         return are_equivalent, counterexample
 
     def reset_statistics(self) -> None:
