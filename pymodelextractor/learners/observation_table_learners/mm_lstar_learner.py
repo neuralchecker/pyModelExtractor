@@ -101,7 +101,6 @@ class MMLStarLearner:
                 return
             self._resolve_inconsistency(inconsistency)
             self._close()
-            time.sleep(2)
     
     def _resolve_inconsistency(self, inconsistency):
         symbol = inconsistency.symbol + inconsistency.differenceSequence
