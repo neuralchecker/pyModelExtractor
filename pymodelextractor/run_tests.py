@@ -6,9 +6,9 @@ from pymodelextractor.tests.learners_tests.test_lstarcol_learner import TestLSta
 from pymodelextractor.tests.learners_tests.test_kearns_vazirani_learner import TestKearnsVaziraniLearner
 from pymodelextractor.tests.learners_tests.test_pdfa_lstar_learner import TestPDFALStarLearner
 from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_learner import TestPDFALStarColLearner
-from pymodelextractor.tests.learners_tests.test_pdfa_lstar_quant_learner import TestPDFALStarQuantLearner
-from pymodelextractor.tests.learners_tests.test_pdfa_lstar_tolerance_learner import TestPDFALStarToleranceLearner
-from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_quant_learner import TestPDFALStarColQuantLearner
+#from pymodelextractor.tests.learners_tests.test_pdfa_lstar_quant_learner import TestPDFALStarQuantLearner
+#from pymodelextractor.tests.learners_tests.test_pdfa_lstar_tolerance_learner import TestPDFALStarToleranceLearner
+#from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_quant_learner import TestPDFALStarColQuantLearner
 from tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerWithEqualityAlgebra
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
@@ -22,28 +22,29 @@ from tests.learners_tests.test_bounded_pdfa_lstar_learner import TestBoundedPDFA
 from tests.learners_tests.test_pac_batch_teacher_quant import TestPACBatchTeacherQuant
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_running_example \
      import TestPDFAQuantizantionNAryTreeLearnerRunningExample
-
+from tests.learners_tests.test_pdfa_lstar_learner_w_tolerance import TestPDFALStarLearnerWTolerance
 
 def run():
-    test_classes_to_run = [TestLStarLearner,
-                           TestLStarColLearner,
-                           TestPDFALStarQuantLearner,
-                           TestPDFALStarToleranceLearner,
-                           TestPDFALStarColQuantLearner,
-                           TestPDFALStarColLearner,
-                           TestKearnsVaziraniLearner,
-                           TestLStarLearner,
-                           TestPDFATeachersLStar,
-                           TestPDFATeachersLStarCol,
-                           TestPACBooleanModelTeachers, 
-                           TestBoundedPDFAQuantizantionNAryTreeLearner, 
-                           TestPDFAQuantizantionNAryTreeLearner,
-                           TestBoundedPDFALStarLearner,
-                           TestBoundedLStarLearner,
-                           TestLambdaStarLearnerWithEqualityAlgebra,
-                           TestPDFAQuantizantionNAryTreeLearnerMetrics,
-                           TestPACBatchTeacherQuant,
-                           TestPDFAQuantizantionNAryTreeLearnerRunningExample]
+#     test_classes_to_run = [TestLStarLearner,
+#                            TestLStarColLearner,
+#                            TestPDFALStarQuantLearner,
+#                            TestPDFALStarToleranceLearner,
+#                            TestPDFALStarColQuantLearner,
+#                            TestPDFALStarColLearner,
+#                            TestKearnsVaziraniLearner,
+#                            TestLStarLearner,
+#                            TestPDFATeachersLStar,
+#                            TestPDFATeachersLStarCol,
+#                            TestPACBooleanModelTeachers, 
+#                            TestBoundedPDFAQuantizantionNAryTreeLearner, 
+#                            TestPDFAQuantizantionNAryTreeLearner,
+#                            TestBoundedPDFALStarLearner,
+#                            TestBoundedLStarLearner,
+#                            TestLambdaStarLearnerWithEqualityAlgebra,
+#                            TestPDFAQuantizantionNAryTreeLearnerMetrics,
+#                            TestPACBatchTeacherQuant,
+#                            TestPDFAQuantizantionNAryTreeLearnerRunningExample]
+    test_classes_to_run = [TestPDFALStarLearnerWTolerance]
     loader = TestLoader()
     suites_list = []
     for test_class in test_classes_to_run:
