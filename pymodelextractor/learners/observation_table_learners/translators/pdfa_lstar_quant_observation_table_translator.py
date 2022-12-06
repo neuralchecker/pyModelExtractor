@@ -13,48 +13,28 @@ from collections import namedtuple
 import numpy as np
 
 
-class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
+class PDFALStarQuantObservationTableTranslation(PDFAObservationTableTranslator):
     class IntermediateState:
 
         Transition = namedtuple('Transition', 'prefix weight')
 
         def __init__(self, comparator: WFAComparator):
-            self.centroid = None
-            self.obs_count = 0
             self.observations = dict()
             self.transitions = dict()
             self.comparator = comparator
 
         def remove_observation(self, key):
             self.observations.pop(key)
-            self.obs_count -= 1
 
         def reset(self):
             self.transitions = dict()
-            self.centroid = sum(self.observations.values()) / len(self.observations)
 
         def add_observation(self, key, value):
             arr_value = np.array(value)
             self.observations[key] = arr_value
-            if self.centroid is None:
-                self.centroid = arr_value
-            else:
-                self.centroid = self.__new_centroid(arr_value)
-            self.obs_count += 1
 
-        def belongs_to_state(self, value, criterion):
-            return criterion(self.comparator.equivalent_output(value, obs)
-                             for obs in self.observations.values())
-
-        def distance_to_centroid(self, value):
-            np_value = np.array(value)
-            return np.ma.sqrt(sum((np_value - self.centroid) ** 2))
-
-        def membership_value(self, value, criterion=all):
-            if self.belongs_to_state(value, criterion):
-                return True, self.distance_to_centroid(value)
-            else:
-                return False, float('Inf')
+        def belongs_to_state(self, value):
+            return self.comparator.equivalent_output(value,  list(self.observations.values())[0])
 
         def has_sequence(self, sequence):
             return sequence in self.observations.keys()
@@ -66,18 +46,15 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
                 self.transitions[symbol][next_state_pos] = list()
             self.transitions[symbol][next_state_pos].append(self.Transition(prefix, weight))
 
-        def __new_centroid(self, value):
-            return (self.centroid * self.obs_count + value) / (self.obs_count + 1)
-
     def translate(self, observation_table: PDFAObservationTable, terminal_symbol: Symbol, comparator) \
             -> PDFA:
         states = self.__make_states(observation_table.get_red_observations(), comparator)
         self.__add_transitions(observation_table, states)
-        was_deterministic = self.__make_deterministic(states, comparator)
-        while not was_deterministic:
-            self.__reset_states(states)
-            self.__add_transitions(observation_table, states)
-            was_deterministic = self.__make_deterministic(states, comparator)
+        # was_deterministic = self.__make_deterministic(states, comparator)
+        # while not was_deterministic:
+        #     self.__reset_states(states)
+        #     self.__add_transitions(observation_table, states)
+        #     was_deterministic = self.__make_deterministic(states, comparator)
         wfa_states = self.__make_wfa_states(states)
         self.__add_wfa_transitions(states, wfa_states)
         wfa_states = set(wfa_states)
@@ -92,21 +69,17 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
 
     def __add_to_state(self, intermediate_states, red_obs, comparator):
         i = 0
-        membership_values = np.array([])
-        belongs = np.array([])
-        while i < len(intermediate_states):
+        added = False
+        while i < len(intermediate_states) and not added:
             intermediate_state = intermediate_states[i]
-            belong, membership_value = intermediate_state.membership_value(red_obs[1])
-            belongs = np.append(belongs, belong)
-            membership_values = np.append(membership_values, membership_value)
+            if intermediate_state.belongs_to_state(red_obs[1]):
+                intermediate_state.add_observation(red_obs[0], red_obs[1])
+                added = True
             i += 1
-        if np.sum(belongs) == 0:
+        if not added:
             new_intermediate_state = self.IntermediateState(comparator)
             new_intermediate_state.add_observation(red_obs[0], red_obs[1])
             intermediate_states.append(new_intermediate_state)
-        else:
-            min_dist_arg = np.argmin(membership_values)
-            intermediate_states[min_dist_arg].add_observation(red_obs[0], red_obs[1])
 
     def __add_transitions(self, observation_table, intermediate_states):
         for state in intermediate_states:
@@ -118,24 +91,11 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
                     added = False
                     while next_state_pos < len(intermediate_states) and not added:
                         next_state = intermediate_states[next_state_pos]
-                        if next_state.has_sequence(new_sequence):
+                        if next_state.has_sequence(new_sequence) or \
+                                next_state.belongs_to_state(observation_table[new_sequence]):
                             state.add_transition(prefix, symbol.value[0], next_state_pos, obs[symbol_pos])
                             added = True
                         next_state_pos += 1
-                    if not added:
-                        next_state_pos = 0
-                        belongs = np.array([])
-                        membership_values = np.array([])
-                        while next_state_pos < len(intermediate_states):
-                            next_state = intermediate_states[next_state_pos]
-                            belong, membership_value = \
-                                next_state.membership_value(observation_table[new_sequence], criterion=any)
-                            belongs = np.append(belongs, belong)
-                            membership_values = np.append(membership_values, membership_value)
-                            next_state_pos += 1
-                        if np.sum(belongs) > 0:
-                            min_dist_arg = np.argmin(membership_values)
-                            state.add_transition(prefix, symbol.value[0], min_dist_arg, obs[symbol_pos])
 
     def __make_wfa_states(self, intermediate_states):
         wfa_states = list()
