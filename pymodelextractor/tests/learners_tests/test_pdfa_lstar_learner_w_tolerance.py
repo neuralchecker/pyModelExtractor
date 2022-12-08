@@ -18,9 +18,7 @@ a = binaryAlphabet['a']
 b = binaryAlphabet['b']
 
 class TestPDFALStarLearnerWTolerance(unittest.TestCase):
-
-    def setUp(self):
-        self.learner = PDFALStarLearner()
+       
 
     def create_PDFA(self):
         q0 = WeightedState("q0", 1, 0.1)
@@ -40,8 +38,11 @@ class TestPDFALStarLearnerWTolerance(unittest.TestCase):
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "SamplePDFA")
 
     def test_1(self):
+        comparator = PDFAComparator(0.05)
+        learner =  PDFALStarLearner(comparator)
         model = self.create_PDFA()
-        teacher = PDFATeacher(model, PDFAComparator(0.05))
-        result = self.learner.learn(teacher, tolerance=0.05)
+        teacher = PDFATeacher(model, comparator)
+        result = learner.learn(teacher)
         extracted_model = result.model
-        self.assertEqual(model, extracted_model)        
+        extracted_model.export("./")
+        self.assertTrue(comparator.are_equivalent(model, extracted_model))        
