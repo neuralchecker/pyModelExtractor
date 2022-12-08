@@ -11,9 +11,9 @@ import numpy as np
 
 class PACProbabilisticTeacher(ProbabilisticTeacher):
 
-    def __init__(self, model: ProbabilisticModel, epsilon: float, delta:float,
-                 comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None,
-                 max_seq_length: int = 128, compute_epsilon_star: bool = True):
+    def __init__(self, model: ProbabilisticModel, comparator: FiniteAutomataComparator, epsilon: float = 0.05,
+                 delta: float = 0.01, sequence_generator: SequenceGenerator = None, max_seq_length: int = 128,
+                 compute_epsilon_star: bool = True):
         super().__init__()
         self._comparator = comparator
         self._target_model = model
