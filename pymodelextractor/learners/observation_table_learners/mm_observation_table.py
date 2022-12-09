@@ -61,9 +61,9 @@ class MMObservationTable:
         for symbol in alphabet.symbols:
             suffixedSequence1 = sequence1 + symbol
             suffixedSequence2 = sequence2 + symbol
-            differenceSequence = self._observation_difference_between(
-                suffixedSequence1, suffixedSequence2)
             if self.observations[suffixedSequence1] != self.observations[suffixedSequence2]:
+                differenceSequence = self._observation_difference_between(
+                    suffixedSequence1, suffixedSequence2)
                 return TableInconsistency(sequence1, sequence2, symbol, differenceSequence)
         return None
 
