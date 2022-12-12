@@ -11,6 +11,7 @@ class MooreMachineTeacher(Teacher):
     def __init__(self, moore_machine: MM, comparison_strategy: MooreMachineComparisonStrategy):
         self.moore_machine = moore_machine
         self._comparison_strategy = comparison_strategy
+        self.verbose = False
         super().__init__()
 
     @property
@@ -33,7 +34,7 @@ class MooreMachineTeacher(Teacher):
         self._membership_queries_count += 1
         return self.moore_machine.last_symbol(sequence)
 
-    def equivalence_query(self, model: MM) -> Tuple[bool, Union[Sequence, None]]:
+    def equivalence_query(self, model: MM, verbose: bool = False) -> Tuple[bool, Union[Sequence, None]]:
         start_eq_time = time.time()
         self._equivalence_queries_count += 1
         counterexample = self._comparison_strategy.get_counterexample_between(model, self.moore_machine)
@@ -41,9 +42,11 @@ class MooreMachineTeacher(Teacher):
 
         duration = time.time() - start_eq_time
         if (not are_equivalent):
-            print("    - Found counterexample in " + str(duration) + "s -> " + str(counterexample))
+            if self.verbose:
+                print("    - Found counterexample in " + str(duration) + "s -> " + str(counterexample))
         else:
-            print("    - Made equivalence query in " + str(duration) + "s")
+            if self.verbose:
+                print("    - Made equivalence query in " + str(duration) + "s")
         
         return are_equivalent, counterexample
 

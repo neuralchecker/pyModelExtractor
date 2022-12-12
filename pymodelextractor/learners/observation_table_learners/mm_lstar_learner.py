@@ -41,9 +41,12 @@ class MMLStarLearner:
             row.append(result)
         return row
 
-    def learn(self, teacher: MMTeacher) -> LearningResult:
+    def learn(self, teacher: MMTeacher, verbose: bool = False) -> LearningResult:
         start_time = time.time()
-        print("**** Started moore machines lstar ****")
+        teacher.verbose = verbose
+        self.verbose = verbose
+        if self.verbose:
+            print("**** Started moore machines lstar ****")
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
         self._build_observation_table()
@@ -55,24 +58,27 @@ class MMLStarLearner:
 
         while not answer:
             start_iteration_time = time.time()
-            print(" # Starting iteration " + str(counter))
+            if self.verbose:
+                print(" # Starting iteration " + str(counter))
             self._close()
             self._make_consistent()
             model = self._model_translator.translate(
                 self._observation_table, self._teacher.alphabet, self._teacher.output_alphabet)
-            answer, counterexample = self._teacher.equivalence_query(model)
+            answer, counterexample = self._teacher.equivalence_query(model, self.verbose)
             if not answer:
                 counterexample_counter += 1
                 self._update_observation_table_with(counterexample)
             duration = time.time() - start_iteration_time
-            print("  # Iteration " + str(counter) + " ended, duration: " + str(duration) + "s")
+            if self.verbose:
+                print("  # Iteration " + str(counter) + " ended, duration: " + str(duration) + "s")
             counter += 1
 
 
         result = self._learning_results_for(model, time.time() - start_time)
         duration = time.time() - start_time
-        print("**** Learning finished in " + str(duration) + "s with " + str(counterexample_counter) \
-            + " counterexamples & " + str(result.state_count) + " states ****" + '\n')
+        if (self.verbose):
+            print("**** Learning finished in " + str(duration) + "s using " + str(counterexample_counter) \
+                + " counterexamples & final model ended with " + str(result.state_count) + " states ****" + '\n')
         return result
 
     def _update_observation_table_with(self, counterexample):
@@ -100,7 +106,8 @@ class MMLStarLearner:
             closedCounterExample = self._observation_table.is_closed()
             if closedCounterExample == None:
                 duration = time.time() - start_closing_time
-                print("    . Closed table in " + str(duration) + "s")
+                if self.verbose:
+                    print("    . Closed table in " + str(duration) + "s")
                 return
             self._observation_table.move_from_blue_to_red(closedCounterExample)
             self._add_suffixes_to_blue(closedCounterExample)
@@ -115,7 +122,8 @@ class MMLStarLearner:
             inconsistency = self._observation_table.find_inconsistency(self._teacher.alphabet)
             if inconsistency == None:
                 duration = time.time() - start_consistent_time
-                print("    + Made table consistent in " + str(duration) + "s")
+                if self.verbose:
+                    print("    + Made table consistent in " + str(duration) + "s")
                 return
 
             self._resolve_inconsistency(inconsistency)
