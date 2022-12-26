@@ -30,15 +30,15 @@ class TestPDFALStarLearnerWTolerance(unittest.TestCase):
         q0.add_transition(b, q2, 0.5)
         q1.add_transition(a, q0, 0.5)
         q1.add_transition(b, q2, 0.4)
-        q2.add_transition(a, q1, 0.45)
-        q2.add_transition(b, q2, 0.45)        
+        q2.add_transition(a, q1, 0.48)
+        q2.add_transition(b, q2, 0.42)        
 
         states = {q0, q1, q2}
         comparator = WFAToleranceComparator()
         return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator, "SamplePDFA")
 
     def test_1(self):
-        comparator = PDFAComparator(0.05)
+        comparator = PDFAComparator(0.099999)
         learner =  PDFALStarLearner(comparator)
         model = self.create_PDFA()
         teacher = PDFATeacher(model, comparator)
