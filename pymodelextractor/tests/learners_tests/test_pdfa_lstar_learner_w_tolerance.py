@@ -4,6 +4,7 @@ from pythautomata.automata_definitions.weighted_tomitas_grammars import Weighted
 
 from pymodelextractor.learners.observation_table_learners.pdfa_lstar_learner import PDFALStarLearner
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator as PDFAComparator
+from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 from pythautomata.base_types.symbol import SymbolStr
@@ -45,4 +46,14 @@ class TestPDFALStarLearnerWTolerance(unittest.TestCase):
         result = learner.learn(teacher)
         extracted_model = result.model
         extracted_model.export("./")
-        self.assertTrue(comparator.are_equivalent(model, extracted_model))        
+        self.assertTrue(comparator.are_equivalent(model, extracted_model))       
+
+    def test_2(self):
+        comparator = WFAQuantizationComparator(10)
+        learner =  PDFALStarLearner(comparator)
+        model = self.create_PDFA()
+        teacher = PDFATeacher(model, comparator)
+        result = learner.learn(teacher)
+        extracted_model = result.model
+        extracted_model.export("./")
+        self.assertTrue(comparator.are_equivalent(model, extracted_model))      

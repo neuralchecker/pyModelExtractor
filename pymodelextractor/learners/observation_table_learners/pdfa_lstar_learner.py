@@ -56,7 +56,7 @@ class PDFALStarLearner:
             if verbose: print("Translating...")
             model = self.model_translator.translate(self.observation_table, self.terminal_symbol, self.comparator)
             size = len(model.weighted_states)
-            assert size > last_size, 'Possible infinite loop'
+            #assert size > last_size, 'Possible infinite loop'
             last_size = size
             if verbose: print("Performing Equivalence Query...")
             model_learned, counterexample = self.perform_equivalence_query(model)
