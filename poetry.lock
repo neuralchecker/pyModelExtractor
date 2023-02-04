@@ -90,11 +90,11 @@ python2 = ["typed-ast (>=1.4.0,<1.5.0)"]
 
 [[package]]
 name = "mypy-extensions"
-version = "0.4.3"
+version = "0.4.4"
 description = "Experimental type system extensions for programs checked with the mypy typechecker."
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7"
 
 [[package]]
 name = "numpy"
@@ -121,8 +121,8 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-testing = ["pytest-benchmark", "pytest"]
-dev = ["tox", "pre-commit"]
+dev = ["pre-commit", "tox"]
+testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "py"
@@ -163,7 +163,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "pythautomata"
-version = "0.22.0"
+version = "0.23.0"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -265,7 +265,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "2dfaf23190ce5e6407f61f6dfb8d591ed209a9030a8dce15a8b9dcfdc4557905"
+content-hash = "a01d1641dbb33a9c3d550c9f77e8cf1e774dd997ff1eccb40cd2dbf2f2e25368"
 
 [metadata.files]
 atomicwrites = []
