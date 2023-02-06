@@ -98,7 +98,7 @@ python-versions = ">=2.7"
 
 [[package]]
 name = "numpy"
-version = "1.24.1"
+version = "1.24.2"
 description = "Fundamental package for array computing in Python"
 category = "main"
 optional = false
@@ -163,7 +163,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "pythautomata"
-version = "0.23.1"
+version = "0.24.0"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -265,7 +265,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "03f399e7828a36ccf60a91a352a8ecb2d61825d755696d04365afdf47ffb5fe8"
+content-hash = "be875de46318c88054a0a4f1fd4a3b9d138af2df4a44798aecd8bf31147b5a4d"
 
 [metadata.files]
 atomicwrites = []
