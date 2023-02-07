@@ -19,7 +19,7 @@ class MMLStarLearner:
         self._observation_table.exp = [lamda]
         self._add_to_red(lamda)
         for symbol in self._symbols:
-            self._add_to_blue(Sequence(symbol))
+            self._add_to_blue(Sequence((symbol,)))
 
     def _add_to_blue(self, sequence: Sequence):
         if not sequence in self._observation_table.blue:

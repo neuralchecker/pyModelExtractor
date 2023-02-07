@@ -24,7 +24,7 @@ class SampleBatchProbabilisticTeacher(SampleProbabilisticTeacher):
         counterexample = None
         suffixes = [self.terminal_symbol]
         for symbol in self.alphabet.symbols:
-            suffixes.append(Sequence(symbol))
+            suffixes.append(Sequence((symbol,)))
 
         rand_words = self.generate_words()
         results = self.last_token_weights_batch(rand_words, suffixes)
