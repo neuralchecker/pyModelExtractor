@@ -145,7 +145,7 @@ class LambdaStarLearner(Learner):
         observation_table.exp = [epsilon]
         self._add_to_red(observation_table, teacher, epsilon)
         for symbol in self._observed_symbols:
-            self._add_to_blue(observation_table, teacher, Sequence(symbol))
+            self._add_to_blue(observation_table, teacher, Sequence((symbol,)))
 
     def _add_to_red(self, observation_table: '_ObservationTable', teacher: Teacher, sequence: Sequence) -> None:
         if sequence not in observation_table.red:

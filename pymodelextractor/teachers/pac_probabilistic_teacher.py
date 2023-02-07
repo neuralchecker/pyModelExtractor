@@ -51,7 +51,7 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         suffixes.append(self.terminal_symbol)
         #total_error = 0
         for symbol in self.alphabet.symbols:
-            suffixes.append(Sequence(symbol))
+            suffixes.append(Sequence((symbol,)))
         
         rand_words = self._sequence_generator.generate_words(sample_size)
         np.sort(rand_words)

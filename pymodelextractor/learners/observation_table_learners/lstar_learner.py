@@ -49,7 +49,7 @@ class LStarLearner(Learner):
         self._observation_table.exp = [epsilon]
         self._add_to_red(epsilon)
         for symbol in self._symbols:
-            self._add_to_blue(Sequence(symbol))
+            self._add_to_blue(Sequence((symbol,)))
 
     def _fill_hole_for(self, sequence: Sequence):
         suffix = self._observation_table.exp[-1]
