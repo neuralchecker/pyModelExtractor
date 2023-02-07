@@ -19,7 +19,7 @@ class KearnsVaziraniLearner(Learner):
     def _symbols(self):
         return self._teacher.alphabet.symbols
 
-    def initialization(self) -> None:        
+    def initialization(self, cache_in_tree: bool) -> tuple[bool, DFA]:        
         is_final = self._teacher.membership_query(epsilon)
         starting_dfa = self.create_single_state_DFA(is_final)
         are_equivalent, counterexample = self._teacher.equivalence_query(starting_dfa)
@@ -36,12 +36,12 @@ class KearnsVaziraniLearner(Learner):
         else:
             nodeRoot.right = nodeCounterexample
             nodeRoot.left = nodeEpsilon
-        self._tree = ClassificationTree(nodeRoot, self._teacher)
+        self._tree = ClassificationTree(nodeRoot, self._teacher, cache_in_tree)
         return (False, None)
 
-    def learn(self, teacher: Teacher) -> LearningResult:
+    def learn(self, teacher: Teacher, cache_in_tree: bool = True) -> LearningResult:
         self._teacher = teacher
-        is_target_DFA, model = self.initialization()
+        is_target_DFA, model = self.initialization(cache_in_tree)
         if not is_target_DFA:
             model = self.tentative_hypothesis()
             are_equivalent, counterexample = self._teacher.equivalence_query(model)
@@ -106,10 +106,13 @@ class KearnsVaziraniLearner(Learner):
         return DFA(self._alphabet, epsilonState, set([epsilonState]), None)
 
 class ClassificationTree():
-    def __init__(self, root: 'ClassificationNode', teacher: Teacher):
+    def __init__(self, root: 'ClassificationNode', teacher: Teacher, cache_queries: bool = True):
         self._teacher = teacher
         self.root = root
         self.add_leaves_to_dict()
+        self._mq_cache = {}
+        self._sift_cache = {}
+        self._cache_queries = cache_queries
   
     def add_leaves_to_dict(self):
         q = [self.root]
@@ -124,15 +127,35 @@ class ClassificationTree():
             if node.right:
                 q.append(node.right)
 
+    def _ask_membership_query(self, sequence: Sequence) -> bool:
+        if self._cache_queries:
+            if sequence in self._mq_cache:
+                return self._mq_cache[sequence]
+        
+        mq = self._teacher.membership_query(sequence)
+        
+        if self._cache_queries:
+            self._mq_cache[sequence] = mq
+
+        return mq
+
     def sift(self, sequence: Sequence) -> Sequence:
+        if self._cache_queries:
+            if sequence in self._sift_cache:
+                return self._sift_cache[sequence]
+
         node = self.root
         while not node.is_leaf():
             d = node.string
             sd = sequence+d
-            if self._teacher.membership_query(sd):
+            if self._ask_membership_query(sd):
                 node = node.right
             else:
                 node = node.left
+
+        if self._cache_queries:
+            self._sift_cache[sequence] = node.string
+
         return node.string
 
     # def get_distinguishing_string(self, string1, string2):
@@ -170,12 +193,13 @@ class ClassificationTree():
 
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
+        old_string = old_node.string
         old_node.string = distinguishing_string
 
         node_1 = ClassificationNode(leaf_1, parent = old_node)
         node_2 = ClassificationNode(node_to_be_replaced, parent = old_node)
 
-        if self._teacher.membership_query(leaf_1+distinguishing_string):
+        if self._ask_membership_query(leaf_1+distinguishing_string):
             old_node.right = node_1
             old_node.left = node_2
         else:
@@ -186,6 +210,17 @@ class ClassificationTree():
         leaf_1 : node_1,
         node_to_be_replaced: node_2,
         })
+        if self._cache_queries:
+            self._update_sift_cache(old_string)
+
+    def _update_sift_cache(self, old_string):
+        keys_to_remove = []
+        for seq, access_string in self._sift_cache.items():
+            if access_string == old_string:
+                keys_to_remove.append(seq)
+
+        for seq in keys_to_remove:
+            del self._sift_cache[seq]    
 
 class ClassificationNode():
     def __init__(self, string: Sequence, parent: 'ClassificationNode' = None):
