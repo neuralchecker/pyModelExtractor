@@ -61,7 +61,7 @@ class KearnsVaziraniLearner(Learner):
     def tentative_hypothesis(self) -> DFA:
         states = {}
         for leaf in self._tree.leaves:
-            is_final = self._teacher.membership_query(leaf)
+            is_final = self._tree._ask_membership_query(leaf)
             state = State(leaf, is_final)
             states[leaf] = state
         
