@@ -67,7 +67,10 @@ class LStarLearner(Learner):
                 self._add_to_blue(newBlueSequence)
 
     def _get_closedness_violation_sequence(self):
-        return next(filter(self._no_same_row_exists_in_red, self._observation_table.blue), None)
+        for sequence in self._observation_table.blue:
+            if self._no_same_row_exists_in_red(sequence):
+                return sequence
+        return None
 
     def _make_consistent(self):
         while True:
@@ -145,11 +148,16 @@ class LStarObservationTable(ObservationTable):
         super().__init__()
 
     def is_closed(self) -> bool:
-        return all(self.same_row_exists_in_red, self.blue)
+        for sequence in self.blue:
+            if not self.same_row_exists_in_red(sequence):
+                return False
+        return True
 
     def same_row_exists_in_red(self, blueSequence: Sequence) -> bool:
-        return any(self.observations[sequence] == self.observations[blueSequence]
-                   for sequence in self.red)
+        for sequence in self.red:
+            if self.observations[sequence] == self.observations[blueSequence]:
+                return True
+        return False
 
     def is_consistent(self) -> bool:
         return self.find_inconsistency() is not None
