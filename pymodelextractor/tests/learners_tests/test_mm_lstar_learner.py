@@ -74,7 +74,6 @@ class TestMMLStarLearner(unittest.TestCase):
     def test_random_walk_lstar(self):
         mm = SampleMooreMachines.get_3_states_automaton()
         moore = generate_moore_machine(mm._input_alphabet, mm._output_alphabet, 300, 21)
-        print(len(moore.states))
         teacher = MMTeacher(moore, RandomWalkMMComparisonStrategy(1000, 0.01))
         result = self.learner.learn(teacher, verbose=True)
         assert ComparisonStrategy().are_equivalent(
