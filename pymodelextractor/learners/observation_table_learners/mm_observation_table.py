@@ -34,7 +34,7 @@ class MMObservationTable:
                 return sequence
         return None
 
-    def _get_red_values(self) -> set[list[Symbol]]:
+    def update_red_values(self) -> set[list[Symbol]]:
         self.redValues = set()
         for sequence in self.red: 
             redSymbol = tuple(self.observations[sequence])
