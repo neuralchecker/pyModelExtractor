@@ -117,16 +117,20 @@ class MMLStarLearner:
             self._add_to_blue(sequence + symbol)
 
     def _make_consistent(self):
-        start_consistent_time = time.time()
         while True:
+            start_consistent_time = time.time()
             inconsistency = self._observation_table.find_inconsistency(self._teacher.alphabet)
+            duration = time.time() - start_consistent_time
+            if self.verbose:
+                print("    + Found Inconsistency in " + str(duration) + "s")
             if inconsistency == None:
-                duration = time.time() - start_consistent_time
-                if self.verbose:
-                    print("    + Made table consistent in " + str(duration) + "s")
                 return
-
+            
+            start_consistent_time = time.time()
             self._resolve_inconsistency(inconsistency)
+            duration = time.time() - start_consistent_time
+            if self.verbose:
+                print("    + Resolved Inconsistency in " + str(duration) + "s")
             self._close()
     
     def _resolve_inconsistency(self, inconsistency):
@@ -134,6 +138,8 @@ class MMLStarLearner:
         self._observation_table.exp.append(symbol)
         for sequence in self._observation_table.observations:
             self._fill_hole_for(sequence, symbol)
+        self._observation_table.update_red_values()
+        
 
     def _fill_hole_for(self, sequence: Sequence, suffix: Sequence):
         self._observation_table[sequence].append(
