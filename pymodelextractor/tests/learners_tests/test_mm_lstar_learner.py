@@ -5,7 +5,9 @@ from pymodelextractor.teachers.moore_machines_teacher import MooreMachineTeacher
 from pythautomata.automata.moore_machine_automaton import MooreMachineAutomaton
 from pythautomata.automata_definitions.sample_moore_machines import SampleMooreMachines
 from pythautomata.model_comparators.moore_machine_comparison_strategy import MooreMachineComparisonStrategy as ComparisonStrategy
+from pythautomata.model_comparators.random_walk_mm_comparison_strategy import RandomWalkMMComparisonStrategy
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars as Tomitas
+from pythautomata.utilities.nicaud_mm_generator import generate_moore_machine
 from pythautomata.utilities.automata_converter import AutomataConverter
 
 class TestMMLStarLearner(unittest.TestCase):
@@ -65,6 +67,14 @@ class TestMMLStarLearner(unittest.TestCase):
         dfa = Tomitas.get_automaton_7()
         moore = AutomataConverter.convert_dfa_to_moore_machine(dfa)
         teacher = self.teacher(moore)
+        result = self.learner.learn(teacher, verbose=True)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, moore)
+
+    def test_random_walk_lstar(self):
+        mm = SampleMooreMachines.get_3_states_automaton()
+        moore = generate_moore_machine(mm._input_alphabet, mm._output_alphabet, 300, 21)
+        teacher = MMTeacher(moore, RandomWalkMMComparisonStrategy(10000, 0.01))
         result = self.learner.learn(teacher, verbose=True)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)

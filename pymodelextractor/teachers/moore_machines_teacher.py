@@ -8,7 +8,7 @@ from pythautomata.base_types.alphabet import Alphabet
 
 
 class MooreMachineTeacher(Teacher):
-    def __init__(self, moore_machine: MM, comparison_strategy: MooreMachineComparisonStrategy):
+    def __init__(self, moore_machine: MM, comparison_strategy = MooreMachineComparisonStrategy()):
         self.moore_machine = moore_machine
         self._comparison_strategy = comparison_strategy
         self.verbose = False
