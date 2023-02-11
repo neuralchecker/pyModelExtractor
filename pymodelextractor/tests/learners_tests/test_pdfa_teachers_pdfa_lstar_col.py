@@ -8,7 +8,8 @@ from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 from pymodelextractor.teachers.sample_probabilistic_teacher import SampleProbabilisticTeacher
 from pymodelextractor.teachers.pac_probabilistic_teacher import PACProbabilisticTeacher
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
-
+from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
+from pythautomata.other_models.probabilistic_filter_model import ProbabilisticFilterModel
 
 class TestPDFATeachersLStarCol(unittest.TestCase):
 
@@ -141,4 +142,30 @@ class TestPDFATeachersLStarCol(unittest.TestCase):
         self.assertEqual(model, extracted_model1)
         self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
         self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
+
+    def test_tomitas_3_with_filter(self):
+        model = WeightedTomitasGrammars.get_automaton_3()
+        tolerance = 0.000001
+        partitions = int(1/tolerance)
+        comp = WFAQuantizationComparator(partitions)
+        probabilistic_filter_model = ProbabilisticFilterModel(model, 4)
+
+        teacher1 = SampleProbabilisticTeacher(probabilistic_filter_model, comparator =comp, sample_size=500, 
+                                              max_seq_length=10)
+        teacher2 = PACProbabilisticTeacher(probabilistic_filter_model, comparator=comp, epsilon=0.05,
+                                           delta=0.01, max_seq_length=10)        
+        teacher3 = PDFATeacher(model, comp)
+
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+
+        self.assertEqual(model, extracted_model3)
+        self.assertTrue(comp.are_equivalent(extracted_model2, extracted_model1))        
+        self.assertFalse(comp.are_equivalent(extracted_model2, extracted_model3))
+
 
