@@ -16,150 +16,156 @@ class TestPDFATeachersLStarCol(unittest.TestCase):
     def setUp(self):
         self.learner = PDFALStarColLearner()
 
-    # def test_tomitas_1(self):
-    #     model = WeightedTomitasGrammars.get_automaton_1()
-    #     teacher1 = PDFATeacher(model, WFAToleranceComparator())
-    #     teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(), sample_size=500, 
-    #                                           max_seq_length=20)
-    #     teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(), epsilon=0.05, delta=0.01,
-    #                                        max_seq_length=20)
-    #     result1 = self.learner.learn(teacher1, verbose=True)
-    #     result2 = self.learner.learn(teacher2, verbose=True)
-    #     result3 = self.learner.learn(teacher3, verbose=True)
-    #     extracted_model1 = result1.model
-    #     extracted_model2 = result2.model
-    #     extracted_model3 = result3.model
-    #     self.assertEqual(model, extracted_model1)
-    #     self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model2))        
-    #     self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model3))
-    #     self.assertEqual(model, extracted_model3)
+    def test_tomitas_1(self):
+        model = WeightedTomitasGrammars.get_automaton_1()
+        teacher1 = PDFATeacher(model, WFAToleranceComparator())
+        teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(), sample_size=500, 
+                                              max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(), epsilon=0.05, delta=0.01,
+                                           max_seq_length=20)
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+        self.assertEqual(model, extracted_model1)
+        self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model2))        
+        self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model3))
+        self.assertEqual(model, extracted_model3)
 
-    # def test_tomitas_2(self):
-    #     model = WeightedTomitasGrammars.get_automaton_2()
-    #     teacher1 = PDFATeacher(model, WFAToleranceComparator())
-    #     teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(), sample_size=500, 
-    #                                           max_seq_length=20)
-    #     teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(), epsilon=0.05, delta=0.01,
-    #                                        max_seq_length=20)
-    #     result1 = self.learner.learn(teacher1, verbose=True)
-    #     result2 = self.learner.learn(teacher2, verbose=True)
-    #     result3 = self.learner.learn(teacher3, verbose=True)
-    #     extracted_model1 = result1.model
-    #     extracted_model2 = result2.model
-    #     extracted_model3 = result3.model
-    #     self.assertEqual(model, extracted_model1)
-    #     self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model2))        
-    #     self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model3))
-    #     self.assertEqual(model, extracted_model3)
+    def test_tomitas_2(self):
+        model = WeightedTomitasGrammars.get_automaton_2()
+        teacher1 = PDFATeacher(model, WFAToleranceComparator())
+        teacher2 = SampleProbabilisticTeacher(model, comparator=WFAToleranceComparator(), sample_size=500, 
+                                              max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(), epsilon=0.05, delta=0.01,
+                                           max_seq_length=20)
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+        self.assertEqual(model, extracted_model1)
+        self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model2))        
+        self.assertTrue(WFAToleranceComparator(0.000001).are_equivalent(model, extracted_model3))
+        self.assertEqual(model, extracted_model3)
 
-    # def test_tomitas_3(self):
-    #     model = WeightedTomitasGrammars.get_automaton_3()
-    #     tolerance = 0.000001
-    #     teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))
-    #     teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
-    #                                           max_seq_length=20)
-    #     teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
-    #                                        delta=0.01, max_seq_length=20)
-    #     result1 = self.learner.learn(teacher1, verbose=True)
-    #     result2 = self.learner.learn(teacher2, verbose=True)
-    #     result3 = self.learner.learn(teacher3, verbose=True)
-    #     extracted_model1 = result1.model
-    #     extracted_model2 = result2.model
-    #     extracted_model3 = result3.model
-    #     self.assertEqual(model, extracted_model1)
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
+    def test_tomitas_3(self):
+        model = WeightedTomitasGrammars.get_automaton_3()
+        tolerance = 0.000001
+        teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))
+        teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
+                                              max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+        self.assertEqual(model, extracted_model1)
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
         
-    # def test_tomitas_4(self):
-    #     model = WeightedTomitasGrammars.get_automaton_4()
-    #     tolerance = 0.000001
-    #     teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
-    #     teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
-    #                                           max_seq_length=20)
-    #     teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
-    #                                        delta=0.01, max_seq_length=20)
-    #     result1 = self.learner.learn(teacher1, verbose=True)
-    #     result2 = self.learner.learn(teacher2, verbose=True)
-    #     result3 = self.learner.learn(teacher3, verbose=True)
-    #     extracted_model1 = result1.model
-    #     extracted_model2 = result2.model
-    #     extracted_model3 = result3.model
-    #     self.assertEqual(model, extracted_model1)
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
+    def test_tomitas_4(self):
+        model = WeightedTomitasGrammars.get_automaton_4()
+        tolerance = 0.000001
+        teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
+        teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
+                                              max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+        self.assertEqual(model, extracted_model1)
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
         
 
-    # def test_tomitas_5(self):
-    #     model = WeightedTomitasGrammars.get_automaton_5()
-    #     tolerance = 0.000001
-    #     teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
-    #     teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
-    #                                           max_seq_length=20)
-    #     teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
-    #                                        delta=0.01, max_seq_length=20)
-    #     result1 = self.learner.learn(teacher1, verbose=True)
-    #     result2 = self.learner.learn(teacher2, verbose=True)
-    #     result3 = self.learner.learn(teacher3, verbose=True)
-    #     extracted_model1 = result1.model
-    #     extracted_model2 = result2.model
-    #     extracted_model3 = result3.model
-    #     self.assertEqual(model, extracted_model1)
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
+    def test_tomitas_5(self):
+        model = WeightedTomitasGrammars.get_automaton_5()
+        tolerance = 0.000001
+        teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
+        teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
+                                              max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+        self.assertEqual(model, extracted_model1)
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
 
-    # def test_tomitas_6(self):
-    #     model = WeightedTomitasGrammars.get_automaton_6()
-    #     tolerance = 0.000001
-    #     teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
-    #     teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
-    #                                           max_seq_length=20)
-    #     teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
-    #                                        delta=0.01, max_seq_length=20)
-    #     result1 = self.learner.learn(teacher1, verbose=True)
-    #     result2 = self.learner.learn(teacher2, verbose=True)
-    #     result3 = self.learner.learn(teacher3, verbose=True)
-    #     extracted_model1 = result1.model
-    #     extracted_model2 = result2.model
-    #     extracted_model3 = result3.model
-    #     self.assertEqual(model, extracted_model1)
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
+    def test_tomitas_6(self):
+        model = WeightedTomitasGrammars.get_automaton_6()
+        tolerance = 0.000001
+        teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
+        teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
+                                              max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+        self.assertEqual(model, extracted_model1)
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
 
-    # def test_tomitas_7(self):
-    #     model = WeightedTomitasGrammars.get_automaton_7()
-    #     tolerance = 0.000001
-    #     teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
-    #     teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
-    #                                           max_seq_length=20)
-    #     teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
-    #                                        delta=0.01, max_seq_length=20)
-    #     result1 = self.learner.learn(teacher1, verbose=True)
-    #     result2 = self.learner.learn(teacher2, verbose=True)
-    #     result3 = self.learner.learn(teacher3, verbose=True)
-    #     extracted_model1 = result1.model
-    #     extracted_model2 = result2.model
-    #     extracted_model3 = result3.model
-    #     self.assertEqual(model, extracted_model1)
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
-    #     self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
+    def test_tomitas_7(self):
+        model = WeightedTomitasGrammars.get_automaton_7()
+        tolerance = 0.000001
+        teacher1 = PDFATeacher(model, WFAToleranceComparator(tolerance))        
+        teacher2 = SampleProbabilisticTeacher(model, comparator = WFAToleranceComparator(tolerance), sample_size=500, 
+                                              max_seq_length=20)
+        teacher3 = PACProbabilisticTeacher(model, comparator=WFAToleranceComparator(tolerance), epsilon=0.05,
+                                           delta=0.01, max_seq_length=20)
+        result1 = self.learner.learn(teacher1, verbose=True)
+        result2 = self.learner.learn(teacher2, verbose=True)
+        result3 = self.learner.learn(teacher3, verbose=True)
+        extracted_model1 = result1.model
+        extracted_model2 = result2.model
+        extracted_model3 = result3.model
+        self.assertEqual(model, extracted_model1)
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model2))        
+        self.assertTrue(WFAToleranceComparator(tolerance).are_equivalent(model, extracted_model3))
 
     def test_tomitas_3_with_filter(self):
         model = WeightedTomitasGrammars.get_automaton_3()
         tolerance = 0.000001
-        partitions = 1/tolerance
+        partitions = int(1/tolerance)
         comp = WFAQuantizationComparator(partitions)
         probabilistic_filter_model = ProbabilisticFilterModel(model, 4)
 
         teacher1 = SampleProbabilisticTeacher(probabilistic_filter_model, comparator =comp, sample_size=500, 
                                               max_seq_length=10)
         teacher2 = PACProbabilisticTeacher(probabilistic_filter_model, comparator=comp, epsilon=0.05,
-                                           delta=0.01, max_seq_length=10)
-        
+                                           delta=0.01, max_seq_length=10)        
+        teacher3 = PDFATeacher(model, comp)
+
         result1 = self.learner.learn(teacher1, verbose=True)
         result2 = self.learner.learn(teacher2, verbose=True)
-        
+        result3 = self.learner.learn(teacher3, verbose=True)
+
         extracted_model1 = result1.model
         extracted_model2 = result2.model
-        extracted_model1.export('model1')
-        extracted_model2.export('model2')
+        extracted_model3 = result3.model
+
+        self.assertEqual(model, extracted_model3)
+        self.assertTrue(comp.are_equivalent(extracted_model2, extracted_model1))        
+        self.assertFalse(comp.are_equivalent(extracted_model2, extracted_model3))
+
 

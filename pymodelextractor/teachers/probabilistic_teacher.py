@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from symtable import Symbol
 
+from pythautomata.base_types.symbol import Symbol
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.automata.wheighted_automaton_definition.weighted_automaton import WeightedAutomaton
