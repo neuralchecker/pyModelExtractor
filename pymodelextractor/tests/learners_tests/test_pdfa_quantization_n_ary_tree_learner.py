@@ -9,6 +9,7 @@ from pymodelextractor.learners.observation_tree_learners.pdfa_quantization_n_ary
      import PDFAQuantizationNAryTreeLearner
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
 from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
+from pythautomata.model_comparators.wfa_partition_comparison_strategy import WFAPartitionComparator
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
@@ -17,6 +18,7 @@ from pythautomata.utilities import nicaud_dfa_generator
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
+from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner, ArgMaxProbabilityPartitioner
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
@@ -25,8 +27,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def setUp(self):
         self.partitions = 10
-        self.comparator = WFAQuantizationComparator(self.partitions)
-        self.learner = PDFAQuantizationNAryTreeLearner(self.comparator)
+        self.comparator = WFAQuantizationComparator(self.partitions)        
+        self.partitioner = QuantizationProbabilityPartitioner(self.partitions)
+        self.learner = PDFAQuantizationNAryTreeLearner(self.partitioner)
 
     def test_tomitas_1(self):
         model = WeightedTomitasGrammars.get_automaton_1()
@@ -312,10 +315,77 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
             print('Extracting model:', model.name)
             partitions = 20
             other_comparator = WFAQuantizationComparator(partitions)
+            partitioner = QuantizationProbabilityPartitioner(partitions)
             teacher = PDFATeacher(model, other_comparator)
-            other_learner = PDFAQuantizationNAryTreeLearner(other_comparator)
+            other_learner = PDFAQuantizationNAryTreeLearner(partitioner)
             result = other_learner.learn(teacher)
             extracted_model = result.model           
             self.assertTrue(other_comparator.get_counterexample_between(model, extracted_model) is None)
             self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
             self.assertTrue(result.info['equivalence_queries_count'] > 0)
+
+    def generate_PDFA_with_3_equivalent_states_according_to_argmax(self):
+        
+        qeps = WeightedState("qeps", 1, 0.60296)
+        q1 = WeightedState("q0", 0, 0.56036)
+        q11 = WeightedState("q1", 0, 0.50998)
+
+        zero = SymbolStr('0')
+        one = SymbolStr('1')
+        qeps.add_transition(zero, qeps, 0.12317)
+        qeps.add_transition(one, q1, 0.27387)
+        q1.add_transition(zero, q1, 0.20647)
+        q1.add_transition(one, q11, 0.23317)
+        q11.add_transition(zero, q11, 0.25791)
+        q11.add_transition(one, q11, 0.23211)        
+        
+
+        states = {qeps, q1, q11}
+        comparator = WFAToleranceComparator()
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator,
+                                                         "PDFA_with_3_equivalent_states_according_to_argmax")
+    
+    def generate_PDFA_with_3_different_states_according_to_argmax(self):
+        
+        qeps = WeightedState("qeps", 1, 0.6)
+        q1 = WeightedState("q0", 0, 0.2)
+        q11 = WeightedState("q1", 0, 0.2)
+
+        zero = SymbolStr('0')
+        one = SymbolStr('1')
+        qeps.add_transition(zero, qeps, 0.2)
+        qeps.add_transition(one, q1, 0.2)
+        q1.add_transition(zero, q1, 0.6)
+        q1.add_transition(one, q11, 0.2)
+        q11.add_transition(zero, q11, 0.2)
+        q11.add_transition(one, q11, 0.6)      
+        states = {qeps, q1, q11}
+        comparator = WFAToleranceComparator()
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator,
+                                                         "PDFA_with_3_equivalent_states_according_to_argmax")
+    
+
+    def test_arg_max_partitioner1(self):     
+        model = self.generate_PDFA_with_3_equivalent_states_according_to_argmax()
+        partitioner = ArgMaxProbabilityPartitioner()
+        comparator = WFAPartitionComparator(partitioner)
+        teacher = PDFATeacher(model, comparator)
+        learner = PDFAQuantizationNAryTreeLearner(partitioner)
+        result = learner.learn(teacher)
+        extracted_model = result.model
+        self.assertTrue(len(extracted_model.weighted_states) == 1)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
+
+    
+    def test_arg_max_partitioner2(self):     
+        model = self.generate_PDFA_with_3_different_states_according_to_argmax()
+        partitioner = ArgMaxProbabilityPartitioner()
+        comparator = WFAPartitionComparator(partitioner)
+        teacher = PDFATeacher(model, comparator)
+        learner = PDFAQuantizationNAryTreeLearner(partitioner)
+        result = learner.learn(teacher)
+        extracted_model = result.model
+        self.assertTrue(len(extracted_model.weighted_states) == 3)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)

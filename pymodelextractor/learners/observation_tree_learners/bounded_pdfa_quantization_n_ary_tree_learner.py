@@ -13,8 +13,8 @@ from pymodelextractor.utils.time_bound_utilities import timeout
 
 
 class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
-    def __init__(self, comparator, max_states, max_query_length, max_seconds_run=None):
-        super().__init__(comparator)
+    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None):
+        super().__init__(partitioner)
         self._max_states = max_states
         self._max_query_length = max_query_length
         self._max_seconds_run = max_seconds_run
