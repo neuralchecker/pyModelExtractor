@@ -2,7 +2,6 @@ from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import Symbol
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
-from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
 from pythautomata.utilities import pdfa_utils
 from pythautomata.utilities.probability_partitioner import ProbabilityPartitioner
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
@@ -162,6 +161,8 @@ class PDFAQuantizationNAryTreeLearner:
 
 
 class ClassificationTree:
+    unknown_leaf = "UNKNOWN"
+
     def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, probability_partitioner: ProbabilityPartitioner,
                  max_query_length: int = math.inf, verbose=False):
         self.leaves = None
@@ -191,7 +192,7 @@ class ClassificationTree:
             for child in node.childs.values():
                 q.append(child)
 
-    def sift(self, sequence: Sequence) -> Sequence:
+    def sift(self, sequence: Sequence, update = True) -> Sequence:
         node = self.root
         updated_tree = False
         while not node.is_leaf():
@@ -202,12 +203,15 @@ class ClassificationTree:
             if child_key is not None:
                 node = node.childs[tuple(child_key)]
             else:
-                node_probabilities = self._next_token_probabilities(sequence)
-                new_node = ClassificationNode(sequence, parent=node, probabilities=node_probabilities)
-                node.childs[tuple(sd_probabilities)] = new_node
-                self.leaves.update({new_node.string: new_node})
-                updated_tree = True
-                node = new_node
+                if update:
+                    node_probabilities = self._next_token_probabilities(sequence)
+                    new_node = ClassificationNode(sequence, parent=node, probabilities=node_probabilities)
+                    node.childs[tuple(sd_probabilities)] = new_node
+                    self.leaves.update({new_node.string: new_node})
+                    updated_tree = True
+                    node = new_node
+                else:
+                    return unknown_leaf,False
 
         return node.string, updated_tree
 

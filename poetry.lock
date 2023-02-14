@@ -179,23 +179,18 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.
 
 [[package]]
 name = "pythautomata"
-version = "0.29.7"
+version = "0.30.0"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
 python-versions = ">=3.9,<3.11"
-develop = false
 
 [package.dependencies]
 graphviz = "*"
 numpy = "*"
-pydot = "^1.4.2"
-scipy = "^1.7.3"
-sklearn = "^0.0"
-
-[package.source]
-type = "directory"
-url = "../pythautomata"
+pydot = ">=1.4.2,<2.0.0"
+scikit-learn = ">=1.2.1,<2.0.0"
+scipy = ">=1.7.3,<2.0.0"
 
 [[package]]
 name = "rope"
@@ -245,14 +240,6 @@ doc = ["sphinx (!=4.1.0)", "pydata-sphinx-theme (==0.9.0)", "sphinx-design (>=0.
 dev = ["mypy", "typing-extensions", "pycodestyle", "flake8", "rich-click", "click", "doit (>=0.36.0)", "pydevtool"]
 
 [[package]]
-name = "sklearn"
-version = "0.0.post2"
-description = "deprecated sklearn package, use scikit-learn instead"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "threadpoolctl"
 version = "3.1.0"
 description = "threadpoolctl"
@@ -287,7 +274,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "69c57ecbf7e414c2d5f3d451b37199718e379098775f889dd1a0db4cde990ac5"
+content-hash = "429f636d56fef513b322682391a3f188b318a63b4b27c34d304dcd8d7ae05f4c"
 
 [metadata.files]
 attrs = []
@@ -310,7 +297,6 @@ pythautomata = []
 rope = []
 scikit-learn = []
 scipy = []
-sklearn = []
 threadpoolctl = []
 toml = []
 tomli = []
