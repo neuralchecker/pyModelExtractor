@@ -2,8 +2,8 @@ from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import Symbol
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
-from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
 from pythautomata.utilities import pdfa_utils
+from pythautomata.utilities.probability_partitioner import ProbabilityPartitioner
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.automata.wheighted_automaton_definition.probabilistic_deterministic_finite_automaton import \
     ProbabilisticDeterministicFiniteAutomaton as PDFA, ProbabilisticDeterministicFiniteAutomaton
@@ -15,9 +15,8 @@ import math
 
 
 class PDFAQuantizationNAryTreeLearner:
-    def __init__(self, comparator: WFAQuantizationComparator):
-        self.comparator = comparator
-        self.partitions = comparator.partitions
+    def __init__(self, probabilityPartitioner: ProbabilityPartitioner):
+        self.probability_partitioner = probabilityPartitioner
         self._verbose = False
         self._tree = None
         pass
@@ -60,7 +59,7 @@ class PDFAQuantizationNAryTreeLearner:
         nodeRoot.childs[tuple(next_token_probabilities_epsilon.values())] = nodeEpsilon
         nodeRoot.childs[tuple(next_token_probabilities_counterexample.values())] = nodeCounterexample
 
-        self._tree = ClassificationTree(nodeRoot, self._teacher, self.partitions, verbose=verbose)
+        self._tree = ClassificationTree(nodeRoot, self._teacher, self.probability_partitioner, verbose=verbose)
         return False, starting_pdfa
 
     def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
@@ -162,12 +161,14 @@ class PDFAQuantizationNAryTreeLearner:
 
 
 class ClassificationTree:
-    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, partitions: int,
+    unknown_leaf = "UNKNOWN"
+
+    def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, probability_partitioner: ProbabilityPartitioner,
                  max_query_length: int = math.inf, verbose=False):
         self.leaves = None
         self._teacher = teacher
         self.root = root
-        self.partitions = partitions
+        self.probability_partitioner = probability_partitioner
         self.add_leaves_to_dict()
         self._equivalence_dict = dict()
         self._next_token_probabilities_cache = dict()
@@ -191,7 +192,7 @@ class ClassificationTree:
             for child in node.childs.values():
                 q.append(child)
 
-    def sift(self, sequence: Sequence) -> Sequence:
+    def sift(self, sequence: Sequence, update = True) -> Sequence:
         node = self.root
         updated_tree = False
         while not node.is_leaf():
@@ -202,34 +203,37 @@ class ClassificationTree:
             if child_key is not None:
                 node = node.childs[tuple(child_key)]
             else:
-                node_probabilities = self._next_token_probabilities(sequence)
-                new_node = ClassificationNode(sequence, parent=node, probabilities=node_probabilities)
-                node.childs[tuple(sd_probabilities)] = new_node
-                self.leaves.update({new_node.string: new_node})
-                updated_tree = True
-                node = new_node
+                if update:
+                    node_probabilities = self._next_token_probabilities(sequence)
+                    new_node = ClassificationNode(sequence, parent=node, probabilities=node_probabilities)
+                    node.childs[tuple(sd_probabilities)] = new_node
+                    self.leaves.update({new_node.string: new_node})
+                    updated_tree = True
+                    node = new_node
+                else:
+                    return unknown_leaf,False
 
         return node.string, updated_tree
 
-    def _get_partition(self, probabilities):
-        if tuple(probabilities) in self._partitions_cache:
-            return self._partitions_cache[tuple(probabilities)]
-        else:
-            partition = pdfa_utils.get_partitions(probabilities, self.partitions)
-            self._partitions_cache[tuple(probabilities)] = partition
-            return partition
+    # def _get_partition(self, probabilities):
+    #     if tuple(probabilities) in self._partitions_cache:
+    #         return self._partitions_cache[tuple(probabilities)]
+    #     else:
+    #         partition = self.probability_partitioner.get_partition(probabilities)
+    #         self._partitions_cache[tuple(probabilities)] = partition
+    #         return partition
 
     def _are_in_same_partition(self, probs1, probs2):
-        partition1 = self._get_partition(probs1)
-        partition2 = self._get_partition(probs2)
-        return pdfa_utils.are_same_partition(partition1, partition2)
+        partition1 = self.probability_partitioner.get_partition(probs1)
+        partition2 = self.probability_partitioner.get_partition(probs2)
+        return self.probability_partitioner.are_in_same_partition(partition1, partition2)
 
     def _look_for_branch(self, childs, probabilities):
         if tuple(probabilities) in childs:
             return probabilities
         for probs in childs.keys():
             probs = list(probs)
-            if self._are_in_same_partition(probs, probabilities):
+            if self.probability_partitioner.are_in_same_partition(probs, probabilities):
                 return probs
         return None
 

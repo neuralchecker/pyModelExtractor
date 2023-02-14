@@ -7,6 +7,7 @@ from pymodelextractor.learners.observation_tree_learners.pdfa_quantization_n_ary
      import PDFAQuantizationNAryTreeLearner
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
 from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
+from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
@@ -21,7 +22,8 @@ class TestPDFAQuantizantionNAryTreeLearnerRunningExample(unittest.TestCase):
     def setUp(self):
         self.partitions = 10
         self.comparator = WFAQuantizationComparator(self.partitions)
-        self.learner = PDFAQuantizationNAryTreeLearner(self.comparator)
+        self.probability_partitioner = QuantizationProbabilityPartitioner(self.partitions)
+        self.learner = PDFAQuantizationNAryTreeLearner(self.probability_partitioner)
 
     def generate_running_example(self):
         qlambda = WeightedState("qlambda", 1, 0.0)

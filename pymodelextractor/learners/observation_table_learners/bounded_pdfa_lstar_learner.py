@@ -9,7 +9,7 @@ from pymodelextractor.utils.time_bound_utilities import timeout
 
 class BoundedPDFALStarLearner(PDFALStarLearner):
 
-    def __init__(self, comparator, max_states, max_query_length, max_seconds_run=None):
+    def __init__(self, comparator, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False):
         super().__init__(comparator=comparator)
         self._max_states = max_states
         self._max_query_length = max_query_length
@@ -17,7 +17,8 @@ class BoundedPDFALStarLearner(PDFALStarLearner):
         self._exceeded_max_states = False
         self._exceeded_max_mq_length = False        
         self._exceded_time_bound = False    
-        self._history = []
+        self._history = []        
+        self._generate_partial_hipothesis = generate_partial_hipothesis
 
     def run_learning_with_time_bound(self, teacher, verbose):        
         try:

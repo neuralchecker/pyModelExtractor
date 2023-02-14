@@ -7,6 +7,7 @@ from pythautomata.automata_definitions.weighted_tomitas_grammars import Weighted
 from pymodelextractor.learners.observation_tree_learners.bounded_pdfa_quantization_n_ary_tree_learner import BoundedPDFAQuantizationNAryTreeLearner
 from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFAToleranceComparator
 from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
+from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
@@ -25,12 +26,13 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
     def setUp(self):
         self.partitions = 10
         self.comparator = WFAQuantizationComparator(self.partitions)
-        self.learner = BoundedPDFAQuantizationNAryTreeLearner(self.comparator, max_states= 100, max_query_length=100)
+        self.partitioner = QuantizationProbabilityPartitioner(self.partitions)
+        self.learner = BoundedPDFAQuantizationNAryTreeLearner(self.partitioner,max_states= 100, max_query_length=100)
 
     def test_time_bound(self):
         if is_unix_system():
             models = WeightedTomitasGrammars.get_all_automata()        
-            learner = BoundedPDFAQuantizationNAryTreeLearner(self.comparator, max_states= 100, max_query_length=100, max_seconds_run=60)
+            learner = BoundedPDFAQuantizationNAryTreeLearner(self.partitioner, max_states= 100, max_query_length=100, max_seconds_run=60)
             for model in models:
                 
                 teacher = PDFATeacher(model, self.comparator)
@@ -319,8 +321,9 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
             print('Extracting model:', model.name)
             partitions2 = 20            
             comparator2 = WFAQuantizationComparator(partitions2)
+            partitioner2 = QuantizationProbabilityPartitioner(partitions2)
             teacher = PDFATeacher(model, comparator2)
-            learner2 = BoundedPDFAQuantizationNAryTreeLearner(comparator2, max_states= 100, max_query_length=100)
+            learner2 = BoundedPDFAQuantizationNAryTreeLearner(partitioner2,max_states= 100, max_query_length=100)
             result = learner2.learn(teacher)
             extracted_model = result.model
             self.assertTrue(comparator2.get_counterexample_between(model, extracted_model) is None)
@@ -328,7 +331,7 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
             self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
     def test_bounded_tomitas_7(self):
-        learner = BoundedPDFAQuantizationNAryTreeLearner(self.comparator, max_states= 2, max_query_length=100)
+        learner = BoundedPDFAQuantizationNAryTreeLearner(self.partitioner,max_states= 2, max_query_length=100)
         model = WeightedTomitasGrammars.get_automaton_7()        
         teacher = PDFATeacher(model, self.comparator)
         result = learner.learn(teacher)

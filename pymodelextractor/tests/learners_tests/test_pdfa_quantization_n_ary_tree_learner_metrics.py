@@ -13,6 +13,7 @@ from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pythautomata.utilities import pdfa_metrics
+from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
@@ -23,8 +24,9 @@ class TestPDFAQuantizantionNAryTreeLearnerMetrics(unittest.TestCase):
         self.partitions = 10
         self.quant_comparator = WFAQuantizationComparator(self.partitions)
         self.tolerance_comparator = WFAToleranceComparator(1/self.partitions)
+        self.partitioner = QuantizationProbabilityPartitioner(self.partitions)
 
-        self.QuaNTLearner = PDFAQuantizationNAryTreeLearner(self.quant_comparator)
+        self.QuaNTLearner = PDFAQuantizationNAryTreeLearner(self.partitioner)
         self.WLSstarLearner = PDFALStarLearner(self.tolerance_comparator)
 
     def test_tomitas_1(self):
