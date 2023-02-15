@@ -27,8 +27,8 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def setUp(self):
         self.partitions = 10
-        self.comparator = WFAQuantizationComparator(self.partitions)        
         self.partitioner = QuantizationProbabilityPartitioner(self.partitions)
+        self.comparator = WFAPartitionComparator(self.partitioner)
         self.learner = PDFAQuantizationNAryTreeLearner(self.partitioner)
 
     def test_tomitas_1(self):

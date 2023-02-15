@@ -198,20 +198,20 @@ class ClassificationTree:
         while not node.is_leaf():
             d = node.string
             sd = sequence + d
-            sd_probabilities = self._next_token_probabilities(sd).values()
+            sd_probabilities = self._next_token_probabilities(sd, update).values()
             child_key = self._look_for_branch(node.childs, list(sd_probabilities))
             if child_key is not None:
                 node = node.childs[tuple(child_key)]
             else:
                 if update:
-                    node_probabilities = self._next_token_probabilities(sequence)
+                    node_probabilities = self._next_token_probabilities(sequence, update)
                     new_node = ClassificationNode(sequence, parent=node, probabilities=node_probabilities)
                     node.childs[tuple(sd_probabilities)] = new_node
                     self.leaves.update({new_node.string: new_node})
                     updated_tree = True
                     node = new_node
                 else:
-                    return unknown_leaf,False
+                    return ClassificationTree.unknown_leaf,False
 
         return node.string, updated_tree
 
@@ -237,8 +237,8 @@ class ClassificationTree:
                 return probs
         return None
 
-    def _next_token_probabilities(self, sequence: Sequence):
-        if len(sequence) > self.max_query_length:
+    def _next_token_probabilities(self, sequence: Sequence, check_max_query_length = True):
+        if check_max_query_length and len(sequence) > self.max_query_length:
             raise QueryLengthExceededException
         if sequence in self._next_token_probabilities_cache:
             return self._next_token_probabilities_cache[sequence]

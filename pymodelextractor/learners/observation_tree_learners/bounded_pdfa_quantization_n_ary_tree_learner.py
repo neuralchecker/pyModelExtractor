@@ -52,7 +52,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True
 
-        if not self._exceeded_max_states and self._generate_partial_hipothesis:
+        if not self._exceeded_max_states and self._generate_partial_hipothesis and (self._exceeded_max_mq_length or self._exceded_time_bound):            
             partial_hipothesis = self.partial_hipothesis()
             self._history.append(partial_hipothesis)
 
@@ -64,16 +64,20 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         return result
 
     def initialization(self, verbose) -> tuple[bool, ProbabilisticDeterministicFiniteAutomaton]:
-        ret = super().initialization(verbose)
-        if not ret[0]:
-            self._tree.max_query_length = self._max_query_length
-        return ret
+        try:
+            ret = super().initialization(verbose)
+            if not ret[0]:
+                self._tree.max_query_length = self._max_query_length
+            return ret
+        except QueryLengthExceededException:
+            print("QueryLengthExceeded")
+            self._exceeded_max_mq_length = True
+            return True, None
 
     def partial_hipothesis(self) -> PDFA:
         states = {}
         symbols = list(self._alphabet.symbols)
         symbols.sort()
-        updated_tree = True
         
         for leaf_str, leaf in self._tree.leaves.items():
             initial_weight = 1 if leaf_str == epsilon else 0
@@ -82,11 +86,18 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             states[leaf_str] = state
         unknown_state =  WeightedState(self._tree.unknown_leaf, 0, 0)     
         states[self._tree.unknown_leaf] = unknown_state
+        unknown_state_is_accessed = False
         for access_string, state in states.items():
-            for symbol in symbols:
-                access_string_of_transition, _ = self._tree.sift(access_string + symbol)
-                state.add_transition(symbol, states[access_string_of_transition],
-                                        self._tree.leaves[access_string].probabilities[symbol])
+            if access_string!=self._tree.unknown_leaf:
+                for symbol in symbols:
+                    access_string_of_transition, _ = self._tree.sift(access_string + symbol, update=False)
+                    if access_string_of_transition == self._tree.unknown_leaf:
+                        unknown_state_is_accessed = True
+                    state.add_transition(symbol, states[access_string_of_transition],
+                                            self._tree.leaves[access_string].probabilities[symbol])
+        if not unknown_state_is_accessed:
+            del states[self._tree.unknown_leaf]
+
         comparator = WFAToleranceComparator()
         states = set(states.values())
         return PDFA(self._alphabet, states, self.terminal_symbol, comparator=comparator, check_is_probabilistic = False)
