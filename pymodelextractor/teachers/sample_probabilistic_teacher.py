@@ -61,7 +61,7 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
                 if prefix not in tried:
                     obs1 = self.last_token_weights(prefix, suffixes)
                     obs2 = aut.get_last_token_weights(prefix, suffixes)
-                    if not self._comparator.equivalent_output(obs1, obs2):
+                    if not self._comparator.next_tokens_equivalent_output(obs1, obs2):
                         return False, prefix
                     tried.add(prefix)        
         return True, None

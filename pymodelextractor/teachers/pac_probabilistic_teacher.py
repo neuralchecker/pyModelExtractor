@@ -59,7 +59,7 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         for word in rand_words:  
             obs1 = self._target_model.get_last_token_weights(word, suffixes)
             obs2 = aut.get_last_token_weights(word, suffixes)
-            if not self._comparator.equivalent_output(obs1, obs2):
+            if not self._comparator.next_tokens_equivalent_output(obs1, obs2):
                 errorCount += 1
                 if counterexample is None:
                     counterexample = word 
