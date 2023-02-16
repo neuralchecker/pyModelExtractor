@@ -32,7 +32,7 @@ class SampleBatchProbabilisticTeacher(SampleProbabilisticTeacher):
             word = rand_words[i]
             obs1 = results[i]
             obs2 = aut.get_last_token_weights(word, suffixes)
-            if not self._comparator.equivalent_output(obs1, obs2):
+            if not self._comparator.next_tokens_equivalent_output(obs1, obs2):
                 errorCount += 1
                 return False, word
         return counterexample is None, counterexample
