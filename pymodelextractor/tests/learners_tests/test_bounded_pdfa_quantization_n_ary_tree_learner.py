@@ -9,7 +9,7 @@ from pythautomata.model_comparators.wfa_tolerance_comparison_strategy import WFA
 from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
 from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner
 from pythautomata.model_comparators.wfa_partition_comparison_strategy import WFAPartitionComparator
-from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner, ArgMaxProbabilityPartitioner
+from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner, TopKProbabilityPartitioner
 
 from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
@@ -386,7 +386,7 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_arg_max_partitioner1(self):     
         model = self.generate_PDFA_with_3_equivalent_states_according_to_argmax()
-        partitioner = ArgMaxProbabilityPartitioner()
+        partitioner = TopKProbabilityPartitioner(1)
         comparator = WFAPartitionComparator(partitioner)
         teacher = PDFATeacher(model, comparator)
         learner = BoundedPDFAQuantizationNAryTreeLearner(partitioner,10, 30)
@@ -399,7 +399,7 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
     
     def test_arg_max_partitioner2(self):     
         model = self.generate_PDFA_with_3_different_states_according_to_argmax()
-        partitioner = ArgMaxProbabilityPartitioner()
+        partitioner = TopKProbabilityPartitioner(1)
         comparator = WFAPartitionComparator(partitioner)
         teacher = PDFATeacher(model, comparator)
         learner = BoundedPDFAQuantizationNAryTreeLearner(partitioner,10, 2, generate_partial_hipothesis=True)

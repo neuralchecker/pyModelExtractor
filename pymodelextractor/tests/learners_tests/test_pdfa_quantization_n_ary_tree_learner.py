@@ -18,7 +18,7 @@ from pythautomata.utilities import nicaud_dfa_generator
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
-from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner, ArgMaxProbabilityPartitioner
+from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner, TopKProbabilityPartitioner
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
@@ -367,7 +367,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
 
     def test_arg_max_partitioner1(self):     
         model = self.generate_PDFA_with_3_equivalent_states_according_to_argmax()
-        partitioner = ArgMaxProbabilityPartitioner()
+        partitioner = TopKProbabilityPartitioner(1)
         comparator = WFAPartitionComparator(partitioner)
         teacher = PDFATeacher(model, comparator)
         learner = PDFAQuantizationNAryTreeLearner(partitioner)
@@ -380,7 +380,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
     
     def test_arg_max_partitioner2(self):     
         model = self.generate_PDFA_with_3_different_states_according_to_argmax()
-        partitioner = ArgMaxProbabilityPartitioner()
+        partitioner = TopKProbabilityPartitioner(1)
         comparator = WFAPartitionComparator(partitioner)
         teacher = PDFATeacher(model, comparator)
         learner = PDFAQuantizationNAryTreeLearner(partitioner)

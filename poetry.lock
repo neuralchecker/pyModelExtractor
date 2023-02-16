@@ -179,7 +179,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.
 
 [[package]]
 name = "pythautomata"
-version = "0.30.0"
+version = "0.31.3"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -265,7 +265,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "typing-extensions"
-version = "4.4.0"
+version = "4.5.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "dev"
 optional = false
@@ -274,7 +274,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "429f636d56fef513b322682391a3f188b318a63b4b27c34d304dcd8d7ae05f4c"
+content-hash = "097b79369ececa0147eea7127cbe2439a6b230ba0a8e84e1440a8f90a1d68985"
 
 [metadata.files]
 attrs = []
