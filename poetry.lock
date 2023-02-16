@@ -179,7 +179,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.
 
 [[package]]
 name = "pythautomata"
-version = "0.31.3"
+version = "0.31.4"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -274,7 +274,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "097b79369ececa0147eea7127cbe2439a6b230ba0a8e84e1440a8f90a1d68985"
+content-hash = "8a96a6bcc3854c0cd6e2447e0d8dd902c6660f0c0f6c1f7eca0fdbb2c480c527"
 
 [metadata.files]
 attrs = []

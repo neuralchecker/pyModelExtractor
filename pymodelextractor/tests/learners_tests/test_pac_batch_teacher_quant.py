@@ -7,6 +7,7 @@ from pymodelextractor.learners.observation_tree_learners.pdfa_quantization_n_ary
 
 from pymodelextractor.teachers.pac_batch_probabilistic_teacher import PACBatchProbabilisticTeacher
 from pythautomata.model_comparators.wfa_quantization_comparison_strategy import WFAQuantizationComparator
+from pythautomata.model_comparators.wfa_partition_comparison_strategy import WFAPartitionComparator
 from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner
 
 class TestPACBatchTeacherQuant(unittest.TestCase):
@@ -15,6 +16,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         self.partitions = 10
         self.comparator = WFAQuantizationComparator(self.partitions)
         self.probability_partitioner = QuantizationProbabilityPartitioner(self.partitions)
+        self.comparator = WFAPartitionComparator(self.probability_partitioner)
         self.learner = PDFAQuantizationNAryTreeLearner(self.probability_partitioner)
 
     def test_tomitas_1(self):
