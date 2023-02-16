@@ -68,7 +68,11 @@ class PDFAQuantizationNAryTreeLearner:
         self._teacher = teacher
         models = []
         is_target_DFA, model = self.initialization(verbose)
+        symbols = list(self._alphabet.symbols)
         if not is_target_DFA:
+            for symbol in symbols:
+                self._tree.sift(Sequence([symbol]))
+            
             model = self.tentative_hypothesis()
             models.append(model)
             last_size = len(model.weighted_states)
