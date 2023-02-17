@@ -86,17 +86,18 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             states[leaf_str] = state
         unknown_state =  WeightedState(self._tree.unknown_leaf, 0, 0)     
         states[self._tree.unknown_leaf] = unknown_state
-        unknown_state_is_accessed = False
+        accessed_states = set()
         for access_string, state in states.items():
             if access_string!=self._tree.unknown_leaf:
                 for symbol in symbols:
                     access_string_of_transition, _ = self._tree.sift(access_string + symbol, update=False)
-                    if access_string_of_transition == self._tree.unknown_leaf:
-                        unknown_state_is_accessed = True
+                    accessed_states.add(access_string_of_transition)
                     state.add_transition(symbol, states[access_string_of_transition],
-                                            self._tree.leaves[access_string].probabilities[symbol])
-        if not unknown_state_is_accessed:
-            del states[self._tree.unknown_leaf]
+                                            self._tree.leaves[access_string].probabilities[symbol])        
+        
+        for state in list(states.keys()).copy():
+            if state not in accessed_states:
+                del states[state]
 
         comparator = WFAToleranceComparator()
         states = set(states.values())
