@@ -1,19 +1,18 @@
-from pymodelextractor.learners.learner import Learner
 from pythautomata.base_types.sequence import Sequence
-from pymodelextractor.learners.observation_table_learners.translators.mm_observation_table_translator import MMObservationTableTranslator
-from pymodelextractor.learners.observation_table_learners.mm_observation_table import MMObservationTable
+from pymodelextractor.learners.observation_table_learners.generic_observation_table import GenericObservationTable
 from pymodelextractor.learners.learning_result import LearningResult
-from pymodelextractor.teachers.moore_machines_teacher import MooreMachineTeacher as MMTeacher
+from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import FAObservationTableTranslator
+from pymodelextractor.teachers.generic_teacher import GenericTeacher
 import time
 
 lamda = Sequence()
 
-class MMLStarLearner:
-    def __init__(self):
-        self._model_translator = MMObservationTableTranslator()
+class GenericLStarLearner:
+    def __init__(self, model_translator):
+        self._model_translator = model_translator
 
     def _build_observation_table(self):
-        self._observation_table = MMObservationTable()
+        self._observation_table = GenericObservationTable()
     
     def _initialize_observation_table(self):
         self._observation_table.exp = [lamda]
@@ -41,12 +40,12 @@ class MMLStarLearner:
             row.append(result)
         return row
 
-    def learn(self, teacher: MMTeacher, verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: GenericTeacher, verbose: bool = False) -> LearningResult:
         start_time = time.time()
         teacher.verbose = verbose
         self.verbose = verbose
         if self.verbose:
-            print("**** Started moore machines lstar ****")
+            print("**** Started lstar learning ****")
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
         self._build_observation_table()
@@ -62,9 +61,12 @@ class MMLStarLearner:
                 print(" # Starting iteration " + str(counter))
             self._close()
             self._make_consistent()
+            
+            self._model_translator._output_alphabet = self._teacher.output_alphabet
             model = self._model_translator.translate(
-                self._observation_table, (self._teacher.alphabet, self._teacher.output_alphabet))
-            answer, counterexample = self._teacher.equivalence_query(model, self.verbose)
+                self._observation_table, self._teacher.alphabets)
+
+            answer, counterexample = self._teacher.equivalence_query(model)
             if not answer:
                 counterexample_counter += 1
                 self._update_observation_table_with(counterexample)

@@ -1,21 +1,21 @@
 import unittest
 
-from pymodelextractor.learners.observation_table_learners.mm_lstar_learner import MMLStarLearner as MooreMachineLearner
-from pymodelextractor.teachers.moore_machines_teacher import MooreMachineTeacher as MMTeacher
-from pythautomata.automata.moore_machine_automaton import MooreMachineAutomaton
+from pymodelextractor.learners.observation_table_learners.generic_lstar_learner import GenericLStarLearner
+from pymodelextractor.teachers.generic_teacher import GenericTeacher
 from pythautomata.automata_definitions.sample_moore_machines import SampleMooreMachines
 from pythautomata.model_comparators.moore_machine_comparison_strategy import MooreMachineComparisonStrategy as ComparisonStrategy
 from pythautomata.model_comparators.random_walk_mm_comparison_strategy import RandomWalkMMComparisonStrategy
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars as Tomitas
 from pythautomata.utilities.nicaud_mm_generator import generate_moore_machine
 from pythautomata.utilities.automata_converter import AutomataConverter
+from pymodelextractor.learners.observation_table_learners.translators.mm_observation_table_translator import MMObservationTableTranslator
 
 class TestMMLStarLearner(unittest.TestCase):
     def setUp(self):
-        self.learner = MooreMachineLearner()
+        self.learner = GenericLStarLearner(MMObservationTableTranslator())
 
-    def teacher(self, automaton: MooreMachineAutomaton) -> MMTeacher:
-        return MMTeacher(automaton, ComparisonStrategy())
+    def teacher(self, automaton):
+        return GenericTeacher(automaton, ComparisonStrategy())
 
     def test_tomitas_1(self):
         grammar1 = SampleMooreMachines.get_tomitas_automaton_1()
@@ -74,7 +74,7 @@ class TestMMLStarLearner(unittest.TestCase):
     def test_random_walk_lstar(self):
         mm = SampleMooreMachines.get_3_states_automaton()
         moore = generate_moore_machine(mm._input_alphabet, mm._output_alphabet, 300, 21)
-        teacher = MMTeacher(moore, RandomWalkMMComparisonStrategy(10000, 0.01))
+        teacher = GenericTeacher(moore, RandomWalkMMComparisonStrategy(10000, 0.01))
         result = self.learner.learn(teacher, verbose=True)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)
