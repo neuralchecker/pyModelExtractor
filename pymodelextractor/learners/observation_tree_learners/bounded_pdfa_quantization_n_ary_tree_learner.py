@@ -96,7 +96,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
                                             self._tree.leaves[access_string].probabilities[symbol])        
         
         for state in list(states.keys()).copy():
-            if state not in accessed_states:
+            if state not in accessed_states and states[state].initial_weight != 1:
                 del states[state]
 
         comparator = WFAToleranceComparator()
