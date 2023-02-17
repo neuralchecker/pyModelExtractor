@@ -52,7 +52,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True
 
-        if not self._exceeded_max_states and self._generate_partial_hipothesis and (self._exceeded_max_mq_length or self._exceded_time_bound):            
+        if not self._exceeded_max_states and self._generate_partial_hipothesis and (self._exceeded_max_mq_length or self._exceded_time_bound) and len(self._tree.leaves)>0:         
             partial_hipothesis = self.partial_hipothesis()
             self._history.append(partial_hipothesis)
 

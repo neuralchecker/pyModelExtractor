@@ -93,10 +93,11 @@ class PDFAQuantizationNAryTreeLearner:
         result = self._learning_results_for(model)
         return result
 
-    def _learning_results_for(self, model):
+    def _learning_results_for(self, model, rename_states = False):
         numberOfStates = len(model.weighted_states) if model is not None else 0
-        for count, state in enumerate(model.weighted_states):
-            state.name = 'q' + str(count)
+        if rename_states:
+            for count, state in enumerate(model.weighted_states):
+                state.name = 'q' + str(count)
 
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
