@@ -7,7 +7,7 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-pythautomata = "0.31.5"
+pythautomata = "0.32.0"
 #pythautomata = { path = "local/path/to/pythautomata", develop = false }
 scikit-learn = "^1.2.1"
 
