@@ -91,7 +91,8 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             if access_string!=self._tree.unknown_leaf:
                 for symbol in symbols:
                     access_string_of_transition, _ = self._tree.sift(access_string + symbol, update=False)
-                    accessed_states.add(access_string_of_transition)
+                    if access_string_of_transition != access_string:
+                        accessed_states.add(access_string_of_transition)
                     state.add_transition(symbol, states[access_string_of_transition],
                                             self._tree.leaves[access_string].probabilities[symbol])        
         
