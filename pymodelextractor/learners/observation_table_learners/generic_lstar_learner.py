@@ -69,10 +69,19 @@ class GenericLStarLearner:
             model = self._model_translator.translate(
                 self._observation_table, self._teacher.alphabets)
 
+            start_eq_time = time.time()
             answer, counterexample = self._teacher.equivalence_query(model)
+            eq_duration = time.time() - start_eq_time
+
             if not answer:
+                if self.verbose == complete_verbose:
+                    print("    - Found counterexample in " + str(eq_duration) + "s -> " + str(counterexample))
                 counterexample_counter += 1
                 self._update_observation_table_with(counterexample)
+            else:
+                if self.verbose == complete_verbose:
+                    print("    - Made equivalence query in " + str(eq_duration) + "s")
+
             duration = time.time() - start_iteration_time
             if self.verbose == complete_verbose:
                 print("  # Iteration " + str(counter) + " ended, duration: " + str(duration) + "s")

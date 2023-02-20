@@ -53,19 +53,10 @@ class GenericTeacher(Teacher):
         #return self.state_machine.process_query(sequence)
 
     def equivalence_query(self, model) -> Tuple[bool, Union[Sequence, None]]:
-        start_eq_time = time.time()
         self._equivalence_queries_count += 1
         counterexample = self._comparison_strategy.get_counterexample_between(model, self.state_machine)
         are_equivalent = counterexample is None
 
-        duration = time.time() - start_eq_time
-        if (not are_equivalent):
-            if self.verbose:
-                print("    - Found counterexample in " + str(duration) + "s -> " + str(counterexample))
-        else:
-            if self.verbose:
-                print("    - Made equivalence query in " + str(duration) + "s")
-        
         return are_equivalent, counterexample
 
     def reset_statistics(self) -> None:
