@@ -84,3 +84,68 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
 
+    def test_tomitas_1_w_pre_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_1()
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20)
+        result = self.learner.learn(teacher, verbose = True, pre_cache_queries_for_building_hipothesis = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+    
+    def test_tomitas_2_w_pre_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_2()
+        
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20)
+        result = self.learner.learn(teacher, verbose = True, pre_cache_queries_for_building_hipothesis = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+    
+
+    def test_tomitas_3_w_pre_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_3()
+        
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20)
+        result = self.learner.learn(teacher, verbose = True, pre_cache_queries_for_building_hipothesis = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+
+    def test_tomitas_4_w_pre_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_4()
+        
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20)
+        result = self.learner.learn(teacher, verbose = True, pre_cache_queries_for_building_hipothesis = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+    
+    def test_tomitas_5_w_pre_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_5()
+        
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20)
+        result = self.learner.learn(teacher, verbose = True, pre_cache_queries_for_building_hipothesis = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+    
+
+    def test_tomitas_6_w_pre_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_6()
+        
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20)
+        result = self.learner.learn(teacher, verbose = True, pre_cache_queries_for_building_hipothesis = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+
+    def test_tomitas_7_w_pre_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_7()
+        
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20)
+        result = self.learner.learn(teacher, verbose = True, pre_cache_queries_for_building_hipothesis = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+
+

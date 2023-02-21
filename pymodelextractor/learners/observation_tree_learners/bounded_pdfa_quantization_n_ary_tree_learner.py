@@ -31,18 +31,18 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             raise NumberOfStatesExceededException
         return super()._perform_equivalence_query(model)
 
-    def run_learning_with_time_bound(self, teacher, verbose):
+    def run_learning_with_time_bound(self, teacher, verbose, pre_cache_queries):
         try:
             with timeout(self._max_seconds_run):
-                super().learn(teacher, verbose)
+                super().learn(teacher, verbose, pre_cache_queries)
         except TimeoutError:
             print("Time Bound Reached")
             self._exceded_time_bound = True
 
-    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False, pre_cache_queries_for_building_hipothesis = False) -> LearningResult:
         try:
             if self._max_seconds_run is not None:
-                self.run_learning_with_time_bound(teacher, verbose)
+                self.run_learning_with_time_bound(teacher, verbose, pre_cache_queries_for_building_hipothesis)
             else:
                 super().learn(teacher, verbose)
         except NumberOfStatesExceededException:
@@ -51,6 +51,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         except QueryLengthExceededException:
             print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True
+        self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
 
         if not self._exceeded_max_states and self._generate_partial_hipothesis and (self._exceeded_max_mq_length or self._exceded_time_bound) and len(self._tree.leaves)>0:         
             partial_hipothesis = self.partial_hipothesis()
@@ -74,11 +75,12 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             self._exceeded_max_mq_length = True
             return True, None
 
-    def partial_hipothesis(self) -> PDFA:
+    def partial_hipothesis(self) -> PDFA:        
+        if self._pre_cache_queries_for_building_hipothesis:
+                self._tree.cache_queries_for_building_hipothesis()        
         states = {}
         symbols = list(self._alphabet.symbols)
         symbols.sort()
-        
         for leaf_str, leaf in self._tree.leaves.items():
             initial_weight = 1 if leaf_str == epsilon else 0
             terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
