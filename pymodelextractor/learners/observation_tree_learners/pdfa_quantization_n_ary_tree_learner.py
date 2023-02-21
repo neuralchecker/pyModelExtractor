@@ -62,8 +62,12 @@ class PDFAQuantizationNAryTreeLearner:
         self._tree = ClassificationTree(nodeRoot, self._teacher, self.probability_partitioner, verbose=verbose)
         return False, starting_pdfa
 
-    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False, pre_cache_queries_for_building_hipothesis = False) -> LearningResult:
         self._verbose = verbose        
+        if pre_cache_queries_for_building_hipothesis:
+            assert hasattr(teacher, 'next_token_probabilities_batch')
+
+        self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         models = []
@@ -106,12 +110,15 @@ class PDFAQuantizationNAryTreeLearner:
         }
         return LearningResult(model, numberOfStates, info)
 
-    def tentative_hypothesis(self) -> PDFA:
+    def tentative_hypothesis(self) -> PDFA:        
         states = {}
         symbols = list(self._alphabet.symbols)
         symbols.sort()
         updated_tree = True
         while updated_tree:
+            if self._pre_cache_queries_for_building_hipothesis:
+                self._tree.cache_queries_for_building_hipothesis()
+
             for leaf_str, leaf in self._tree.leaves.items():
                 initial_weight = 1 if leaf_str == epsilon else 0
                 terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
@@ -170,34 +177,51 @@ class ClassificationTree:
 
     def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, probability_partitioner: ProbabilityPartitioner,
                  max_query_length: int = math.inf, verbose=False):
-        self.leaves = None
+        self.leaves = dict()
         self._teacher = teacher
         self.root = root
         self.probability_partitioner = probability_partitioner
-        self.add_leaves_to_dict()
+        self.inner_nodes = dict()
+        self._add_leaves_and_inner_nodes()
         self._equivalence_dict = dict()
         self._next_token_probabilities_cache = dict()
         self._partitions_cache = dict()
-        self.max_query_length = max_query_length
-        self.inner_nodes = 0
+        self._sift_cache = dict()
+        self.max_query_length = max_query_length        
         self._verbose = verbose
+        
 
     @property
     def depth(self) -> int:
         return max([x.depth for x in self.leaves.values()])
 
-    def add_leaves_to_dict(self):
-        q = [self.root]
-        self.leaves = {}
+    def _add_leaves_and_inner_nodes(self):
+        q = [self.root]        
         while q:
             node = q.pop()
             if node.is_leaf():
                 self.leaves.update({node.string: node})
-                continue
-            for child in node.childs.values():
-                q.append(child)
+            else:
+                self.inner_nodes.update({node.string: node})
+                for child in node.childs.values():
+                    q.append(child)
+
+    def cache_queries_for_building_hipothesis(self):
+        symbols = list(self._teacher.alphabet.symbols)
+        symbols.sort()
+        queries = set()
+        for access_string in self.leaves.keys():
+            for symbol in symbols:
+                for distinguishing_string in self.inner_nodes:
+                    query = access_string + symbol + distinguishing_string
+                    if query not in self._next_token_probabilities_cache:
+                        queries.add(query)
+        results = self._teacher.next_token_probabilities_batch(queries)
+        self._next_token_probabilities_cache.update(results)
 
     def sift(self, sequence: Sequence, update = True) -> Sequence:
+        if sequence in self._sift_cache:
+                return self._sift_cache[sequence], False
         node = self.root
         updated_tree = False
         while not node.is_leaf():
@@ -217,16 +241,8 @@ class ClassificationTree:
                     node = new_node
                 else:
                     return ClassificationTree.unknown_leaf,False
-
+        self._sift_cache[sequence] = node.string
         return node.string, updated_tree
-
-    # def _get_partition(self, probabilities):
-    #     if tuple(probabilities) in self._partitions_cache:
-    #         return self._partitions_cache[tuple(probabilities)]
-    #     else:
-    #         partition = self.probability_partitioner.get_partition(probabilities)
-    #         self._partitions_cache[tuple(probabilities)] = partition
-    #         return partition
 
     def _are_in_same_partition(self, probs1, probs2):
         partition1 = self.probability_partitioner.get_partition(probs1)
@@ -276,38 +292,11 @@ class ClassificationTree:
             node = node.left[0]
         return self.leaves[node.string]
 
-    def update_leftmost_node(self, counterexample):
-        old_node = self.get_leftmost_node()
-        node1_str = old_node.string
-        node2_str = counterexample
-        old_node.string = epsilon
-
-        next_token_probabilities_node1 = self._next_token_probabilities(node1_str)
-        next_token_probabilities_node2 = self._next_token_probabilities(node2_str)
-
-        node_1 = ClassificationNode(node1_str, parent=old_node, probabilities=next_token_probabilities_node1)
-        node_2 = ClassificationNode(node2_str, parent=old_node, probabilities=next_token_probabilities_node2)
-
-        old_node.left = (node_1, next_token_probabilities_node1)
-        old_node.right = (node_2, next_token_probabilities_node2)
-        if self._verbose:
-            print("-----update_leftmost_node----")
-            print('Old Node (new Leaf)', node1_str)
-            print('New Leaf (counterexample)', node2_str)
-            print(self.leaves.keys())
-        self.leaves.update({
-            node1_str: node_1,
-            node2_str: node_2,
-        })
-        if self._verbose:
-            print(self.leaves.keys())
-            print("---------")
-
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
-        self.inner_nodes += 1
+        old_string = old_node.string
         old_node.string = distinguishing_string
-
+        self.inner_nodes.update({distinguishing_string: old_node})
         next_token_probabilities_node1 = self._next_token_probabilities(leaf_1)
         next_token_probabilities_node2 = self._next_token_probabilities(node_to_be_replaced)
         node_1 = ClassificationNode(leaf_1, parent=old_node, probabilities=next_token_probabilities_node1)
@@ -332,7 +321,16 @@ class ClassificationTree:
         if self._verbose:
             print(self.leaves.keys())
             print("--------")
+        self._update_sift_cache(old_string)
 
+    def _update_sift_cache(self, old_string):
+        keys_to_remove = []
+        for seq, access_string in self._sift_cache.items():
+            if access_string == old_string:
+                keys_to_remove.append(seq)
+
+        for seq in keys_to_remove:
+            del self._sift_cache[seq] 
 
 class ClassificationNode:
     def __init__(self, string: Sequence, parent: 'ClassificationNode' = None, probabilities=None):
