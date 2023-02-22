@@ -14,8 +14,8 @@ from pymodelextractor.learners.observation_table_learners.observation_table impo
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 
 class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
-    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False):
-        super().__init__(partitioner)
+    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False, pre_cache_queries_for_building_hipothesis = False):
+        super().__init__(partitioner, pre_cache_queries_for_building_hipothesis)
         self._max_states = max_states
         self._max_query_length = max_query_length
         self._max_seconds_run = max_seconds_run
@@ -31,18 +31,18 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             raise NumberOfStatesExceededException
         return super()._perform_equivalence_query(model)
 
-    def run_learning_with_time_bound(self, teacher, verbose, pre_cache_queries):
+    def run_learning_with_time_bound(self, teacher, verbose):
         try:
             with timeout(self._max_seconds_run):
-                super().learn(teacher, verbose, pre_cache_queries)
+                super().learn(teacher, verbose)
         except TimeoutError:
             print("Time Bound Reached")
             self._exceded_time_bound = True
 
-    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False, pre_cache_queries_for_building_hipothesis = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
         try:
             if self._max_seconds_run is not None:
-                self.run_learning_with_time_bound(teacher, verbose, pre_cache_queries_for_building_hipothesis)
+                self.run_learning_with_time_bound(teacher, verbose)
             else:
                 super().learn(teacher, verbose)
         except NumberOfStatesExceededException:
@@ -50,8 +50,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             self._exceeded_max_states = True
         except QueryLengthExceededException:
             print("QueryLengthExceeded")
-            self._exceeded_max_mq_length = True
-        self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
+            self._exceeded_max_mq_length = True        
 
         if not self._exceeded_max_states and self._generate_partial_hipothesis and (self._exceeded_max_mq_length or self._exceded_time_bound) and len(self._tree.leaves)>0:         
             partial_hipothesis = self.partial_hipothesis()
