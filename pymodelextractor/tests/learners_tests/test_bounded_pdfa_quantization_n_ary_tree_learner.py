@@ -414,8 +414,8 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         partitioner = TopKProbabilityPartitioner(1)
         comparator = WFAPartitionComparator(partitioner)
         teacher = PACBatchProbabilisticTeacher(model, epsilon = 0.05, delta = 0.05, comparator=comparator)
-        learner = BoundedPDFAQuantizationNAryTreeLearner(partitioner,10, 2, generate_partial_hipothesis=True)
-        result = learner.learn(teacher, pre_cache_queries_for_building_hipothesis=True)
+        learner = BoundedPDFAQuantizationNAryTreeLearner(partitioner,10, 2, generate_partial_hipothesis=True, pre_cache_queries_for_building_hipothesis=True)
+        result = learner.learn(teacher)
         extracted_model = result.model
         self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
