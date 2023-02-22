@@ -15,8 +15,9 @@ import math
 
 
 class PDFAQuantizationNAryTreeLearner:
-    def __init__(self, probabilityPartitioner: ProbabilityPartitioner):
+    def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False):
         self.probability_partitioner = probabilityPartitioner
+        self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
         self._verbose = False
         self._tree = None
         pass
@@ -62,12 +63,11 @@ class PDFAQuantizationNAryTreeLearner:
         self._tree = ClassificationTree(nodeRoot, self._teacher, self.probability_partitioner, verbose=verbose)
         return False, starting_pdfa
 
-    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False, pre_cache_queries_for_building_hipothesis = False) -> LearningResult:
+    def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
         self._verbose = verbose        
-        if pre_cache_queries_for_building_hipothesis:
+        if self._pre_cache_queries_for_building_hipothesis:
             assert hasattr(teacher, 'next_token_probabilities_batch')
 
-        self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         models = []
