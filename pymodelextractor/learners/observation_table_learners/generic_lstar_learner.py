@@ -7,8 +7,10 @@ import time
 
 lamda = Sequence()
 
-no_verbose = 0
-complete_verbose = 2
+no_log = 'none'
+info_log = 'info'
+debug_log = 'debug'
+trace_log = 'trace'
 
 class GenericLStarLearner:
     def __init__(self, model_translator):
@@ -43,11 +45,11 @@ class GenericLStarLearner:
             row.append(result)
         return row
 
-    def learn(self, teacher: GenericTeacher, verbose: int = 0) -> LearningResult:
+    def learn(self, teacher: GenericTeacher, log_hierachy: str = 'none') -> LearningResult:
         start_time = time.time()
-        teacher.verbose = verbose
-        self.verbose = verbose
-        if self.verbose != no_verbose:
+        teacher.log_hierachy = log_hierachy
+        self.log_hierachy = log_hierachy
+        if self.log_hierachy != no_log:
             print("**** Started lstar learning ****")
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
@@ -60,7 +62,7 @@ class GenericLStarLearner:
 
         while not answer:
             start_iteration_time = time.time()
-            if self.verbose == complete_verbose:
+            if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
                 print(" # Starting iteration " + str(counter))
             self._close()
             self._make_consistent()
@@ -74,23 +76,23 @@ class GenericLStarLearner:
             eq_duration = time.time() - start_eq_time
 
             if not answer:
-                if self.verbose == complete_verbose:
+                if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
                     print("    - Found counterexample in " + str(eq_duration) + "s -> " + str(counterexample))
                 counterexample_counter += 1
                 self._update_observation_table_with(counterexample)
             else:
-                if self.verbose == complete_verbose:
+                if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
                     print("    - Made equivalence query in " + str(eq_duration) + "s")
 
             duration = time.time() - start_iteration_time
-            if self.verbose == complete_verbose:
+            if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
                 print("  # Iteration " + str(counter) + " ended, duration: " + str(duration) + "s")
             counter += 1
 
 
         result = self._learning_results_for(model, time.time() - start_time)
         duration = time.time() - start_time
-        if (self.verbose != no_verbose):
+        if self.log_hierachy != no_log:
             print("**** Learning finished in " + str(duration) + "s using " + str(counterexample_counter) \
                 + " counterexamples & final model ended with " + str(result.state_count) + " states ****" + '\n')
         return result
@@ -120,7 +122,7 @@ class GenericLStarLearner:
             closedCounterExample = self._observation_table.is_closed()
             if closedCounterExample == None:
                 duration = time.time() - start_closing_time
-                if self.verbose == complete_verbose:
+                if self.log_hierachy == trace_log:
                     print("    . Closed table in " + str(duration) + "s")
                 return
             self._observation_table.move_from_blue_to_red(closedCounterExample)
@@ -135,7 +137,7 @@ class GenericLStarLearner:
             start_consistent_time = time.time()
             inconsistency = self._observation_table.find_inconsistency(self._teacher.alphabet)
             duration = time.time() - start_consistent_time
-            if self.verbose == complete_verbose:
+            if self.log_hierachy == trace_log:
                 print("    + Found Inconsistency in " + str(duration) + "s")
             if inconsistency == None:
                 return
@@ -143,7 +145,7 @@ class GenericLStarLearner:
             start_consistent_time = time.time()
             self._resolve_inconsistency(inconsistency)
             duration = time.time() - start_consistent_time
-            if self.verbose == complete_verbose:
+            if self.log_hierachy == trace_log:
                 print("    + Resolved Inconsistency in " + str(duration) + "s")
             self._close()
     

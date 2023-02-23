@@ -10,7 +10,7 @@ class GenericTeacher(Teacher):
     def __init__(self, state_machine, comparison_strategy):
         self.state_machine = state_machine
         self._comparison_strategy = comparison_strategy
-        self.verbose = False
+        self.log_hierachy = 'none'
         super().__init__()
 
     @property
