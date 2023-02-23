@@ -19,24 +19,11 @@ class GenericTeacher(Teacher):
 
     @property
     def alphabet(self) -> Alphabet:
-        if (type(self.state_machine)) == MooreMachineAutomaton:
-            return self.state_machine._input_alphabet
-        else:
-            return self.state_machine._alphabet
-
-    @property
-    def alphabets(self):
-        if (type(self.state_machine)) == MooreMachineAutomaton:
-            return (self.state_machine._input_alphabet, self.state_machine._output_alphabet)
-        else:
-            return self.state_machine._alphabet
+        return self.state_machine._alphabet
 
     @property
     def output_alphabet(self) -> Alphabet:
-        if (type(self.state_machine)) == MooreMachineAutomaton:
-            return self.state_machine._output_alphabet
-        else:
-            return None
+        return self.state_machine._output_alphabet
 
     @property
     def equivalence_queries_count(self) -> int:

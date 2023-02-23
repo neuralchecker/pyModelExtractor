@@ -19,7 +19,7 @@ class FAObservationTableTranslator(ObservationTableTranslator):
     """
     epsilon = Sequence([])
 
-    def translate(self, observation_table: ObservationTable, alphabet: Alphabet) -> FA:
+    def translate(self, observation_table: ObservationTable, alphabet: Alphabet, output_alphabet = None) -> FA:
         sequence_states: dict[Sequence, State] = self._get_states_for(
             observation_table.red, observation_table)
         for sequence, state in sequence_states.items():

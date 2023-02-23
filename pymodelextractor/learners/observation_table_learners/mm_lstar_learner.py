@@ -63,7 +63,7 @@ class MMLStarLearner:
             self._close()
             self._make_consistent()
             model = self._model_translator.translate(
-                self._observation_table, (self._teacher.alphabet, self._teacher.output_alphabet))
+                self._observation_table, self._teacher.alphabet, self._teacher.output_alphabet)
             answer, counterexample = self._teacher.equivalence_query(model, self.verbose)
             if not answer:
                 counterexample_counter += 1

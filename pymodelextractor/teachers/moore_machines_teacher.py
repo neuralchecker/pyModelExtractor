@@ -20,7 +20,7 @@ class MooreMachineTeacher(Teacher):
 
     @property
     def alphabet(self) -> Alphabet:
-        return self.moore_machine._input_alphabet
+        return self.moore_machine._alphabet
 
     @property
     def output_alphabet(self) -> Alphabet:

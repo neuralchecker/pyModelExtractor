@@ -13,11 +13,9 @@ from symtable import Symbol
 class MMObservationTableTranslator:
     epsilon = Sequence([])
 
-    def translate(self, observation_table: MMOT, alphabets: Alphabet) -> MM:
+    def translate(self, observation_table: MMOT, alphabet: Alphabet, output_alphabet) -> MM:
         sequence_states: dict[Sequence, State] = self._get_states_for(
             observation_table.red, observation_table)
-        alphabet = alphabets[0]
-        output_alphabet = alphabets[1]
         for sequence, state in sequence_states.items():
             for symbol in alphabet.symbols:
                 to_find = observation_table[sequence + symbol]

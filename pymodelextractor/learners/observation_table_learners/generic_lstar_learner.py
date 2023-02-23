@@ -67,7 +67,7 @@ class GenericLStarLearner:
             
             self._model_translator._output_alphabet = self._teacher.output_alphabet
             model = self._model_translator.translate(
-                self._observation_table, self._teacher.alphabets)
+                self._observation_table, self._teacher.alphabet, self._teacher.output_alphabet)
 
             start_eq_time = time.time()
             answer, counterexample = self._teacher.equivalence_query(model)
