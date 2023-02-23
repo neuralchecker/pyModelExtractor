@@ -97,6 +97,9 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
                     state.add_transition(symbol, states[access_string_of_transition],
                                             self._tree.leaves[access_string].probabilities[symbol])        
         
+        for symbol in symbols:
+            states[self._tree.unknown_leaf].add_transition(symbol, states[self._tree.unknown_leaf], 0)
+
         for state in list(states.keys()).copy():
             if state not in accessed_states and states[state].initial_weight != 1:
                 del states[state]
