@@ -6,7 +6,7 @@ from pymodelextractor.teachers.pac_probabilistic_teacher import PACProbabilistic
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from typing import Union
 import numpy as np
-
+from collections import OrderedDict
 
 class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
 
@@ -33,7 +33,7 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
             word = rand_words[i]
             obs1 = results[i]
             obs2 = aut.get_last_token_weights(word, suffixes)
-            if not self._comparator.equivalent_output(obs1, obs2):
+            if not self._comparator.next_tokens_equivalent_output(obs1, obs2):
                 errorCount += 1
                 if counterexample is None:
                     counterexample = word
@@ -43,3 +43,11 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
             self._calculate_epsilon_star_with(errorCount)
 
         return counterexample is None, counterexample
+
+    def next_token_probabilities_batch(self, sequences):
+        symbols = list(self.alphabet.symbols)
+        symbols.sort()
+        symbols = [self.terminal_symbol] + symbols
+        results = self._target_model.get_last_token_weights_batch(sequences, symbols)
+        results_od = [OrderedDict(zip(symbols, x)) for x in results]
+        return zip(sequences, results_od)
