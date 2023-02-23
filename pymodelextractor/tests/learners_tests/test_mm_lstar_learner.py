@@ -48,7 +48,7 @@ class TestMMLStarLearner(unittest.TestCase):
     def test_tomitas_2(self):
         grammar2 = SampleMooreMachines.get_tomitas_automaton_2()
         teacher = self.teacher(grammar2)
-        result = self.learner.learn(teacher, 2)
+        result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar2)
 
@@ -56,7 +56,7 @@ class TestMMLStarLearner(unittest.TestCase):
         dfa = Tomitas.get_automaton_3()
         moore = AutomataConverter.convert_dfa_to_moore_machine(dfa)
         teacher = self.teacher(moore)
-        result = self.learner.learn(teacher, log_hierachy=2)
+        result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)
 
@@ -64,7 +64,7 @@ class TestMMLStarLearner(unittest.TestCase):
         dfa = Tomitas.get_automaton_4()
         moore = AutomataConverter.convert_dfa_to_moore_machine(dfa)
         teacher = self.teacher(moore)
-        result = self.learner.learn(teacher, log_hierachy=2)
+        result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)
 
@@ -72,7 +72,7 @@ class TestMMLStarLearner(unittest.TestCase):
         dfa = Tomitas.get_automaton_5()
         moore = AutomataConverter.convert_dfa_to_moore_machine(dfa)
         teacher = self.teacher(moore)
-        result = self.learner.learn(teacher, log_hierachy=2)
+        result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)
     
@@ -80,7 +80,7 @@ class TestMMLStarLearner(unittest.TestCase):
         dfa = Tomitas.get_automaton_6()
         moore = AutomataConverter.convert_dfa_to_moore_machine(dfa)
         teacher = self.teacher(moore)
-        result = self.learner.learn(teacher, log_hierachy=2)
+        result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)
 
@@ -88,7 +88,7 @@ class TestMMLStarLearner(unittest.TestCase):
         dfa = Tomitas.get_automaton_7()
         moore = AutomataConverter.convert_dfa_to_moore_machine(dfa)
         teacher = self.teacher(moore)
-        result = self.learner.learn(teacher, log_hierachy=2)
+        result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)
 
@@ -96,6 +96,6 @@ class TestMMLStarLearner(unittest.TestCase):
         mm = SampleMooreMachines.get_3_states_automaton()
         moore = generate_moore_machine(mm._alphabet, mm._output_alphabet, 300, 21)
         teacher = GenericTeacher(moore, RandomWalkMMComparisonStrategy(10000, 0.01))
-        result = self.learner.learn(teacher, verbose=2)
+        result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)

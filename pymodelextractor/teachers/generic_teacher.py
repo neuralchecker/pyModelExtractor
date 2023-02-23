@@ -1,9 +1,8 @@
 from typing import Tuple, Union
-import time
+
 from pythautomata.base_types.sequence import Sequence
 from pymodelextractor.teachers.teacher import Teacher
 from pythautomata.base_types.alphabet import Alphabet
-from pythautomata.automata.moore_machine_automaton import MooreMachineAutomaton
 
 
 class GenericTeacher(Teacher):
@@ -31,13 +30,8 @@ class GenericTeacher(Teacher):
 
     def membership_query(self, sequence: Sequence):
         self._membership_queries_count += 1
-        
-        if (type(self.state_machine)) == MooreMachineAutomaton:
-            return self.state_machine.last_symbol(sequence)
-        else:
-            return self.state_machine.accepts(sequence)
 
-        #return self.state_machine.process_query(sequence)
+        return self.state_machine.process_query(sequence)
 
     def equivalence_query(self, model) -> Tuple[bool, Union[Sequence, None]]:
         self._equivalence_queries_count += 1

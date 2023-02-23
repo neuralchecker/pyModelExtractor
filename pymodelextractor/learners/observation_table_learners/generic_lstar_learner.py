@@ -1,7 +1,6 @@
 from pythautomata.base_types.sequence import Sequence
 from pymodelextractor.learners.observation_table_learners.generic_observation_table import GenericObservationTable
 from pymodelextractor.learners.learning_result import LearningResult
-from pymodelextractor.learners.observation_table_learners.translators.fa_observation_table_translator import FAObservationTableTranslator
 from pymodelextractor.teachers.generic_teacher import GenericTeacher
 import time
 
