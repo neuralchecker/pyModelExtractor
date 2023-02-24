@@ -1,6 +1,7 @@
 from typing import Tuple
 from pymodelextractor.teachers.teacher import Teacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
+from pythautomata.utilities.uniform_length_sequence_generator import UniformLengthSequenceGenerator
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.abstract.boolean_model import BooleanModel
@@ -20,7 +21,7 @@ class PACBooleanTeacher(Teacher):
         self.epsilon_star = 0
         self.__compute_epsilon_star = compute_epsilon_star
         if sequence_generator is None:
-            self._sequence_generator = SequenceGenerator(self.__target_model.alphabet, max_seq_length=max_seq_length)
+            self._sequence_generator = UniformLengthSequenceGenerator(self.__target_model.alphabet, max_seq_length=max_seq_length)
         else:
             self._sequence_generator = sequence_generator
         self._verbose = verbose

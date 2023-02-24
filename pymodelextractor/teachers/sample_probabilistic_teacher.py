@@ -3,6 +3,7 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_automaton imp
 from pythautomata.abstract.probabilistic_model import ProbabilisticModel
 from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
+from pythautomata.utilities.uniform_length_sequence_generator import UniformLengthSequenceGenerator
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from typing import Union, Sized
 
@@ -19,7 +20,7 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
             raise ValueError('full_prefix_set value should be False if sample_size is_set')
         
         if sequence_generator is None:
-            self._sequence_generator = SequenceGenerator(self._target_model.alphabet, max_seq_length= max_seq_length)
+            self._sequence_generator = UniformLengthSequenceGenerator(self._target_model.alphabet, max_seq_length= max_seq_length)
         else:
             self._sequence_generator = sequence_generator
         self.__rand_words = None
