@@ -5,10 +5,11 @@ from pymodelextractor.learners.observation_table_learners.translators.mm_observa
 class LStarFactory:
 
     @staticmethod
-    def get_dfa_lstar_learner() -> GenericLStarLearner:
-        return GenericLStarLearner(FAObservationTableTranslator())
+    def get_dfa_lstar_learner(max_states = None, max_query_length = None) -> GenericLStarLearner:
+        return GenericLStarLearner(FAObservationTableTranslator(), max_states, max_query_length)
 
     @staticmethod
-    def get_moore_machine_lstar_learner() -> GenericLStarLearner:
-        return GenericLStarLearner(MMObservationTableTranslator())
+    def get_moore_machine_lstar_learner(max_states = None, max_query_length = None) -> GenericLStarLearner:
+        return GenericLStarLearner(MMObservationTableTranslator(), max_states, max_query_length)
+
 
