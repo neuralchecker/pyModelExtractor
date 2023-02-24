@@ -14,8 +14,8 @@ from pymodelextractor.learners.observation_table_learners.observation_table impo
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 
 class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
-    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False, pre_cache_queries_for_building_hipothesis = False):
-        super().__init__(partitioner, pre_cache_queries_for_building_hipothesis)
+    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True):
+        super().__init__(partitioner, pre_cache_queries_for_building_hipothesis, check_probabilistic_hipothesis)
         self._max_states = max_states
         self._max_query_length = max_query_length
         self._max_seconds_run = max_seconds_run
@@ -24,6 +24,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         self._exceded_time_bound = False
         self._history = []        
         self._generate_partial_hipothesis = generate_partial_hipothesis
+        
 
     def _perform_equivalence_query(self, model):
         self._history.append(model)
