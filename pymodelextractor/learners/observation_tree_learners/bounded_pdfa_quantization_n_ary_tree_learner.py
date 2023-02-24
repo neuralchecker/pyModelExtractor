@@ -37,7 +37,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             with timeout(self._max_seconds_run):
                 super().learn(teacher, verbose)
         except TimeoutError:
-            print("Time Bound Reached")
+            if verbose: print("Time Bound Reached")
             self._exceded_time_bound = True
 
     def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
@@ -47,10 +47,10 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             else:
                 super().learn(teacher, verbose)
         except NumberOfStatesExceededException:
-            print("NumberOfStatesExceeded")
+            if verbose: print("NumberOfStatesExceeded")
             self._exceeded_max_states = True
         except QueryLengthExceededException:
-            print("QueryLengthExceeded")
+            if verbose: print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True        
 
         if not self._exceeded_max_states and self._generate_partial_hipothesis and (self._exceeded_max_mq_length or self._exceded_time_bound) and len(self._tree.leaves)>0:         

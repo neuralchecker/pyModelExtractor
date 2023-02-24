@@ -25,7 +25,7 @@ class BoundedPDFALStarLearner(PDFALStarLearner):
             with timeout(self._max_seconds_run):
                 super().learn(teacher, verbose) 
         except TimeoutError:
-            print("Time Bound Reached") 
+            if verbose: print("Time Bound Reached") 
             self._exceded_time_bound = True
 
     def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
@@ -35,10 +35,10 @@ class BoundedPDFALStarLearner(PDFALStarLearner):
             else:
                 super().learn(teacher, verbose)
         except NumberOfStatesExceededException:
-            print("NumberOfStatesExceeded")
+            if verbose: print("NumberOfStatesExceeded")
             self._exceeded_max_states = True
         except QueryLengthExceededException:
-            print("QueryLengthExceeded")
+            if verbose: print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True
         result = self._learning_results_for(self._history[-1] if len(self._history) > 0 else None)
         result.info['NumberOfStatesExceeded'] = self._exceeded_max_states
