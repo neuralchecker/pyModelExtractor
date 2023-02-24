@@ -86,7 +86,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
             state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability)
             states[leaf_str] = state
-        unknown_state =  WeightedState(self._tree.unknown_leaf, 0, 0)     
+        unknown_state =  WeightedState(self._tree.unknown_leaf, 0, -1)     
         states[self._tree.unknown_leaf] = unknown_state
         accessed_states = set()
         for access_string, state in states.items():
@@ -99,7 +99,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
                                             self._tree.leaves[access_string].probabilities[symbol])        
         
         for symbol in symbols:
-            states[self._tree.unknown_leaf].add_transition(symbol, states[self._tree.unknown_leaf], 0)
+            states[self._tree.unknown_leaf].add_transition(symbol, states[self._tree.unknown_leaf], -1)
 
         for state in list(states.keys()).copy():
             if state not in accessed_states and states[state].initial_weight != 1:
