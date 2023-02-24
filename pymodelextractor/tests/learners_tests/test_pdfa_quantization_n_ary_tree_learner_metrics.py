@@ -11,7 +11,7 @@ from pymodelextractor.teachers.pdfa_teacher import PDFATeacher
 
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
-from pythautomata.utilities.sequence_generator import SequenceGenerator
+from pythautomata.utilities.uniform_length_sequence_generator import UniformLengthSequenceGenerator
 from pythautomata.utilities import pdfa_metrics
 from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner
 
@@ -45,7 +45,7 @@ class TestPDFAQuantizantionNAryTreeLearnerMetrics(unittest.TestCase):
         self.assertTrue(result1.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result1.info['equivalence_queries_count']>0)
 
-        sg = SequenceGenerator(model.alphabet, 20, 42)
+        sg = UniformLengthSequenceGenerator(model.alphabet, 20, 42)
         test_sequences = sg.generate_words(500)
         m1 = pdfa_metrics.log_probability_error(model, model1, test_sequences)
         m2 = pdfa_metrics.wer_avg(model, model1, test_sequences)
