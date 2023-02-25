@@ -217,8 +217,9 @@ class ClassificationTree:
                     query = access_string + symbol + distinguishing_string
                     if query not in self._next_token_probabilities_cache:
                         queries.add(query)
-        results = self._teacher.next_token_probabilities_batch(queries)
-        self._next_token_probabilities_cache.update(results)
+        if len(queries)>0:
+            results = self._teacher.next_token_probabilities_batch(queries)
+            self._next_token_probabilities_cache.update(results)
 
     def sift(self, sequence: Sequence, update = True) -> Sequence:
         if sequence in self._sift_cache:
