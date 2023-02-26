@@ -20,11 +20,11 @@ class MooreMachineTeacher(Teacher):
 
     @property
     def alphabet(self) -> Alphabet:
-        return self.moore_machine._input_alphabet
+        return self.moore_machine.alphabet
 
     @property
     def output_alphabet(self) -> Alphabet:
-        return self.moore_machine._output_alphabet
+        return self.moore_machine.output_alphabet
 
     @property
     def equivalence_queries_count(self) -> int:
