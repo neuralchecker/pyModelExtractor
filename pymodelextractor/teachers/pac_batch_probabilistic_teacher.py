@@ -7,14 +7,37 @@ from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from typing import Union
 import numpy as np
 from collections import OrderedDict
+from multiprocessing import Process, Manager
 
 class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
 
     def __init__(self, model: ProbabilisticModel, epsilon: float, delta: float,
                  comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None,
-                 max_seq_length: float = 128, compute_epsilon_star: bool = True):
+                 max_seq_length: float = 128, compute_epsilon_star: bool = True, parallel_cache = False, max_query_elements = 1_000_000):
         super().__init__(model, comparator, epsilon, delta, sequence_generator, max_seq_length, compute_epsilon_star)
         assert (hasattr(model, 'get_last_token_weights_batch'))
+        self._parallel_cache = parallel_cache
+        self._max_query_elements = max_query_elements
+        if self._parallel_cache:
+            manager = Manager()
+            self._cache = manager.dict()
+            job = Process(target=self.fill_cache, args=(self._cache, self._max_query_elements)) 
+            job.start() 
+
+    def fill_cache(self, cache, max_query_elements):
+        total_elements = 0
+        generator = self._sequence_generator.generate_all_words()
+        batch_size = 10000
+        symbols = list(self.alphabet.symbols)
+        symbols.sort()
+        symbols = [self.terminal_symbol] + symbols
+
+        while total_elements<max_query_elements:
+            queries = []
+            for _ in range(batch_size):
+                queries.append(next(generator))
+            self._target_model.get_last_token_weights_batch(queries, symbols)  
+            total_elements+=batch_size
 
     def equivalence_query(self, aut: WeightedAutomaton) -> tuple[bool, Union[Sequence, None]]:
         self._equivalence_queries_count += 1
@@ -48,6 +71,22 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
         symbols = list(self.alphabet.symbols)
         symbols.sort()
         symbols = [self.terminal_symbol] + symbols
-        results = self._target_model.get_last_token_weights_batch(sequences, symbols)
-        results_od = [OrderedDict(zip(symbols, x)) for x in results]
-        return zip(sequences, results_od)
+
+        if self._parallel_cache:
+            queries = set()
+            results_already_in_cache = dict()
+            for sequence in sequences:
+                if sequence not in self._cache:
+                    queries.add(sequence)
+                else:
+                    results_already_in_cache[sequence] = self._cache[sequence]
+            results = self._target_model.get_last_token_weights_batch(queries, symbols)   
+            results_od = [OrderedDict(zip(symbols, x)) for x in results]
+            final_results  = dict(zip(queries, results_od))
+            self._cache.update(final_results)
+            final_results.update(results_already_in_cache)
+        else:        
+            results = self._target_model.get_last_token_weights_batch(sequences, symbols)
+            results_od = [OrderedDict(zip(symbols, x)) for x in results]
+            final_results = zip(sequences, results_od)
+        return final_results
