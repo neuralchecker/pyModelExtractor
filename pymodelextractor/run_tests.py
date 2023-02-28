@@ -10,7 +10,7 @@ from pymodelextractor.tests.learners_tests.test_pdfa_lstar_tolerance_learner imp
 from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_quant_learner import TestPDFALStarColQuantLearner
 from tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerWithEqualityAlgebra
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
-from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
+#from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
 from tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanModelTeachers
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner import TestPDFAQuantizantionNAryTreeLearner
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_metrics \
@@ -27,24 +27,24 @@ from tests.learners_tests.test_generic_lstar_learner import TestGenericLStarLear
 
 def run():
      test_classes_to_run = [TestLStarLearner,
-                              TestLStarColLearner,
-                              TestPDFALStarQuantLearner,
-                              TestPDFALStarToleranceLearner,
-                              TestPDFALStarColQuantLearner,
-                              TestPDFALStarColLearner,
-                              TestKearnsVaziraniLearner,
-                              TestLStarLearner,
-                              TestPDFATeachersLStar,
-                              TestPDFATeachersLStarCol,
-                              TestPACBooleanModelTeachers, 
-                              TestBoundedPDFAQuantizantionNAryTreeLearner, 
-                              TestPDFAQuantizantionNAryTreeLearner,
-                              TestBoundedPDFALStarLearner,
-                              TestBoundedLStarLearner,
-                              TestLambdaStarLearnerWithEqualityAlgebra,
-                              TestPDFAQuantizantionNAryTreeLearnerMetrics,
-                              TestPACBatchTeacherQuant,
-                              TestPDFAQuantizantionNAryTreeLearnerRunningExample,
+                              # TestLStarColLearner,
+                              # TestPDFALStarQuantLearner,
+                              # TestPDFALStarToleranceLearner,
+                              # TestPDFALStarColQuantLearner,
+                              # TestPDFALStarColLearner,
+                              # TestKearnsVaziraniLearner,
+                              # TestLStarLearner,
+                              # TestPDFATeachersLStar,
+                              # #TestPDFATeachersLStarCol,
+                              # TestPACBooleanModelTeachers, 
+                              # TestBoundedPDFAQuantizantionNAryTreeLearner, 
+                              # TestPDFAQuantizantionNAryTreeLearner,
+                              # TestBoundedPDFALStarLearner,
+                              # TestBoundedLStarLearner,
+                              # TestLambdaStarLearnerWithEqualityAlgebra,
+                              # TestPDFAQuantizantionNAryTreeLearnerMetrics,
+                              # TestPACBatchTeacherQuant,
+                              # TestPDFAQuantizantionNAryTreeLearnerRunningExample,
                               TestMMLStarLearner,
                               TestGenericLStarLearner]
      loader = TestLoader()

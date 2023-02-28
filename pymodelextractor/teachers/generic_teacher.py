@@ -22,7 +22,7 @@ class GenericTeacher(Teacher):
 
     @property
     def output_alphabet(self) -> Alphabet:
-        return self.state_machine._output_alphabet
+        return self.state_machine.output_alphabet
 
     @property
     def equivalence_queries_count(self) -> int:
