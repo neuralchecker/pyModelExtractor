@@ -149,3 +149,10 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
 
+    def test_tomitas_1_w_parallel_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_1()
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20,parallel_cache=True)
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)        
+        extracted_model = result.model     
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))

@@ -14,8 +14,8 @@ from pymodelextractor.learners.observation_table_learners.observation_table impo
 from pythautomata.automata.wheighted_automaton_definition.weighted_state import WeightedState
 
 class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
-    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False, pre_cache_queries_for_building_hipothesis = False):
-        super().__init__(partitioner, pre_cache_queries_for_building_hipothesis)
+    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True):
+        super().__init__(partitioner, pre_cache_queries_for_building_hipothesis, check_probabilistic_hipothesis)
         self._max_states = max_states
         self._max_query_length = max_query_length
         self._max_seconds_run = max_seconds_run
@@ -24,6 +24,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         self._exceded_time_bound = False
         self._history = []        
         self._generate_partial_hipothesis = generate_partial_hipothesis
+        
 
     def _perform_equivalence_query(self, model):
         self._history.append(model)
@@ -36,7 +37,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             with timeout(self._max_seconds_run):
                 super().learn(teacher, verbose)
         except TimeoutError:
-            print("Time Bound Reached")
+            if verbose: print("Time Bound Reached")
             self._exceded_time_bound = True
 
     def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
@@ -46,10 +47,10 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             else:
                 super().learn(teacher, verbose)
         except NumberOfStatesExceededException:
-            print("NumberOfStatesExceeded")
+            if verbose: print("NumberOfStatesExceeded")
             self._exceeded_max_states = True
         except QueryLengthExceededException:
-            print("QueryLengthExceeded")
+            if verbose: print("QueryLengthExceeded")
             self._exceeded_max_mq_length = True        
 
         if not self._exceeded_max_states and self._generate_partial_hipothesis and (self._exceeded_max_mq_length or self._exceded_time_bound) and len(self._tree.leaves)>0:         
@@ -85,7 +86,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
             state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability)
             states[leaf_str] = state
-        unknown_state =  WeightedState(self._tree.unknown_leaf, 0, 0)     
+        unknown_state =  WeightedState(self._tree.unknown_leaf, 0, -1)     
         states[self._tree.unknown_leaf] = unknown_state
         accessed_states = set()
         for access_string, state in states.items():
@@ -98,7 +99,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
                                             self._tree.leaves[access_string].probabilities[symbol])        
         
         for symbol in symbols:
-            states[self._tree.unknown_leaf].add_transition(symbol, states[self._tree.unknown_leaf], 0)
+            states[self._tree.unknown_leaf].add_transition(symbol, states[self._tree.unknown_leaf], -1)
 
         for state in list(states.keys()).copy():
             if state not in accessed_states and states[state].initial_weight != 1:

@@ -15,11 +15,12 @@ import math
 
 
 class PDFAQuantizationNAryTreeLearner:
-    def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False):
+    def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True):
         self.probability_partitioner = probabilityPartitioner
         self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
         self._verbose = False
         self._tree = None
+        self._check_probabilistic_hipothesis = check_probabilistic_hipothesis
         pass
 
     @property
@@ -137,7 +138,7 @@ class PDFAQuantizationNAryTreeLearner:
 
         comparator = WFAToleranceComparator()
         states = set(states.values())
-        return PDFA(self._alphabet, states, self.terminal_symbol, comparator=comparator)
+        return PDFA(self._alphabet, states, self.terminal_symbol, comparator=comparator, check_is_probabilistic=self._check_probabilistic_hipothesis)
 
     def get_accessing_string(self, model: PDFA, sequence: Sequence):
         state = model.get_first_state()
@@ -216,8 +217,9 @@ class ClassificationTree:
                     query = access_string + symbol + distinguishing_string
                     if query not in self._next_token_probabilities_cache:
                         queries.add(query)
-        results = self._teacher.next_token_probabilities_batch(queries)
-        self._next_token_probabilities_cache.update(results)
+        if len(queries)>0:
+            results = self._teacher.next_token_probabilities_batch(queries)
+            self._next_token_probabilities_cache.update(results)
 
     def sift(self, sequence: Sequence, update = True) -> Sequence:
         if sequence in self._sift_cache:
