@@ -170,7 +170,7 @@ class PDFAQuantizationNAryTreeLearner:
         initialState = WeightedState(epsilon, 1, final_weight=final_weight)
         for symbol, probability in probabilities.items():
             initialState.add_transition(symbol, initialState, probability)
-        return PDFA(self._alphabet, {initialState}, self.terminal_symbol, comparator=WFAToleranceComparator())
+        return PDFA(self._alphabet, {initialState}, self.terminal_symbol, comparator=WFAToleranceComparator(), check_is_probabilistic=self._check_probabilistic_hipothesis)
 
 
 class ClassificationTree:
