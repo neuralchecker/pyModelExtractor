@@ -6,10 +6,12 @@ from pythautomata.base_types.alphabet import Alphabet
 
 
 class GenericTeacher(Teacher):
-    def __init__(self, state_machine, comparison_strategy):
+    def __init__(self, state_machine, comparison_strategy, w_cache = True):
         self.state_machine = state_machine
         self._comparison_strategy = comparison_strategy
         self.log_hierachy = 'none'
+        self._cache = {}
+        self._w_cache = w_cache
         super().__init__()
 
     @property
@@ -31,7 +33,15 @@ class GenericTeacher(Teacher):
     def membership_query(self, sequence: Sequence):
         self._membership_queries_count += 1
 
-        return self.state_machine.process_query(sequence)
+        if not self._w_cache:
+            return self.state_machine.process_query(sequence)  
+        
+        if sequence not in self._cache:
+            result = self.state_machine.process_query(sequence)
+            self._cache[sequence] = result
+            return result
+
+        return self._cache[sequence]
 
     def equivalence_query(self, model) -> Tuple[bool, Union[Sequence, None]]:
         self._equivalence_queries_count += 1
