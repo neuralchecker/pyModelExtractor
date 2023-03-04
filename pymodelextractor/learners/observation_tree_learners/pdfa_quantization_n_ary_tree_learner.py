@@ -15,12 +15,13 @@ import math
 
 
 class PDFAQuantizationNAryTreeLearner:
-    def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True):
+    def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True, exhaust_counterexample = False):
         self.probability_partitioner = probabilityPartitioner
         self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
         self._verbose = False
         self._tree = None
         self._check_probabilistic_hipothesis = check_probabilistic_hipothesis
+        self._exhaust_counterexample = exhaust_counterexample
         pass
 
     @property
@@ -84,8 +85,7 @@ class PDFAQuantizationNAryTreeLearner:
             are_equivalent, counterexample = self._perform_equivalence_query(model)
 
             while not are_equivalent:
-
-                if verbose: print('Size before update:', last_size)
+                if verbose: print('Size before update:', last_size)                
                 self.update_tree(counterexample, model)
                 model = self.tentative_hypothesis()
                 models.append(model)
@@ -93,6 +93,18 @@ class PDFAQuantizationNAryTreeLearner:
                 if verbose: print('Size after update:', size)
                 assert size > last_size, 'Possible infinite loop'
                 last_size = size
+                
+                teacher_prob = self._teacher.next_token_probabilities(counterexample).values()                
+                model_prob = model.last_token_probabilities(counterexample, self._all_symbols_sorted)
+                ce_is_correct = self.probability_partitioner.are_in_same_partition(teacher_prob, model_prob)
+                
+                while self._exhaust_counterexample and not ce_is_correct:
+                    self.update_tree(counterexample, model)
+                    model = self.tentative_hypothesis()
+                    models.append(model)
+                    model_prob = model.last_token_probabilities(counterexample, self._all_symbols_sorted)
+                    ce_is_correct = self.probability_partitioner.are_in_same_partition(teacher_prob, model_prob)
+
                 are_equivalent, counterexample = self._perform_equivalence_query(model)
 
         result = self._learning_results_for(model)
@@ -170,7 +182,7 @@ class PDFAQuantizationNAryTreeLearner:
         initialState = WeightedState(epsilon, 1, final_weight=final_weight)
         for symbol, probability in probabilities.items():
             initialState.add_transition(symbol, initialState, probability)
-        return PDFA(self._alphabet, {initialState}, self.terminal_symbol, comparator=WFAToleranceComparator())
+        return PDFA(self._alphabet, {initialState}, self.terminal_symbol, comparator=WFAToleranceComparator(), check_is_probabilistic=self._check_probabilistic_hipothesis)
 
 
 class ClassificationTree:
