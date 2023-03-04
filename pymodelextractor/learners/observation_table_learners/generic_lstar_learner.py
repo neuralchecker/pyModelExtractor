@@ -4,6 +4,8 @@ from pymodelextractor.learners.observation_table_learners.generic_observation_ta
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.teachers.generic_teacher import GenericTeacher
 import time
+import multiprocessing
+from pymodelextractor.utils.time_bound_utilities import timeout
 
 lamda = Sequence()
 
@@ -13,10 +15,11 @@ debug_log = 'debug'
 trace_log = 'trace'
 
 class GenericLStarLearner:
-    def __init__(self, model_translator, max_states = None, max_query_lenght = None):
+    def __init__(self, model_translator, max_states = None, max_query_lenght = None, max_time = None):
         self._model_translator = model_translator
         self._max_states = max_states
         self._max_query_length = max_query_lenght
+        self._max_time = max_time
         self._history = []
 
     def _build_observation_table(self):
@@ -36,8 +39,6 @@ class GenericLStarLearner:
             
             return surpassed_max_query_len
             
-        
-
     def _add_to_red(self, sequence: Sequence) -> bool:
         if sequence not in self._observation_table.red:
             redValue, surpassed_max_query_len = self._get_filled_row_for(sequence)
@@ -57,8 +58,19 @@ class GenericLStarLearner:
             result = self._teacher.membership_query(sequence + suffix)
             row.append(result)
         return row, False
+    
+    def learn(self, teacher, log_hierachy: str = 'none'):
+        if self._max_time is None:
+            return self._learn(teacher, log_hierachy)
 
-    def learn(self, teacher: GenericTeacher, log_hierachy: str = 'none') -> LearningResult:
+        try:
+            with timeout(self._max_time):
+                results = self._learn(teacher, log_hierachy) 
+                return results
+        except TimeoutError:
+            self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, self._max_time)
+
+    def _learn(self, teacher: GenericTeacher, return_dict = None, log_hierachy: str = 'none') -> LearningResult:
         start_time = time.time()
         teacher.log_hierachy = log_hierachy
         self.log_hierachy = log_hierachy
@@ -91,6 +103,9 @@ class GenericLStarLearner:
             model = self._model_translator.translate(
                 self._observation_table, self._teacher.alphabet, self._teacher.output_alphabet)
             self._history.append(model)
+            
+            if self._max_time is not None: 
+                return_dict[self._max_time] = self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, None)
 
             start_eq_time = time.time()
             answer, counterexample = self._teacher.equivalence_query(model)
@@ -117,12 +132,12 @@ class GenericLStarLearner:
                 print("  # Iteration " + str(counter) + " ended, duration: " + str(duration) + "s")
             counter += 1
 
-
         result = self._learning_results_for(model, time.time() - start_time)
         duration = time.time() - start_time
         if self.log_hierachy != no_log:
             print("**** Learning finished in " + str(duration) + "s using " + str(counterexample_counter) \
                 + " counterexamples & final model ended with " + str(result.state_count) + " states ****" + '\n')
+        if self._max_time != None: return_dict[self._max_time] = result
         return result
 
     def _update_observation_table_with(self, counterexample) -> bool:

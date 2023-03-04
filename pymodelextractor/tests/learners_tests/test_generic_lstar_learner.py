@@ -11,6 +11,7 @@ from pythautomata.model_comparators.moore_machine_comparison_strategy import Moo
 from pythautomata.model_comparators.dfa_comparison_strategy import DFAComparisonStrategy
 from pythautomata.utilities.automata_converter import AutomataConverter
 from pythautomata.utilities.simple_dfa_generator import generate_dfa
+from pymodelextractor.utils.time_bound_utilities import is_unix_system
 
 
 class TestGenericLStarLearner(unittest.TestCase):
@@ -95,6 +96,21 @@ class TestGenericLStarLearner(unittest.TestCase):
         result = LStarFactory.get_moore_machine_lstar_learner(max_query_length=10).learn(GenericTeacher(moore, MooreMachineComparisonStrategy()))
         self.assertFalse(MooreMachineComparisonStrategy().are_equivalent(result.model, moore))
 
+    def test_time_bounded_lstar(self):
+
+        if is_unix_system():
+            automaton = generate_dfa(TomitasGrammars.get_automaton_7()._alphabet, 10000)
+            moore = AutomataConverter().convert_dfa_to_moore_machine(automaton)
+
+            
+            result = LStarFactory.get_dfa_lstar_learner(max_time=1).learn(GenericTeacher(automaton, DFAComparisonStrategy()))
+            self.assertFalse(ComparisonStrategy().are_equivalent(result.model, automaton))
+
+            result = LStarFactory.get_moore_machine_lstar_learner(max_time=1).learn(GenericTeacher(moore, MooreMachineComparisonStrategy()))
+            self.assertFalse(MooreMachineComparisonStrategy().are_equivalent(result.model, moore))
+
+
+        
     
 
     
