@@ -94,7 +94,7 @@ class PDFAQuantizationNAryTreeLearner:
                 assert size > last_size, 'Possible infinite loop'
                 last_size = size
                 
-                teacher_prob = self._teacher.next_token_probabilities(counterexample).values()                
+                teacher_prob = list(self._teacher.next_token_probabilities(counterexample).values())                
                 model_prob = model.last_token_probabilities(counterexample, self._all_symbols_sorted)
                 ce_is_correct = self.probability_partitioner.are_in_same_partition(teacher_prob, model_prob)
                 
@@ -257,11 +257,6 @@ class ClassificationTree:
                     return ClassificationTree.unknown_leaf,False
         self._sift_cache[sequence] = node.string
         return node.string, updated_tree
-
-    def _are_in_same_partition(self, probs1, probs2):
-        partition1 = self.probability_partitioner.get_partition(probs1)
-        partition2 = self.probability_partitioner.get_partition(probs2)
-        return self.probability_partitioner.are_in_same_partition(partition1, partition2)
 
     def _look_for_branch(self, childs, probabilities):
         if tuple(probabilities) in childs:
