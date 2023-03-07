@@ -22,8 +22,8 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
         if self._parallel_cache:
             manager = Manager()
             self._cache = manager.dict()
-            job = Process(target=self.fill_cache, args=(self._cache, model,self._max_query_elements, batch_size)) 
-            job.start() 
+            self._job = Process(target=self.fill_cache, args=(self._cache, model,self._max_query_elements, batch_size)) 
+            self._job.start() 
 
     def fill_cache(self, cache, model, max_query_elements, batch_size):
         total_elements = 0
@@ -98,3 +98,7 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
             results_od = [OrderedDict(zip(symbols, x)) for x in results]
             final_results = zip(sequences, results_od)
         return final_results
+    
+    def __del__(self):
+        if self._parallel_cache:
+            self._job.terminate()

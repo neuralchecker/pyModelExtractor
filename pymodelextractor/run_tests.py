@@ -10,6 +10,7 @@ from pymodelextractor.tests.learners_tests.test_pdfa_lstar_tolerance_learner imp
 from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_quant_learner import TestPDFALStarColQuantLearner
 from tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerWithEqualityAlgebra
 from tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
+from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
 from tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanModelTeachers
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner import TestPDFAQuantizantionNAryTreeLearner
 from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_metrics \
@@ -44,7 +45,8 @@ def run():
                               TestPACBatchTeacherQuant,
                               TestPDFAQuantizantionNAryTreeLearnerRunningExample,
                               TestMMLStarLearner,
-                              TestGenericLStarLearner]
+                              TestGenericLStarLearner,
+                              TestPDFATeachersLStarCol]
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:

@@ -68,10 +68,13 @@ class TestGenericLStarLearner(unittest.TestCase):
     def test_pac_against_many_DFAs(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata()))
         for automaton in mergedAutomata:
-            teacher = GenericTeacher(automaton, PACComparisonStrategy(automaton, 0.005, 0.005, 20))
+            teacher = GenericTeacher(automaton, PACComparisonStrategy(automaton.alphabet, 0.005, 0.005, 20))
             result = LStarFactory.get_dfa_lstar_learner().learn(teacher)
             assert ComparisonStrategy().are_equivalent(result.model, automaton)
-        
+
+            moore = AutomataConverter().convert_dfa_to_moore_machine(automaton)
+            teacher = GenericTeacher(moore, PACComparisonStrategy(moore.alphabet, 0.005, 0.005, 20))
+            result = LStarFactory.get_moore_machine_lstar_learner().learn(teacher)
 
 
 

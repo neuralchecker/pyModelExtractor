@@ -1,26 +1,24 @@
-from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pythautomata.utilities.uniform_length_sequence_generator import UniformLengthSequenceGenerator
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
-from pythautomata.abstract.boolean_model import BooleanModel
 from math import ceil, log, comb
 import numpy as np
 
 
 class PACComparisonStrategy:
-    def __init__(self, target_model, epsilon: float, delta: float, max_seq_length: int = 128, compute_epsilon_star: bool = True,sequence_generator = None):
-        self._target_model = target_model
+    def __init__(self, target_model_alphabet: Alphabet, epsilon: float, delta: float, max_seq_length: int = 128, 
+                compute_epsilon_star: bool = True, sequence_generator = None):
         self._epsilon = epsilon
         self._delta = delta
         self._equivalence_queries_count = 0
         self._compute_epsilon_star = compute_epsilon_star
 
         if sequence_generator is None:
-            self._sequence_generator = UniformLengthSequenceGenerator(target_model.alphabet, max_seq_length)
+            self._sequence_generator = UniformLengthSequenceGenerator(target_model_alphabet, max_seq_length)
         else:
             self._sequence_generator = sequence_generator
 
-    def get_counterexample_between(self, model, _) -> Sequence:
+    def get_counterexample_between(self, model, target_model) -> Sequence:
             self._equivalence_queries_count += 1
             sample_size = self._calculate_sample_size()
             sequences = self._sequence_generator.generate_words(sample_size)
@@ -29,7 +27,7 @@ class PACComparisonStrategy:
 
             np.sort(sequences)
             for sequence in sequences:
-                if self._target_model.process_query(sequence) != model.process_query(sequence):
+                if target_model.process_query(sequence) != model.process_query(sequence):
                     if not self._compute_epsilon_star:
                         return (False, sequence)
                     error_count += 1
