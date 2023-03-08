@@ -1,6 +1,10 @@
+from typing import Union
 from pythautomata.utilities.uniform_length_sequence_generator import UniformLengthSequenceGenerator
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
+from pythautomata.abstract.finite_automaton import FiniteAutomaton as Automaton
+from pythautomata.automata.mealy_machine import MealyMachine as Mealys
+from pythautomata.automata.moore_machine_automaton import MooreMachineAutomaton as MM
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from math import ceil, log, comb
 import numpy as np
@@ -19,7 +23,7 @@ class PACComparisonStrategy:
         else:
             self._sequence_generator = sequence_generator
 
-    def get_counterexample_between(self, model, target_model) -> Sequence:
+    def get_counterexample_between(self, model: Union[Automaton, MM, Mealys], target_model) -> Sequence:
             self._equivalence_queries_count += 1
             sample_size = self._calculate_sample_size()
             sequences = self._sequence_generator.generate_words(sample_size)
