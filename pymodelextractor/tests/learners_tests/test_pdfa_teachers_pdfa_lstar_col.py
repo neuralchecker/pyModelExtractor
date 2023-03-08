@@ -167,5 +167,3 @@ class TestPDFATeachersLStarCol(unittest.TestCase):
         self.assertEqual(model, extracted_model3)
         self.assertTrue(comp.are_equivalent(extracted_model2, extracted_model1))        
         self.assertFalse(comp.are_equivalent(extracted_model2, extracted_model3))
-
-

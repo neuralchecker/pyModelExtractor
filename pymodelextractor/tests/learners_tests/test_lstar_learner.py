@@ -14,6 +14,7 @@ from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
 from itertools import chain
 
 
+
 class TestLStarLearner(unittest.TestCase):
     def setUp(self):
         self.learner = LStarLearner()
@@ -58,3 +59,4 @@ class TestLStarLearner(unittest.TestCase):
             result = self.learner.learn(teacher)
             assert ComparisonStrategy().are_equivalent(
                 result.model, automaton)
+        
