@@ -9,7 +9,6 @@ class GeneralTeacher(Teacher):
     def __init__(self, state_machine, comparison_strategy, w_cache = True):
         self._state_machine = state_machine
         self._comparison_strategy = comparison_strategy
-        self.log_hierachy = 'none'
         self._cache = {}
         self._w_cache = w_cache
         super().__init__()
