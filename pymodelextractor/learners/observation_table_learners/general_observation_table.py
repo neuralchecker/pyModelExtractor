@@ -6,7 +6,7 @@ from pythautomata.base_types.alphabet import Alphabet
 from pymodelextractor.learners.observation_table_learners.observation_table import TableInconsistency
 
 
-class GenericObservationTable:
+class GeneralObservationTable:
     red: set[Sequence]
     blue: set[Sequence]
     observations: dict[Sequence, Union[list[Symbol], list[bool]]]

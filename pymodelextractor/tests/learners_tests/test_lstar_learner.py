@@ -19,7 +19,7 @@ class TestLStarLearner(unittest.TestCase):
     def setUp(self):
         self.learner = LStarLearner()
 
-    def teacher(self, automaton: DeterministicFiniteAutomaton):
+    def teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, ComparisonStrategy())
 
     def test_tomitas_1(self):

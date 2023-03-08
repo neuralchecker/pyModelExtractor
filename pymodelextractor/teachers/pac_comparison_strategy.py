@@ -1,13 +1,14 @@
 from pythautomata.utilities.uniform_length_sequence_generator import UniformLengthSequenceGenerator
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
+from pythautomata.utilities.sequence_generator import SequenceGenerator
 from math import ceil, log, comb
 import numpy as np
 
 
 class PACComparisonStrategy:
     def __init__(self, target_model_alphabet: Alphabet, epsilon: float, delta: float, max_seq_length: int = 128, 
-                compute_epsilon_star: bool = True, sequence_generator = None):
+                compute_epsilon_star: bool = True, sequence_generator: SequenceGenerator = None):
         self._epsilon = epsilon
         self._delta = delta
         self._equivalence_queries_count = 0

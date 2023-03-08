@@ -1,29 +1,28 @@
 from ast import Tuple
 from pythautomata.base_types.sequence import Sequence
-from pymodelextractor.learners.observation_table_learners.generic_observation_table import GenericObservationTable
+from pymodelextractor.learners.observation_table_learners.general_observation_table import GeneralObservationTable
 from pymodelextractor.learners.learning_result import LearningResult
-from pymodelextractor.teachers.generic_teacher import GenericTeacher
+from pymodelextractor.teachers.general_teacher import GeneralTeacher
 import time
-import multiprocessing
 from pymodelextractor.utils.time_bound_utilities import timeout
 
 lamda = Sequence()
 
-no_log = 'none'
-info_log = 'info'
-debug_log = 'debug'
-trace_log = 'trace'
+no_log = 0
+info_log = 1
+debug_log = 2
+trace_log = 3
 
-class GenericLStarLearner:
-    def __init__(self, model_translator, max_states = None, max_query_lenght = None, max_time = None):
+class GeneralLStarLearner:
+    def __init__(self, model_translator, max_states = -1, max_query_lenght = -1, max_time = -1):
         self._model_translator = model_translator
         self._max_states = max_states
         self._max_query_length = max_query_lenght
         self._max_time = max_time
-        self._history = []
+        self._last_model = None
 
     def _build_observation_table(self):
-        self._observation_table = GenericObservationTable()
+        self._observation_table = GeneralObservationTable()
     
     def _initialize_observation_table(self):
         self._observation_table.exp = [lamda]
@@ -51,7 +50,7 @@ class GenericLStarLearner:
         required_suffixes = self._observation_table.exp
         row = []
 
-        if (self._max_query_length is not None) and ( max(len(suffix) for suffix in required_suffixes) + len(sequence) > self._max_query_length):
+        if self._surpassed_max_query_len(sequence, required_suffixes):
             return row, True
         
         for suffix in required_suffixes:
@@ -59,8 +58,12 @@ class GenericLStarLearner:
             row.append(result)
         return row, False
     
-    def learn(self, teacher, log_hierachy: str = 'none'):
-        if self._max_time is None:
+    def _surpassed_max_query_len(self, sequence, required_suffixes):
+        return (self._max_query_length != -1) and \
+            (max(len(suffix) for suffix in required_suffixes) + len(sequence) > self._max_query_length)
+    
+    def learn(self, teacher, log_hierachy: int = 0):
+        if self._max_time == -1:
             return self._learn(teacher, log_hierachy)
 
         try:
@@ -68,13 +71,13 @@ class GenericLStarLearner:
                 results = self._learn(teacher, log_hierachy) 
                 return results
         except TimeoutError:
-            self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, self._max_time)
+            self._learning_results_for(self._last_model, self._max_time)
 
-    def _learn(self, teacher: GenericTeacher, return_dict = None, log_hierachy: str = 'none') -> LearningResult:
+    def _learn(self, teacher: GeneralTeacher, log_hierachy: int = 0) -> LearningResult:
         start_time = time.time()
         teacher.log_hierachy = log_hierachy
         self.log_hierachy = log_hierachy
-        if self.log_hierachy != no_log:
+        if self.log_hierachy > no_log:
             print("**** Started lstar learning ****")
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
@@ -87,57 +90,54 @@ class GenericLStarLearner:
 
         while not answer:
             start_iteration_time = time.time()
-            if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
+            if self.log_hierachy >= debug_log:
                 print(" # Starting iteration " + str(counter))
             surpassed_max_query_len = self._close()
             
             if surpassed_max_query_len:
-                return self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, time.time() - start_time)
+                return self._learning_results_for(self._last_model, time.time() - start_time)
 
             surpassed_max_query_len = self._make_consistent()
             
             if surpassed_max_query_len:
-                return self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, time.time() - start_time)
+                return self._learning_results_for(self._last_model, time.time() - start_time)
 
             self._model_translator._output_alphabet = self._teacher.output_alphabet
             model = self._model_translator.translate(
                 self._observation_table, self._teacher.alphabet, self._teacher.output_alphabet)
-            self._history.append(model)
-            
-            if self._max_time is not None: 
-                return_dict[self._max_time] = self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, None)
+            self._last_model = model
 
             start_eq_time = time.time()
             answer, counterexample = self._teacher.equivalence_query(model)
             eq_duration = time.time() - start_eq_time
 
-            if (self._max_states is not None) and (len(model.states) > self._max_states):
+            if (self._max_states != -1) and (len(model.states) > self._max_states):
                 return self._learning_results_for(model, time.time() - start_time)
 
             if not answer:
-                if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
+                if self.log_hierachy >= debug_log:
                     print("    - Found counterexample in " + str(eq_duration) + "s -> " + str(counterexample))
                 counterexample_counter += 1
 
                 surpassed_max_query_len = self._update_observation_table_with(counterexample)
                 if surpassed_max_query_len:
-                    return self._learning_results_for(self._history[-1] if len(self._history) > 0 else None, time.time() - start_time)
+                    return self._learning_results_for(self._last_model, time.time() - start_time)
                 
             else:
-                if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
+                if self.log_hierachy >= debug_log:
                     print("    - Made equivalence query in " + str(eq_duration) + "s")
 
             duration = time.time() - start_iteration_time
-            if self.log_hierachy == debug_log or self.log_hierachy == trace_log:
+            if self.log_hierachy >= debug_log:
                 print("  # Iteration " + str(counter) + " ended, duration: " + str(duration) + "s")
             counter += 1
 
         result = self._learning_results_for(model, time.time() - start_time)
         duration = time.time() - start_time
-        if self.log_hierachy != no_log:
+        if self.log_hierachy > no_log:
             print("**** Learning finished in " + str(duration) + "s using " + str(counterexample_counter) \
                 + " counterexamples & final model ended with " + str(result.state_count) + " states ****" + '\n')
-        if self._max_time != None: return_dict[self._max_time] = result
+
         return result
 
     def _update_observation_table_with(self, counterexample) -> bool:
@@ -172,7 +172,7 @@ class GenericLStarLearner:
             closed_counter_example = self._observation_table.is_closed()
             if closed_counter_example == None:
                 duration = time.time() - start_closing_time
-                if self.log_hierachy == trace_log:
+                if self.log_hierachy >= trace_log:
                     print("    . Closed table in " + str(duration) + "s")
                 return False
             self._observation_table.move_from_blue_to_red(closed_counter_example)
@@ -195,7 +195,7 @@ class GenericLStarLearner:
             start_consistent_time = time.time()
             inconsistency = self._observation_table.find_inconsistency(self._teacher.alphabet)
             duration = time.time() - start_consistent_time
-            if self.log_hierachy == trace_log:
+            if self.log_hierachy >= trace_log:
                 print("    + Found Inconsistency in " + str(duration) + "s")
             if inconsistency == None:
                 return False
@@ -207,7 +207,7 @@ class GenericLStarLearner:
                 return surpassed_max_query_len
 
             duration = time.time() - start_consistent_time
-            if self.log_hierachy == trace_log:
+            if self.log_hierachy >= trace_log:
                 print("    + Resolved Inconsistency in " + str(duration) + "s")
             
             surpassed_max_query_len = self._close()
@@ -228,7 +228,7 @@ class GenericLStarLearner:
         
 
     def _fill_hole_for(self, sequence: Sequence, suffix: Sequence):
-        if (self._max_query_length is not None) and (len(sequence) + len(suffix) > self._max_query_length):
+        if self._surpassed_max_query_len(sequence, [suffix]):
             return True
         
         self._observation_table[sequence].append(

@@ -5,7 +5,7 @@ from pymodelextractor.teachers.teacher import Teacher
 from pythautomata.base_types.alphabet import Alphabet
 
 
-class GenericTeacher(Teacher):
+class GeneralTeacher(Teacher):
     def __init__(self, state_machine, comparison_strategy, w_cache = True):
         self._state_machine = state_machine
         self._comparison_strategy = comparison_strategy

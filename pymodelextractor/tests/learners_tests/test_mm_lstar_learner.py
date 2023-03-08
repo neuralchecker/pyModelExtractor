@@ -1,7 +1,7 @@
 import unittest
 
-from pymodelextractor.learners.observation_table_learners.generic_lstar_learner import GenericLStarLearner
-from pymodelextractor.teachers.generic_teacher import GenericTeacher
+from pymodelextractor.learners.observation_table_learners.general_lstar_learner import GeneralLStarLearner
+from pymodelextractor.teachers.general_teacher import GeneralTeacher
 from pythautomata.automata_definitions.sample_moore_machines import SampleMooreMachines
 from pythautomata.model_comparators.moore_machine_comparison_strategy import MooreMachineComparisonStrategy as ComparisonStrategy
 from pythautomata.model_comparators.random_walk_mm_comparison_strategy import RandomWalkMMComparisonStrategy
@@ -12,36 +12,36 @@ from pymodelextractor.learners.observation_table_learners.translators.mm_observa
 
 class TestMMLStarLearner(unittest.TestCase):
     def setUp(self):
-        self.learner = GenericLStarLearner(MMObservationTableTranslator())
+        self.learner = GeneralLStarLearner(MMObservationTableTranslator())
 
     def teacher(self, automaton):
-        return GenericTeacher(automaton, ComparisonStrategy())
+        return GeneralTeacher(automaton, ComparisonStrategy())
 
     def test_tomitas_1_without_log(self):
         grammar1 = SampleMooreMachines.get_tomitas_automaton_1()
         teacher = self.teacher(grammar1)
-        result = self.learner.learn(teacher, log_hierachy='none')
+        result = self.learner.learn(teacher, log_hierachy=0)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar1)
         
     def test_tomitas_1_with_log_hierachy_info(self):
         grammar1 = SampleMooreMachines.get_tomitas_automaton_1()
         teacher = self.teacher(grammar1)
-        result = self.learner.learn(teacher, log_hierachy='info')
+        result = self.learner.learn(teacher, log_hierachy=1)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar1)
         
     def test_tomitas_1_with_log_hierachy_debug(self):
         grammar1 = SampleMooreMachines.get_tomitas_automaton_1()
         teacher = self.teacher(grammar1)
-        result = self.learner.learn(teacher, log_hierachy='debug')
+        result = self.learner.learn(teacher, log_hierachy=2)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar1)
         
     def test_tomitas_1(self):
         grammar1 = SampleMooreMachines.get_tomitas_automaton_1()
         teacher = self.teacher(grammar1)
-        result = self.learner.learn(teacher, log_hierachy='trace')
+        result = self.learner.learn(teacher, log_hierachy=3)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar1)
     
@@ -95,7 +95,7 @@ class TestMMLStarLearner(unittest.TestCase):
     def test_random_walk_lstar(self):
         mm = SampleMooreMachines.get_3_states_automaton()
         moore = generate_moore_machine(mm._alphabet, mm._output_alphabet, 300, 21)
-        teacher = GenericTeacher(moore, RandomWalkMMComparisonStrategy(10000, 0.01))
+        teacher = GeneralTeacher(moore, RandomWalkMMComparisonStrategy(10000, 0.01))
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, moore)
