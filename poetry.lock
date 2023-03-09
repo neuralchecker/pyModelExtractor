@@ -214,14 +214,14 @@ pyparsing = ">=2.1.4"
 
 [[package]]
 name = "pylint"
-version = "2.16.4"
+version = "2.17.0"
 description = "python code static checker"
 category = "dev"
 optional = false
 python-versions = ">=3.7.2"
 
 [package.dependencies]
-astroid = ">=2.14.2,<=2.16.0-dev0"
+astroid = ">=2.15.0,<=2.17.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = {version = ">=0.2", markers = "python_version < \"3.11\""}
 isort = ">=4.2.5,<6"
@@ -268,7 +268,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.
 
 [[package]]
 name = "pythautomata"
-version = "0.35.2"
+version = "0.35.3"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -294,7 +294,7 @@ dev = ["pytest"]
 
 [[package]]
 name = "scikit-learn"
-version = "1.2.1"
+version = "1.2.2"
 description = "A set of python modules for machine learning and data mining"
 category = "main"
 optional = false
@@ -379,7 +379,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "2225a6bc2a6d1bf8362a5e536f893d5001f4dfad2e6b06934c06ffe6417d6075"
+content-hash = "6e6a2a9f5869fd5395954814a64e3aa757c7e8d6150cc7e339ccace406b52d7f"
 
 [metadata.files]
 astroid = []
