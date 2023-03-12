@@ -12,7 +12,7 @@ from pythautomata.model_comparators.mealy_machine_comparison_strategy import Mea
 from pythautomata.model_comparators.moore_machine_comparison_strategy import MooreMachineComparisonStrategy as MooreComparator
 
 class GeneralTeacher(Teacher):
-    def __init__(self, state_machine: Union[Automaton, MM, Mealys],
+    def __init__(self, state_machine,
                 comparison_strategy: Union[FAComparator, PAC, MealyComparator, MooreComparator],
                 w_cache = True):
         self._state_machine = state_machine
