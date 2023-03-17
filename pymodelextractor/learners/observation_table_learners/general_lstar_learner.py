@@ -62,7 +62,7 @@ class GeneralLStarLearner:
         return (self._max_query_length != -1) and \
             (max(len(suffix) for suffix in required_suffixes) + len(sequence) > self._max_query_length)
     
-    def learn(self, teacher, log_hierachy: int = 0):
+    def learn(self, teacher, log_hierachy: int = 0) -> LearningResult:
         if self._max_time == -1:
             return self._learn(teacher, log_hierachy)
 
