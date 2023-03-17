@@ -268,7 +268,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.
 
 [[package]]
 name = "pythautomata"
-version = "0.35.3"
+version = "0.35.4"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
@@ -379,7 +379,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "6e6a2a9f5869fd5395954814a64e3aa757c7e8d6150cc7e339ccace406b52d7f"
+content-hash = "ba0ceaccb90734d352f312ea8e2cfd02420f1c6a649bc00b0ee257682e48719d"
 
 [metadata.files]
 astroid = [
@@ -555,8 +555,8 @@ pytest = [
     {file = "pytest-7.2.2.tar.gz", hash = "sha256:c99ab0c73aceb050f68929bc93af19ab6db0558791c6a0715723abe9d0ade9d4"},
 ]
 pythautomata = [
-    {file = "pythautomata-0.35.3-py3-none-any.whl", hash = "sha256:53099de5392bf579af0d32c02e227aaf400148d72925af0a92119226923f0900"},
-    {file = "pythautomata-0.35.3.tar.gz", hash = "sha256:7ffe50ac2eb059704670ee21a8944b9541abc5da48fd4ef17a608e2f268db747"},
+    {file = "pythautomata-0.35.4-py3-none-any.whl", hash = "sha256:36dbedaf0542966ce2e0e947b11eefc8a8faef434dd65f80ff2a497e96277a22"},
+    {file = "pythautomata-0.35.4.tar.gz", hash = "sha256:3ec9a27a9b25146771db639fc55ff66ef4d381db75a7166964d632154c47f27c"},
 ]
 rope = [
     {file = "rope-0.19.0.tar.gz", hash = "sha256:64e6d747532e1f5c8009ec5aae3e5523a5bcedf516f39a750d57d8ed749d90da"},
