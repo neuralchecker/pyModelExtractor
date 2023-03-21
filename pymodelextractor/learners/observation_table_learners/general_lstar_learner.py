@@ -37,6 +37,7 @@ class GeneralLStarLearner:
                 sequence)
             
             return surpassed_max_query_len
+        return False
             
     def _add_to_red(self, sequence: Sequence) -> bool:
         if sequence not in self._observation_table.red:
@@ -45,6 +46,7 @@ class GeneralLStarLearner:
             self._observation_table.add_to_red(sequence, redValue)
 
             return surpassed_max_query_len
+        return False
     
     def _get_filled_row_for(self, sequence: Sequence):
         required_suffixes = self._observation_table.exp
@@ -71,7 +73,7 @@ class GeneralLStarLearner:
                 results = self._learn(teacher, log_hierachy) 
                 return results
         except TimeoutError:
-            self._learning_results_for(self._last_model, self._max_time)
+            return self._learning_results_for(self._last_model, self._max_time)
 
     def _learn(self, teacher: GeneralTeacher, log_hierachy: int = 0) -> LearningResult:
         start_time = time.time()

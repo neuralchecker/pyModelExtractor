@@ -11,6 +11,7 @@ from pythautomata.abstract.boolean_model import BooleanModel
 from pythautomata.abstract.model import Model
 
 class GeneralTeacher(Teacher):
+
     def __init__(self, state_machine: Union[BooleanModel, Model],
                 comparison_strategy: Union[FAComparator, PAC, MealyComparator, MooreComparator],
                 w_cache = True):
