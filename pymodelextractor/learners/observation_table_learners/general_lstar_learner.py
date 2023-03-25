@@ -64,18 +64,20 @@ class GeneralLStarLearner:
         return (self._max_query_length != -1) and \
             (max(len(suffix) for suffix in required_suffixes) + len(sequence) > self._max_query_length)
     
-    def learn(self, teacher, log_hierachy: int = 0) -> LearningResult:
+    def learn(self, teacher, observation_table: GeneralObservationTable = None,
+               log_hierachy: int = 0) -> LearningResult:
         if self._max_time == -1:
-            return self._learn(teacher, log_hierachy)
+            return self._learn(teacher, observation_table, log_hierachy)
 
         try:
             with timeout(self._max_time):
-                results = self._learn(teacher, log_hierachy) 
+                results = self._learn(teacher, observation_table, log_hierachy) 
                 return results
         except TimeoutError:
             return self._learning_results_for(self._last_model, self._max_time)
 
-    def _learn(self, teacher: GeneralTeacher, log_hierachy: int = 0) -> LearningResult:
+    def _learn(self, teacher: GeneralTeacher, observation_table: GeneralObservationTable = None,
+                log_hierachy: int = 0) -> LearningResult:
         start_time = time.time()
         teacher.log_hierachy = log_hierachy
         self.log_hierachy = log_hierachy
@@ -83,8 +85,12 @@ class GeneralLStarLearner:
             print("**** Started lstar learning ****")
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
-        self._build_observation_table()
-        self._initialize_observation_table()
+        if observation_table == None:
+            self._build_observation_table()
+            self._initialize_observation_table()
+        else:
+            self._observation_table = observation_table
+        
         model = None
         answer = False
         counter = 1
