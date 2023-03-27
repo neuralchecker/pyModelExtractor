@@ -23,6 +23,7 @@ from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_running_exam
      import TestPDFAQuantizantionNAryTreeLearnerRunningExample
 from tests.learners_tests.test_mm_lstar_learner import TestMMLStarLearner
 from tests.learners_tests.test_general_lstar_learner import TestGeneralLStarLearner
+from pymodelextractor.tests.learners_tests.test_kearns_vazirani_opt import TestKearnsVaziraniLearnerOptimization
 
 
 def run():
@@ -46,7 +47,8 @@ def run():
                               TestPDFAQuantizantionNAryTreeLearnerRunningExample,
                               TestMMLStarLearner,
                               TestGeneralLStarLearner,
-                              TestPDFATeachersLStarCol]
+                              TestPDFATeachersLStarCol,
+                              TestKearnsVaziraniLearnerOptimization]
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:
