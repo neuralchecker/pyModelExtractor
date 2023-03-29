@@ -10,6 +10,7 @@ python = ">=3.9,<3.11"
 pythautomata = "0.35.2"
 #pythautomata = { path = "local/path/to/pythautomata", develop = false }
 scikit-learn = "^1.2.1"
+pandas = "^1.5.3"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.902"
