@@ -100,7 +100,7 @@ class KearnsVaziraniLearnerOpt(Learner):
         for prefix in counterexample.get_prefixes():
             s_i_minus_1 = s_i
             # Optimization 3: use a checkpoint to avoid asking MQ to all predecessors
-            s_i, path_to_checkpoint = self._tree.sift(prefix, w_checkpoint=True, path_to_checkpoint=path_to_checkpoint)
+            s_i, path_to_checkpoint = self._tree.sift(prefix, w_checkpoint=False, path_to_checkpoint=path_to_checkpoint)
             s_hat_i = self.get_accessing_string(model,prefix)
             if not s_i == s_hat_i:
                 internal_node_string = prefix[-1] + self._tree.lca(s_i, s_hat_i)
@@ -174,7 +174,6 @@ class ClassificationTree():
             node = self.get_node_from_checkpoint(path_to_checkpoint)
         
         while not node.is_leaf():
-            print(node.string)
             d = node.string
             sd = sequence+d
     
