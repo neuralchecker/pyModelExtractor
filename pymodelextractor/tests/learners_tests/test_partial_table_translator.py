@@ -12,7 +12,7 @@ from pythautomata.model_comparators.dfa_comparison_strategy import DFAComparison
 from pythautomata.utilities.simple_dfa_generator import generate_dfa
 from pymodelextractor.learners.observation_table_learners.general_observation_table \
     import GeneralObservationTable
-from pythautomata.base_types.sequence import Sequence
+from pymodelextractor.utils.time_bound_utilities import is_unix_system
 
 class TestPartialDFATranslator(unittest.TestCase):
     def get_observation_table(self, automaton) -> GeneralObservationTable:
@@ -48,11 +48,21 @@ class TestPartialDFATranslator(unittest.TestCase):
 
         new_automaton = PartialDFATranslator().translate(observation_table,
                                                          automaton.alphabet)
-        new_automaton.export()
-        automaton.export()
-
         
         assert not ComparisonStrategy().are_equivalent(new_automaton, automaton)
+
+    def test_lstar_with_partial_translator(self):
+        if is_unix_system():
+            alphabet = TomitasGrammars.get_automaton_1().alphabet
+            automaton = generate_dfa(alphabet, number_of_states=500, seed=17)
+            learner = LStarFactory.get_dfa_lstar_learner(max_time=10)
+
+            result = learner.learn(GeneralTeacher(automaton, DFAComparisonStrategy()))
+
+            new_automaton = PartialDFATranslator().translate(result.info['observation_table'],
+                                                            automaton.alphabet)
+            
+            assert ComparisonStrategy().are_equivalent(result.model, new_automaton)
     
 
         
