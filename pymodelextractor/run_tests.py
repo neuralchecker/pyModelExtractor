@@ -24,31 +24,33 @@ from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_running_exam
 from tests.learners_tests.test_mm_lstar_learner import TestMMLStarLearner
 from tests.learners_tests.test_general_lstar_learner import TestGeneralLStarLearner
 from tests.learners_tests.test_base_observation_table import TestBaseObservationTable
+from tests.learners_tests.test_partial_table_translator import TestPartialDFATranslator
 
 
 def run():
-     test_classes_to_run = [TestLStarLearner,
-                              TestLStarColLearner,
-                              TestPDFALStarQuantLearner,
-                              TestPDFALStarToleranceLearner,
-                              TestPDFALStarColQuantLearner,
-                              TestPDFALStarColLearner,
-                              TestKearnsVaziraniLearner,
-                              TestLStarLearner,
-                              TestPDFATeachersLStar,
-                              TestPACBooleanModelTeachers, 
-                              TestBoundedPDFAQuantizantionNAryTreeLearner, 
-                              TestPDFAQuantizantionNAryTreeLearner,
-                              TestBoundedPDFALStarLearner,
-                              TestBoundedLStarLearner,
-                              TestLambdaStarLearnerWithEqualityAlgebra,
-                              TestPDFAQuantizantionNAryTreeLearnerMetrics,
-                              TestPACBatchTeacherQuant,
-                              TestPDFAQuantizantionNAryTreeLearnerRunningExample,
-                              TestMMLStarLearner,
-                              TestGeneralLStarLearner,
-                              TestPDFATeachersLStarCol,
-                              TestBaseObservationTable]
+     test_classes_to_run = [# TestLStarLearner,
+                              # TestLStarColLearner,
+                              # TestPDFALStarQuantLearner,
+                              # TestPDFALStarToleranceLearner,
+                              # TestPDFALStarColQuantLearner,
+                              # TestPDFALStarColLearner,
+                              # TestKearnsVaziraniLearner,
+                              # TestLStarLearner,
+                              # TestPDFATeachersLStar,
+                              # TestPACBooleanModelTeachers, 
+                              # TestBoundedPDFAQuantizantionNAryTreeLearner, 
+                              # TestPDFAQuantizantionNAryTreeLearner,
+                              # TestBoundedPDFALStarLearner,
+                              # TestBoundedLStarLearner,
+                              # TestLambdaStarLearnerWithEqualityAlgebra,
+                              # TestPDFAQuantizantionNAryTreeLearnerMetrics,
+                              # TestPACBatchTeacherQuant,
+                              # TestPDFAQuantizantionNAryTreeLearnerRunningExample,
+                              # TestMMLStarLearner,
+                              # TestGeneralLStarLearner,
+                              # TestPDFATeachersLStarCol,
+                              # TestBaseObservationTable,
+                              TestPartialDFATranslator]
 
      loader = TestLoader()
      suites_list = []

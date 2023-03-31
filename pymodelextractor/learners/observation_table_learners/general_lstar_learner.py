@@ -1,10 +1,13 @@
 from ast import Tuple
 from pythautomata.base_types.sequence import Sequence
-from pymodelextractor.learners.observation_table_learners.general_observation_table import GeneralObservationTable
+from pymodelextractor.learners.observation_table_learners.general_observation_table\
+      import GeneralObservationTable
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.teachers.general_teacher import GeneralTeacher
 import time
 from pymodelextractor.utils.time_bound_utilities import timeout
+from pymodelextractor.learners.observation_table_learners.translators.partial_dfa_translator \
+    import PartialDFATranslator
 
 lamda = Sequence()
 
@@ -74,6 +77,10 @@ class GeneralLStarLearner:
                 results = self._learn(teacher, observation_table, log_hierachy) 
                 return results
         except TimeoutError:
+            if type(self._model_translator) == PartialDFATranslator:
+                self._last_model = self._model_translator.translate(self._observation_table, 
+                                                                    self._teacher.alphabet, 
+                                                                    self._teacher.output_alphabet)
             return self._learning_results_for(self._last_model, self._max_time)
 
     def _learn(self, teacher: GeneralTeacher, observation_table: GeneralObservationTable = None,
