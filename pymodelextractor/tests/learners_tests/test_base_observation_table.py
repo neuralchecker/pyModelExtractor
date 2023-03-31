@@ -1,5 +1,4 @@
 import unittest
-import numpy
 
 from pymodelextractor.teachers.general_teacher import \
     GeneralTeacher
@@ -7,15 +6,9 @@ from pymodelextractor.factories.lstar_factory import LStarFactory
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars
 from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
-from pythautomata.model_comparators.moore_machine_comparison_strategy import MooreMachineComparisonStrategy
 from pythautomata.model_comparators.dfa_comparison_strategy import DFAComparisonStrategy
-from pythautomata.utilities.automata_converter import AutomataConverter
-from pythautomata.utilities.simple_dfa_generator import generate_dfa
-from pymodelextractor.teachers.pac_comparison_strategy import PACComparisonStrategy
-from pymodelextractor.utils.time_bound_utilities import is_unix_system
 from pymodelextractor.learners.observation_table_learners.general_observation_table import GeneralObservationTable
 from pythautomata.base_types.sequence import Sequence
-from itertools import chain
 
 
 class TestBaseObservationTable(unittest.TestCase):
@@ -106,6 +99,21 @@ class TestBaseObservationTable(unittest.TestCase):
             sequences = sequences + new_sequences
                     
         return sequences
+    
+    def test_partitioned_lstar(self):
+        automaton = TomitasGrammars.get_automaton_7()
+        
+        learner = LStarFactory.get_dfa_lstar_learner(max_query_length=4)
+
+        teacher = GeneralTeacher(automaton, ComparisonStrategy())
+        partial_result = learner.learn(teacher)
+
+        partial_observation_table = partial_result.info['observation_table']
+
+        learner = LStarFactory.get_dfa_lstar_learner()
+        final_result = learner.learn(teacher, partial_observation_table)
+
+        assert ComparisonStrategy().are_equivalent(final_result.model, automaton)
         
 
 
