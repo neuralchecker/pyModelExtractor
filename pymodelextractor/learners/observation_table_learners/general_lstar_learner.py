@@ -1,10 +1,12 @@
-from ast import Tuple
 from pythautomata.base_types.sequence import Sequence
-from pymodelextractor.learners.observation_table_learners.general_observation_table import GeneralObservationTable
+from pymodelextractor.learners.observation_table_learners.general_observation_table\
+      import GeneralObservationTable
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.teachers.general_teacher import GeneralTeacher
 import time
 from pymodelextractor.utils.time_bound_utilities import timeout
+from pymodelextractor.learners.observation_table_learners.translators.partial_dfa_translator \
+    import PartialDFATranslator
 
 lamda = Sequence()
 
@@ -40,42 +42,57 @@ class GeneralLStarLearner:
         return False
             
     def _add_to_red(self, sequence: Sequence) -> bool:
+        surpassed_len = False
         if sequence not in self._observation_table.red:
             redValue, surpassed_max_query_len = self._get_filled_row_for(sequence)
             self._observation_table[sequence] = redValue
             self._observation_table.add_to_red(sequence, redValue)
 
-            return surpassed_max_query_len
-        return False
+            if surpassed_max_query_len:
+                surpassed_len = True
+        return surpassed_len
     
     def _get_filled_row_for(self, sequence: Sequence):
         required_suffixes = self._observation_table.exp
         row = []
-
-        if self._surpassed_max_query_len(sequence, required_suffixes):
-            return row, True
         
         for suffix in required_suffixes:
             result = self._teacher.membership_query(sequence + suffix)
             row.append(result)
-        return row, False
+
+        return row, self._surpassed_max_query_len(sequence, required_suffixes)
     
     def _surpassed_max_query_len(self, sequence, required_suffixes):
         return (self._max_query_length != -1) and \
             (max(len(suffix) for suffix in required_suffixes) + len(sequence) > self._max_query_length)
     
-    def learn(self, teacher, log_hierachy: int = 0) -> LearningResult:
+    def learn(self, teacher, observation_table: GeneralObservationTable = None,
+               log_hierachy: int = 0) -> LearningResult:
         if self._max_time == -1:
-            return self._learn(teacher, log_hierachy)
+            stopped_by_bounds, _ = self._learn(teacher, observation_table, log_hierachy)
+            if stopped_by_bounds and type(self._model_translator) == PartialDFATranslator:
+                self._last_model = self._model_translator.translate(self._observation_table,
+                                                                self._teacher.alphabet,
+                                                                self._teacher.output_alphabet)
+            return self._learning_results_for(self._last_model, self._max_time)
 
         try:
             with timeout(self._max_time):
-                results = self._learn(teacher, log_hierachy) 
-                return results
+                stopped_by_bounds, _ = self._learn(teacher, observation_table, log_hierachy) 
+                if stopped_by_bounds and type(self._model_translator) == PartialDFATranslator:
+                    self._last_model = self._model_translator.translate(self._observation_table,
+                                                                    self._teacher.alphabet,
+                                                                    self._teacher.output_alphabet)
+                return self._learning_results_for(self._last_model, self._max_time)
         except TimeoutError:
+            if type(self._model_translator) == PartialDFATranslator:
+                self._last_model = self._model_translator.translate(self._observation_table, 
+                                                                    self._teacher.alphabet, 
+                                                                    self._teacher.output_alphabet)
             return self._learning_results_for(self._last_model, self._max_time)
 
-    def _learn(self, teacher: GeneralTeacher, log_hierachy: int = 0) -> LearningResult:
+    def _learn(self, teacher: GeneralTeacher, observation_table: GeneralObservationTable = None,
+                log_hierachy: int = 0) -> tuple[bool, LearningResult]:
         start_time = time.time()
         teacher.log_hierachy = log_hierachy
         self.log_hierachy = log_hierachy
@@ -83,8 +100,12 @@ class GeneralLStarLearner:
             print("**** Started lstar learning ****")
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
-        self._build_observation_table()
-        self._initialize_observation_table()
+        if observation_table == None:
+            self._build_observation_table()
+            self._initialize_observation_table()
+        else:
+            self._observation_table = observation_table
+        
         model = None
         answer = False
         counter = 1
@@ -97,12 +118,12 @@ class GeneralLStarLearner:
             surpassed_max_query_len = self._close()
             
             if surpassed_max_query_len:
-                return self._learning_results_for(self._last_model, time.time() - start_time)
+                return True, self._learning_results_for(self._last_model, time.time() - start_time)
 
             surpassed_max_query_len = self._make_consistent()
             
             if surpassed_max_query_len:
-                return self._learning_results_for(self._last_model, time.time() - start_time)
+                return True, self._learning_results_for(self._last_model, time.time() - start_time)
 
             self._model_translator._output_alphabet = self._teacher.output_alphabet
             model = self._model_translator.translate(
@@ -114,7 +135,7 @@ class GeneralLStarLearner:
             eq_duration = time.time() - start_eq_time
 
             if (self._max_states != -1) and (len(model.states) > self._max_states):
-                return self._learning_results_for(model, time.time() - start_time)
+                return True, self._learning_results_for(model, time.time() - start_time)
 
             if not answer:
                 if self.log_hierachy >= debug_log:
@@ -123,7 +144,7 @@ class GeneralLStarLearner:
 
                 surpassed_max_query_len = self._update_observation_table_with(counterexample)
                 if surpassed_max_query_len:
-                    return self._learning_results_for(self._last_model, time.time() - start_time)
+                    return True, self._learning_results_for(self._last_model, time.time() - start_time)
                 
             else:
                 if self.log_hierachy >= debug_log:
@@ -140,23 +161,21 @@ class GeneralLStarLearner:
             print("**** Learning finished in " + str(duration) + "s using " + str(counterexample_counter) \
                 + " counterexamples & final model ended with " + str(result.state_count) + " states ****" + '\n')
 
-        return result
+        return False, result
 
     def _update_observation_table_with(self, counterexample) -> bool:
         prefixes = counterexample.get_prefixes()
+        surpassed_max_query_len = False
         for sequence in prefixes:
             surpassed_max_query_len = self._add_to_red(sequence)
-            if surpassed_max_query_len:
-                        return surpassed_max_query_len
             
             for symbol in self._symbols:
                 suffixedSequence = sequence + symbol
                 if suffixedSequence not in prefixes:
-                    surpassed_max_query_len = self._add_to_blue(suffixedSequence)
-
-                    if surpassed_max_query_len:
-                        return surpassed_max_query_len
-        return False
+                    if self._add_to_blue(suffixedSequence):
+                        surpassed_max_query_len = True
+        
+        return surpassed_max_query_len
     
     def _learning_results_for(self, model, duration):
         number_of_states = len(model.states) if model is not None else 0
@@ -185,12 +204,12 @@ class GeneralLStarLearner:
     
 
     def _add_suffixes_to_blue(self, sequence: Sequence) -> bool:
+        surpassed_max_query_len = False
         for symbol in self._symbols:
-            surpassed_max_query_len = self._add_to_blue(sequence + symbol)
-            if surpassed_max_query_len:
-                return surpassed_max_query_len
+            if self._add_to_blue(sequence + symbol):
+                surpassed_max_query_len = True
             
-        return False
+        return surpassed_max_query_len
 
     def _make_consistent(self) -> bool:
         while True:
@@ -219,23 +238,20 @@ class GeneralLStarLearner:
     
     def _resolve_inconsistency(self, inconsistency):
         symbol = inconsistency.symbol + inconsistency.differenceSequence
+        surpassed_max_query_len = False
         self._observation_table.exp.append(symbol)
         for sequence in self._observation_table.observations:
-            surpassed_max_query_len = self._fill_hole_for(sequence, symbol)
-            if surpassed_max_query_len:
-                return surpassed_max_query_len
-
+            if self._fill_hole_for(sequence, symbol):
+                surpassed_max_query_len = True
+            
         self._observation_table.update_red_values()
-        return False
+        return surpassed_max_query_len
         
 
     def _fill_hole_for(self, sequence: Sequence, suffix: Sequence):
-        if self._surpassed_max_query_len(sequence, [suffix]):
-            return True
-        
         self._observation_table[sequence].append(
             self._teacher.membership_query(sequence + suffix))
         
-        return False
+        return self._surpassed_max_query_len(sequence, [suffix])
     
     

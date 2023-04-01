@@ -8,21 +8,23 @@ from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_learner import Tes
 from pymodelextractor.tests.learners_tests.test_pdfa_lstar_quant_learner import TestPDFALStarQuantLearner
 from pymodelextractor.tests.learners_tests.test_pdfa_lstar_tolerance_learner import TestPDFALStarToleranceLearner
 from pymodelextractor.tests.learners_tests.test_pdfa_lstarcol_quant_learner import TestPDFALStarColQuantLearner
-from tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerWithEqualityAlgebra
-from tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
-from tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
-from tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanModelTeachers
-from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner import TestPDFAQuantizantionNAryTreeLearner
-from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_metrics \
+from pymodelextractor.tests.learners_tests.test_lambda_star_learner import TestLambdaStarLearnerWithEqualityAlgebra
+from pymodelextractor.tests.learners_tests.test_pdfa_teachers_pdfa_lstar import TestPDFATeachersLStar
+from pymodelextractor.tests.learners_tests.test_pdfa_teachers_pdfa_lstar_col import TestPDFATeachersLStarCol
+from pymodelextractor.tests.learners_tests.test_pac_boolean_model_teacher import TestPACBooleanModelTeachers
+from pymodelextractor.tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner import TestPDFAQuantizantionNAryTreeLearner
+from pymodelextractor.tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_metrics \
      import TestPDFAQuantizantionNAryTreeLearnerMetrics
-from tests.learners_tests.test_bounded_pdfa_quantization_n_ary_tree_learner \
+from pymodelextractor.tests.learners_tests.test_bounded_pdfa_quantization_n_ary_tree_learner \
      import TestBoundedPDFAQuantizantionNAryTreeLearner
-from tests.learners_tests.test_bounded_pdfa_lstar_learner import TestBoundedPDFALStarLearner
-from tests.learners_tests.test_pac_batch_teacher_quant import TestPACBatchTeacherQuant
-from tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_running_example \
+from pymodelextractor.tests.learners_tests.test_bounded_pdfa_lstar_learner import TestBoundedPDFALStarLearner
+from pymodelextractor.tests.learners_tests.test_pac_batch_teacher_quant import TestPACBatchTeacherQuant
+from pymodelextractor.tests.learners_tests.test_pdfa_quantization_n_ary_tree_learner_running_example \
      import TestPDFAQuantizantionNAryTreeLearnerRunningExample
-from tests.learners_tests.test_mm_lstar_learner import TestMMLStarLearner
+from pymodelextractor.tests.learners_tests.test_mm_lstar_learner import TestMMLStarLearner
 from tests.learners_tests.test_general_lstar_learner import TestGeneralLStarLearner
+from tests.learners_tests.test_base_observation_table import TestBaseObservationTable
+from tests.learners_tests.test_partial_table_translator import TestPartialDFATranslator
 
 
 def run():
@@ -46,7 +48,10 @@ def run():
                               TestPDFAQuantizantionNAryTreeLearnerRunningExample,
                               TestMMLStarLearner,
                               TestGeneralLStarLearner,
-                              TestPDFATeachersLStarCol]
+                              TestPDFATeachersLStarCol,
+                              TestBaseObservationTable,
+                              TestPartialDFATranslator]
+
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:
