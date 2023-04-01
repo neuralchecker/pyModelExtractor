@@ -64,7 +64,6 @@ class KearnsVaziraniLearnerOpt(Learner):
     def tentative_hypothesis(self) -> DFA:
         states = {}
         for leaf in self._tree.leaves:
-            # Optimization 2: Only ask MQ if access string is new
             if leaf in self._tree.MHat:
                 state = State(leaf, self._tree.MHat[leaf])
             else:
@@ -76,7 +75,7 @@ class KearnsVaziraniLearnerOpt(Learner):
         
         for access_string, state in states.items():
             for symbol in self._symbols:
-                access_string_of_transition, _ = self._tree.sift(access_string+symbol)
+                access_string_of_transition = self._tree.sift(access_string+symbol)
                 state.add_transition(symbol, states[access_string_of_transition])
         
         return DFA(self._alphabet, states[epsilon], set(states.values()), None)
@@ -95,12 +94,10 @@ class KearnsVaziraniLearnerOpt(Learner):
         s_i = epsilon
         gamma_j_minus_1 = epsilon
         distinguishing_string_found = False
-        path_to_checkpoint = []
 
         for prefix in counterexample.get_prefixes():
             s_i_minus_1 = s_i
-            # Optimization 3: use a checkpoint to avoid asking MQ to all predecessors
-            s_i, path_to_checkpoint = self._tree.sift(prefix, w_checkpoint=False, path_to_checkpoint=path_to_checkpoint)
+            s_i = self._tree.sift(prefix)
             s_hat_i = self.get_accessing_string(model,prefix)
             if not s_i == s_hat_i:
                 internal_node_string = prefix[-1] + self._tree.lca(s_i, s_hat_i)
@@ -111,17 +108,6 @@ class KearnsVaziraniLearnerOpt(Learner):
 
         assert(distinguishing_string_found, 'Some distinguishing string must have been found, if not an infinite loop occurs')
 
-    def get_node_from_checkpoint(self, path_to_checkpoint: list) -> 'ClassificationNode':
-        node = self._tree.root
-        while(path_to_checkpoint != []):
-            action = path_to_checkpoint.pop(0)
-            if action == 'R':    
-                node = node.right
-            else:
-                node = node.left
-        
-        return node
-    
     def create_single_state_DFA(self, is_final: bool):
         epsilonState = State(epsilon, is_final=is_final)
         for symbol in self._symbols:
@@ -163,49 +149,38 @@ class ClassificationTree():
 
         return mq
 
-    def sift(self, sequence: Sequence, w_checkpoint: bool=False, path_to_checkpoint:list=[]) -> tuple[Sequence, list]:
+    def sift(self, sequence: Sequence) -> Sequence:
         if self._cache_queries:
             if sequence in self._sift_cache:
-                return (self._sift_cache[sequence], [])
+                return self._sift_cache[sequence]
             
         node = self.root
-        
-        if w_checkpoint:
-            node = self.get_node_from_checkpoint(path_to_checkpoint)
         
         while not node.is_leaf():
             d = node.string
             sd = sequence+d
-    
-            # Optimization 1: Ask if sd is in mq_cache
+
             if sd in self._mq_cache:
                 mq = self._mq_cache[sd]
                 if mq:
                     node = node.right
-                    action = 'R'
                 else:
                     node = node.left
-                    action = 'L'
             else:
                 if self._ask_membership_query(sd):
                     node = node.right
-                    action = 'R'
                 else:
                     node = node.left
-                    action = 'L'
-
-            if w_checkpoint and not node.is_leaf():
-                    path_to_checkpoint.append(action)
 
         if self._cache_queries:
             self._sift_cache[sequence] = node.string
 
-        return (node.string, path_to_checkpoint)
+        return node.string
     
     def lca(self, a:Sequence, b:Sequence) -> Sequence:
         ''' lca: lowest common ancestor '''
         if not a in self.leaves:
-            print('unexpected error')
+            print('recorcholis batman')
         t1 = self.leaves[a]
         t2 = self.leaves[b]
         if t1.depth < t2.depth:
@@ -250,17 +225,6 @@ class ClassificationTree():
 
         for seq in keys_to_remove:
             del self._sift_cache[seq]
-
-    def get_node_from_checkpoint(self, path_to_checkpoint: list) -> 'ClassificationNode':
-        node = self.root
-        while(path_to_checkpoint != []):
-            action = path_to_checkpoint.pop(0)
-            if action == 'R':    
-                node = node.right
-            else:
-                node = node.left
-        
-        return node
 
 class ClassificationNode():
     def __init__(self, string: Sequence, parent: 'ClassificationNode' = None):
