@@ -17,11 +17,18 @@ from pythautomata.automata.deterministic_finite_automaton import \
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
 from pythautomata.base_types.state import State
-
+from pythautomata.model_comparators.dfa_comparison_strategy import \
+      DFAComparisonStrategy as DFAComparator
+from pythautomata.base_types.sequence import Sequence
+from pythautomata.base_types.symbol import SymbolStr
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 zero = binaryAlphabet['0']
 one = binaryAlphabet['1']
+a = SymbolStr('a')
+b = SymbolStr('b')
+abAlphabet = Alphabet(frozenset((a, b)))
+epsilon = Sequence([])
 
 class TestPartialDFATranslator(unittest.TestCase):
     def get_observation_table(self, automaton) -> GeneralObservationTable:
@@ -67,8 +74,8 @@ class TestPartialDFATranslator(unittest.TestCase):
 
         partial_result = learner.learn(GeneralTeacher(automaton, DFAComparisonStrategy()))
 
-        translated_automaton = PartialDFATranslator().translate(partial_result.info['observation_table'],
-                                                            automaton.alphabet)
+        translated_automaton = PartialDFATranslator(). \
+        translate(partial_result.info['observation_table'], automaton.alphabet)
             
         assert ComparisonStrategy().are_equivalent(partial_result.model, translated_automaton)
 
@@ -87,6 +94,117 @@ class TestPartialDFATranslator(unittest.TestCase):
 
         partial_result = learner.learn(GeneralTeacher(automaton, DFAComparisonStrategy()))
 
-        assert ComparisonStrategy().are_equivalent(partial_result.model, partial_expected_automaton)
+        assert ComparisonStrategy().are_equivalent(partial_result.model, 
+        partial_expected_automaton)
+ 
+    def test_with_unclosed_table(self):
+        state0 = State("State 0", True)
+        state1 = State("State 1")
+
+        state0.add_transition(a, state1)
+        state0.add_transition(b, state1)
+        state1.add_transition(a, state1)
+        state1.add_transition(b, state1)
+
+        comparator = DFAComparator()
+
+        partial_expected_automaton = DFA(abAlphabet, state0,
+                   set([state0, state1]), comparator, "Automaton with unclosed OT")
+        
+        obs_table = GeneralObservationTable()
+        obs_table.red = set()
+        obs_table.blue = set()
+        obs_table.observations = {}
+
+        obs_table.red.add(epsilon)
+        obs_table.blue.add(Sequence([a]))
+        obs_table.blue.add(Sequence([b]))
+
+        obs_table[epsilon] = [True]
+        obs_table[Sequence([a])] = [False]
+        obs_table[Sequence([b])] = [False]
+
+        translated_automaton = PartialDFATranslator().translate(obs_table,
+                                                            partial_expected_automaton.alphabet)
+
+        assert ComparisonStrategy().are_equivalent(translated_automaton, 
+                                                   partial_expected_automaton)
+
+
+    def create_automaton_1(self):
+        state0 = State("State 0", True)
+        state1 = State("State 1")
+
+        state0.add_transition(a, state1)
+        state0.add_transition(b, state1)
+        state1.add_transition(a, state1)
+        state1.add_transition(b, state0)
+
+        comparator = DFAComparator()
+
+        return DFA(abAlphabet, state0,
+                   set([state0, state1]), comparator, "Automaton with inconsistent OT")
+
+    def create_automaton_2(self):
+        stateA = State("State A", True)
+        stateB = State("State B")
+
+        stateA.add_transition(a, stateB)
+        stateA.add_transition(b, stateB)
+        stateB.add_transition(a, stateB)
+        stateB.add_transition(b, stateB)
+
+        comparator = DFAComparator()
+
+        return DFA(abAlphabet, stateA,
+                   set([stateA, stateB]), comparator, "Automaton with inconsistent OT")
+
+    def create_inconsistent_observation_table(self):
+        obs_table = GeneralObservationTable()
+        obs_table.red = set()
+        obs_table.blue = set()
+        obs_table.observations = {}
+
+        obs_table.red.add(epsilon)
+        obs_table.red.add(Sequence([a]))
+        obs_table.red.add(Sequence([b]))
+        obs_table.red.add(Sequence([b, b]))
+        obs_table.blue.add(Sequence([a, a]))
+        obs_table.blue.add(Sequence([a, b]))
+        obs_table.blue.add(Sequence([b, a]))
+        obs_table.blue.add(Sequence([b, b, a]))
+        obs_table.blue.add(Sequence([b, b, b]))
+
+        obs_table[epsilon] = [True]
+        obs_table[Sequence([a])] = [False]
+        obs_table[Sequence([b])] = [False]
+        obs_table[Sequence([b, b])] = [False]
+        obs_table[Sequence([a, a])] = [False]
+        obs_table[Sequence([a, b])] = [True]
+        obs_table[Sequence([b, a])] = [False]
+        obs_table[Sequence([b, b, a])] = [False]
+        obs_table[Sequence([b, b, b])] = [False]
+
+        return obs_table
+    
+    def test_with_inconsistent_table(self):
+        partial_expected_automaton1 = self.create_automaton_1()
+        
+        partial_expected_automaton2 = self.create_automaton_2()
+        
+        obs_table = self.create_inconsistent_observation_table()
+        
+        translated_automaton = PartialDFATranslator().translate(obs_table,
+                                                            partial_expected_automaton1.alphabet)
+
+        is_eq1 = ComparisonStrategy().are_equivalent(translated_automaton, 
+                                                     partial_expected_automaton1)
+
+        is_eq2 = ComparisonStrategy().are_equivalent(translated_automaton, 
+                                                     partial_expected_automaton2)
+
+        assert is_eq1 or is_eq2
+        
+    
         
 

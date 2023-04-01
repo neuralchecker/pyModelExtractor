@@ -42,11 +42,11 @@ class PartialDFATranslator(ObservationTableTranslator):
         red_values = set()
         states = [(self.epsilon, State(str(self.epsilon), observation_table[self.epsilon][0]))]
         for red_seq in observation_table.red:
-            if red_seq not in red_values:
-                values = observation_table[red_seq]
-                state = State(str(red_seq), values[0])
+            red_value = tuple(observation_table[red_seq])
+            if red_value not in red_values:
+                state = State(str(red_seq), red_value[0])
                 states.append((red_seq, state))
-                red_values.add(tuple(values))
+                red_values.add(red_value)
         
         return states
     
