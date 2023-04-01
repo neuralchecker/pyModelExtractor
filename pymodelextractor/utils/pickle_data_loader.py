@@ -5,7 +5,6 @@ from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import SymbolStr
 
-import pandas as pd
 import joblib
 
 class PickleDataLoader(DataLoader):    
