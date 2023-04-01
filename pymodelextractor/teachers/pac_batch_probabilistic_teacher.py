@@ -9,21 +9,25 @@ from typing import Union
 import numpy as np
 from collections import OrderedDict
 from multiprocessing import Process, Manager
-
+from utils.data_loader import DataLoader
 class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
 
     def __init__(self, model: ProbabilisticModel, epsilon: float, delta: float,
                  comparator: FiniteAutomataComparator, sequence_generator: SequenceGenerator = None,
-                 max_seq_length: float = 128, compute_epsilon_star: bool = True, parallel_cache = False, max_query_elements = 1_000_000, batch_size = 10_000):
+                 max_seq_length: float = 128, compute_epsilon_star: bool = True, parallel_cache = False, max_query_elements = 1_000_000, batch_size = 10_000, cache_from_dataloader:DataLoader = None):
         super().__init__(model, comparator, epsilon, delta, sequence_generator, max_seq_length, compute_epsilon_star)
         assert (hasattr(model, 'get_last_token_weights_batch'))
         self._parallel_cache = parallel_cache
-        self._max_query_elements = max_query_elements
+        self._max_query_elements = max_query_elements    
         if self._parallel_cache:
             manager = Manager()
             self._cache = manager.dict()
             self._job = Process(target=self.fill_cache, args=(self._cache, model,self._max_query_elements, batch_size)) 
             self._job.start() 
+        if cache_from_dataloader is not None:
+            if self._cache is None:
+                self._cache = dict()
+            self._cache.update(cache_from_dataloader.get_data())
 
     def fill_cache(self, cache, model, max_query_elements, batch_size):
         total_elements = 0
