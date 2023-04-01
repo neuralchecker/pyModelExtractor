@@ -10,6 +10,8 @@ from pythautomata.automata.deterministic_finite_automaton import \
 from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.state import State
+from pymodelextractor.learners.observation_table_learners.general_observation_table import \
+    GeneralObservationTable
 
 
 class FAObservationTableTranslator(ObservationTableTranslator):
@@ -19,7 +21,7 @@ class FAObservationTableTranslator(ObservationTableTranslator):
     """
     epsilon = Sequence([])
 
-    def translate(self, observation_table: ObservationTable, alphabet: Alphabet, output_alphabet: Alphabet = None) -> FA:
+    def translate(self, observation_table: Union[ObservationTable, GeneralObservationTable], alphabet: Alphabet, output_alphabet: Alphabet = None) -> FA:
         sequence_states: dict[Sequence, State] = self._get_states_for(
             observation_table.red, observation_table)
         for sequence, state in sequence_states.items():
@@ -31,7 +33,7 @@ class FAObservationTableTranslator(ObservationTableTranslator):
                     state.add_transition(symbol, transition_state)
         return DFA(alphabet, sequence_states[self.epsilon], set(sequence_states.values()), None)
 
-    def _get_states_for(self, red: set[Sequence], observation_table: ObservationTable) -> dict[Sequence, State]:
+    def _get_states_for(self, red: set[Sequence], observation_table: Union[ObservationTable, GeneralObservationTable]) -> dict[Sequence, State]:
         sequences = [self.epsilon]
         # might thorw error on set of list, easily solved by casting list to tuple
 
