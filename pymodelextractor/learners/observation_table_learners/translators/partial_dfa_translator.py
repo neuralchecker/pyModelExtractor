@@ -16,6 +16,11 @@ from pythautomata.model_comparators.dfa_comparison_strategy import DFAComparison
     as DFAComparator
 
 class PartialDFATranslator(ObservationTableTranslator):
+    # This partial observation table translator is non deterministic due to red being an 
+    #   unordered set.
+    # Iterating through an unordered set in python is non deterministic and leads to 
+    #   different states added on final automaton resulting in a different automaton.
+
     hole_state = State("Hole", False)
     epsilon = Sequence([])
 
