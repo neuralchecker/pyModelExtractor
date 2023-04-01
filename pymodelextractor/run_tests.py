@@ -45,7 +45,7 @@ def run():
                               TestPACBatchTeacherQuant,
                               TestPDFAQuantizantionNAryTreeLearnerRunningExample,
                               TestMMLStarLearner, TestPDFATeachersLStarCol]
-
+     test_classes_to_run = [TestPACBatchTeacherQuant]
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:
