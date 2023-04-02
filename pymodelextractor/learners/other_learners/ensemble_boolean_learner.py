@@ -14,16 +14,16 @@ debug_log = 2
 trace_log = 3
 
 class EnsembleBooleanLearner:
-    def __init__(self, learners, max_time = -1):
-        self._learners = learners
+    def __init__(self, learning_functions, max_time = -1):
+        self._learning_functions = learning_functions
         self._max_time = max_time
         self._last_model = None
         
     def learn(self, teacher) -> LearningResult:
         results = {}
         models = []
-        for learner in self._learners:
-            result = learner.learn(teacher)
+        for learning_fun in self._learning_functions:
+            result = learning_fun(teacher)
             models.append(result.model)
             results[result.model.name] = result
         composed_model = ComposedBooleanModel(models, models[0].alphabet, lambda *args: sum(args)>(len(args)/2))

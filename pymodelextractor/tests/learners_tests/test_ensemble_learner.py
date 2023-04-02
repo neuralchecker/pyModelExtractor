@@ -19,10 +19,10 @@ from itertools import chain
 
 class TestEnsembleBooleanLearner(unittest.TestCase):
     def setUp(self):
-        l1 = LStarLearner()
-        l2 = LStarLearner()
-        l3 = LStarLearner()
-        self.learner = EnsembleBooleanLearner(learners=[l1, l2, l3])
+        l1 = LStarLearner().learn
+        l2 = LStarLearner().learn
+        l3 = LStarLearner().learn
+        self.learner = EnsembleBooleanLearner(learning_functions=[l1, l2, l3])
 
     def teacher(self, automaton: DeterministicFiniteAutomaton) -> PACBooleanTeacher:
         epsilon = delta = 0.05

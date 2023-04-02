@@ -53,7 +53,6 @@ def run():
                               TestBaseObservationTable,
                               TestPartialDFATranslator,
                               TestEnsembleBooleanLearner]
-
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:
