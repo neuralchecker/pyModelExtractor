@@ -25,6 +25,7 @@ from pymodelextractor.tests.learners_tests.test_mm_lstar_learner import TestMMLS
 from tests.learners_tests.test_general_lstar_learner import TestGeneralLStarLearner
 from tests.learners_tests.test_base_observation_table import TestBaseObservationTable
 from tests.learners_tests.test_partial_table_translator import TestPartialDFATranslator
+from tests.learners_tests.test_ensemble_learner import TestEnsembleBooleanLearner
 
 
 def run():
@@ -50,7 +51,8 @@ def run():
                               TestGeneralLStarLearner,
                               TestPDFATeachersLStarCol,
                               TestBaseObservationTable,
-                              TestPartialDFATranslator]
+                              TestPartialDFATranslator,
+                              TestEnsembleBooleanLearner]
 
      loader = TestLoader()
      suites_list = []
