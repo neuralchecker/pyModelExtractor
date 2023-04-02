@@ -5,11 +5,12 @@ from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pymodelextractor.teachers.pac_probabilistic_teacher import PACProbabilisticTeacher
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from pythautomata.base_types.symbol import Symbol
+from pymodelextractor.utils.data_loader import DataLoader
+
 from typing import Union
 import numpy as np
 from collections import OrderedDict
 from multiprocessing import Process, Manager
-from utils.data_loader import DataLoader
 class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
 
     def __init__(self, model: ProbabilisticModel, epsilon: float, delta: float,

@@ -9,16 +9,21 @@ from pythautomata.model_comparators.mealy_machine_comparison_strategy import Mea
 from pythautomata.model_comparators.moore_machine_comparison_strategy import MooreMachineComparisonStrategy as MooreComparator
 from pythautomata.abstract.boolean_model import BooleanModel
 from pythautomata.abstract.model import Model
+from pymodelextractor.utils.data_loader import DataLoader
 
 class GeneralTeacher(Teacher):
 
     def __init__(self, state_machine: Union[BooleanModel, Model],
                 comparison_strategy: Union[FAComparator, PAC, MealyComparator, MooreComparator],
-                w_cache = True):
+                w_cache = True,
+                cache_from_dataloader: DataLoader = None):
         self._state_machine = state_machine
         self._comparison_strategy = comparison_strategy
         self._cache = {}
         self._w_cache = w_cache
+        if cache_from_dataloader is not None:
+            self._cache.update(cache_from_dataloader.get_data())
+
         super().__init__()
 
     @property
