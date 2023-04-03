@@ -64,13 +64,9 @@ class KearnsVaziraniLearnerOpt(Learner):
     def tentative_hypothesis(self) -> DFA:
         states = {}
         for leaf in self._tree.leaves:
-            if leaf in self._tree.MHat:
-                state = State(leaf, self._tree.MHat[leaf])
-            else:
-                is_final = self._tree._ask_membership_query(leaf)
-                state = State(leaf, is_final)
-                self._tree.MHat[state] = is_final
-                
+            is_final = self._tree._ask_membership_query(leaf)
+            state = State(leaf, is_final)
+            
             states[leaf] = state
         
         for access_string, state in states.items():
@@ -161,17 +157,10 @@ class ClassificationTree():
             d = node.string
             sd = sequence+d
 
-            if sd in self._mq_cache:
-                mq = self._mq_cache[sd]
-                if mq:
-                    node = node.right
-                else:
-                    node = node.left
+            if self._ask_membership_query(sd):
+                node = node.right
             else:
-                if self._ask_membership_query(sd):
-                    node = node.right
-                else:
-                    node = node.left
+                node = node.left
 
         if self._cache_queries:
             self._sift_cache[sequence] = node.string
