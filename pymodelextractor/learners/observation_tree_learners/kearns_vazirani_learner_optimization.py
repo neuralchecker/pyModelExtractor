@@ -95,7 +95,8 @@ class KearnsVaziraniLearnerOpt(Learner):
         gamma_j_minus_1 = epsilon
         distinguishing_string_found = False
 
-        for prefix in counterexample.get_prefixes():
+        for i in range(1, len(counterexample) + 1):
+            prefix = Sequence(counterexample[:i])
             s_i_minus_1 = s_i
             s_i = self._tree.sift(prefix)
             s_hat_i = self.get_accessing_string(model,prefix)
