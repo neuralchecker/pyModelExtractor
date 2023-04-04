@@ -26,7 +26,7 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
             self._job = Process(target=self.fill_cache, args=(self._cache, model,self._max_query_elements, batch_size)) 
             self._job.start() 
         if cache_from_dataloader is not None:
-            if self._cache is None:
+            if not self._parallel_cache:
                 self._cache = dict()
             self._cache.update(cache_from_dataloader.get_data())
 
