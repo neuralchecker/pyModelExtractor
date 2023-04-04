@@ -12,6 +12,12 @@ from pythautomata.base_types.sequence import Sequence
 
 
 class TestBaseObservationTable(unittest.TestCase):
+    def get_observation_table(self, automaton) -> GeneralObservationTable:
+        learner = LStarFactory.get_dfa_lstar_learner()
+
+        result = learner.learn(GeneralTeacher(automaton, DFAComparisonStrategy()))
+        return result.info['observation_table']
+    
     def test_lstar_with_initialized_base_table(self):
         tomitas_automaton = TomitasGrammars.get_automaton_1()
 
@@ -114,8 +120,45 @@ class TestBaseObservationTable(unittest.TestCase):
         final_result = learner.learn(teacher, partial_observation_table)
 
         assert ComparisonStrategy().are_equivalent(final_result.model, automaton)
-        
 
+    def test_lstar_with_partial_red_table(self):
+        automaton = TomitasGrammars.get_automaton_7()
+        observation_table = self.get_observation_table(automaton)
+
+        observation_table.red = set()
+
+        learner = LStarFactory.get_partial_dfa_lstar_learner()
+        
+        result = learner.learn(GeneralTeacher(automaton, ComparisonStrategy()),
+                               observation_table
+                               )
+        assert ComparisonStrategy().are_equivalent(result.model, automaton)
+
+    def test_lstar_with_partial_blue_table(self):
+        automaton = TomitasGrammars.get_automaton_7()
+        observation_table = self.get_observation_table(automaton)
+
+        observation_table.blue = set()
+
+        learner = LStarFactory.get_partial_dfa_lstar_learner()
+        
+        result = learner.learn(GeneralTeacher(automaton, ComparisonStrategy()),
+                               observation_table
+                               )
+        assert ComparisonStrategy().are_equivalent(result.model, automaton)
+        
+    def test_lstar_with_partial_obs_table(self):
+        automaton = TomitasGrammars.get_automaton_7()
+        observation_table = self.get_observation_table(automaton)
+
+        observation_table.observations = dict()
+
+        learner = LStarFactory.get_partial_dfa_lstar_learner()
+        
+        result = learner.learn(GeneralTeacher(automaton, ComparisonStrategy()),
+                               observation_table
+                               )
+        assert ComparisonStrategy().are_equivalent(result.model, automaton)
 
 
         

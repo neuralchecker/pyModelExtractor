@@ -94,17 +94,17 @@ class GeneralLStarLearner:
     def _learn(self, teacher: GeneralTeacher, observation_table: GeneralObservationTable = None,
                 log_hierachy: int = 0) -> tuple[bool, LearningResult]:
         start_time = time.time()
-        teacher.log_hierachy = log_hierachy
         self.log_hierachy = log_hierachy
         if self.log_hierachy > no_log:
             print("**** Started lstar learning ****")
         self._teacher = teacher
         self._symbols = self._teacher.alphabet.symbols
-        if observation_table == None:
+        if observation_table is None:
             self._build_observation_table()
             self._initialize_observation_table()
         else:
             self._observation_table = observation_table
+            self._observation_table.fill_observations(teacher)
         
         model = None
         answer = False
