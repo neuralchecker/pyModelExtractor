@@ -4,6 +4,7 @@ from typing import Sequence
 from pythautomata.base_types.alphabet import Alphabet
 
 from pymodelextractor.learners.observation_table_learners.observation_table import TableInconsistency
+from pymodelextractor.teachers.general_teacher import GeneralTeacher
 
 
 class GeneralObservationTable:
@@ -85,6 +86,27 @@ class GeneralObservationTable:
     
     def add_to_blue(self, sequence: Sequence):
         self.blue.add(sequence)
+
+    def fill_observations(self, oracle: GeneralTeacher):
+        for red_seq in self.red:
+            if red_seq not in self.observations or \
+                len(self.observations[red_seq]) != len(self.exp):
+                sequences = []
+                for suffix in self.exp:
+                    sequence = red_seq + suffix
+                    sequences.append(oracle.membership_query(sequence))
+
+                self.observations[red_seq] = sequences
+
+        for blue_seq in self.blue:
+            if blue_seq not in self.observations or \
+                len(self.observations[blue_seq]) != len(self.exp):
+                sequences = []
+                for suffix in self.exp:
+                    sequence = blue_seq + suffix
+                    sequences.append(oracle.membership_query(sequence))
+
+                self.observations[blue_seq] = sequences
 
     def __str__(self):
         lines = ["\nObservation Table:",
