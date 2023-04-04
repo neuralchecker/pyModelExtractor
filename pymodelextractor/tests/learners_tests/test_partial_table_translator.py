@@ -21,6 +21,7 @@ from pythautomata.model_comparators.dfa_comparison_strategy import \
       DFAComparisonStrategy as DFAComparator
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.base_types.symbol import SymbolStr
+from pymodelextractor.utils.time_bound_utilities import is_unix_system
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 zero = binaryAlphabet['0']
@@ -75,10 +76,59 @@ class TestPartialDFATranslator(unittest.TestCase):
         partial_result = learner.learn(GeneralTeacher(automaton, DFAComparisonStrategy()))
 
         translated_automaton = PartialDFATranslator(). \
-        translate(partial_result.info['observation_table'], automaton.alphabet)
+            translate(partial_result.info['observation_table'], automaton.alphabet)
             
         assert ComparisonStrategy().are_equivalent(partial_result.model, translated_automaton)
 
+    def get_complex_alphabet(self):
+        symbols = set()
+        for symbol in range(100):
+            symbols.add(SymbolStr(str(symbol)))
+
+        return Alphabet(frozenset(symbols))
+
+    def test_lstar_with_partial_translator_max_time(self):
+        if is_unix_system():
+            alphabet = self.get_complex_alphabet()
+            automaton = generate_dfa(alphabet, number_of_states=50, seed=17)
+            partial_learner = LStarFactory.get_partial_dfa_lstar_learner(max_time=3)
+
+            teacher = GeneralTeacher(automaton, DFAComparisonStrategy())
+            partial_result = partial_learner.learn(teacher)
+
+            translated_automaton = PartialDFATranslator(). \
+                translate(partial_result.info['observation_table'], automaton.alphabet)
+                
+            assert ComparisonStrategy().are_equivalent(partial_result.model, translated_automaton)
+
+            learner = LStarFactory.get_partial_dfa_lstar_learner()
+
+            result = learner.learn(teacher)
+
+            assert ComparisonStrategy().are_equivalent(result.model, automaton)
+
+    def test_lstar_with_partial_blue_table(self):
+        automaton = TomitasGrammars.get_automaton_7()
+        observation_table = self.get_observation_table(automaton)
+
+        observation_table.blue = set()
+
+        new_automaton = PartialDFATranslator().translate(observation_table,
+                                                       automaton.alphabet)
+        
+        assert ComparisonStrategy().are_equivalent(new_automaton, automaton)
+        
+    def test_lstar_with_partial_obs_table(self):
+        automaton = TomitasGrammars.get_automaton_7()
+        observation_table = self.get_observation_table(automaton)
+
+        observation_table.observations = dict()
+
+        new_automaton = PartialDFATranslator().translate(observation_table,
+                                                       automaton.alphabet)
+        
+        assert not ComparisonStrategy().are_equivalent(new_automaton, automaton)
+    
     def test_partial_tomitas7_automaton(self):
         automaton = TomitasGrammars.get_automaton_7()
         

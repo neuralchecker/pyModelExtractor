@@ -14,6 +14,7 @@ from pythautomata.automata.deterministic_finite_automaton import \
     DeterministicFiniteAutomaton as DFA
 from pythautomata.model_comparators.dfa_comparison_strategy import DFAComparisonStrategy \
     as DFAComparator
+from pythautomata.base_types.symbol import Symbol
 
 class PartialDFATranslator(ObservationTableTranslator):
     # This partial observation table translator is non deterministic due to red being an 
@@ -32,32 +33,38 @@ class PartialDFATranslator(ObservationTableTranslator):
 
         for seq, state in states:
             for suffix in alphabet.symbols:
-                next_state_value = observation_table[seq + suffix]
-                next_state = self.find_state(states, observation_table, next_state_value)
+                if (seq+suffix) in (observation_table.observations):
+                    next_state_value = observation_table[seq + suffix]
+                    next_state = self.find_state(states, observation_table, next_state_value)
 
-                if next_state is None:
-                    state.add_hole_transition(self.hole_state)
+                    if next_state is None:
+                        state.add_hole_transition(self.hole_state)
+                    else:
+                        state.add_transition(suffix, next_state)
                 else:
-                    state.add_transition(suffix, next_state)
-        
-        return DFA(alphabet, states[0][1], {state for _, state in states}, 
+                    state.add_hole_transition(self.hole_state)
+        initial_state = states[0][1] if states else self.hole_state
+        return DFA(alphabet, initial_state, {state for _, state in states}, 
                    DFAComparator, hole=self.hole_state)
 
     def create_states(self, observation_table) -> list[tuple[Sequence, State]]:
         red_values = set()
-        states = [(self.epsilon, State(str(self.epsilon), observation_table[self.epsilon][0]))]
+        states = []
+        if self.epsilon in observation_table.observations:
+            states.append((self.epsilon, State(str(self.epsilon), observation_table[self.epsilon][0])))
         for red_seq in observation_table.red:
-            red_value = tuple(observation_table[red_seq])
-            if red_value not in red_values:
-                state = State(str(red_seq), red_value[0])
-                states.append((red_seq, state))
-                red_values.add(red_value)
+            if red_seq in observation_table.observations:
+                red_value = tuple(observation_table[red_seq])
+                if red_value not in red_values:
+                    state = State(str(red_seq), red_value[0])
+                    states.append((red_seq, state))
+                    red_values.add(red_value)
         
         return states
     
     def find_state(self, states: list[tuple[Sequence, State]], 
                    observation_table: Union[ObservationTable, GeneralObservationTable],
-                   value: list[bool]) -> Union[State, None]:
+                   value: Union[list[bool], list[Symbol]]) -> Union[State, None]:
         
         for sequence, state in states:
             if value == observation_table[sequence]:
