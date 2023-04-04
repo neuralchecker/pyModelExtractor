@@ -165,7 +165,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
     
-    def test_tomitas_1_w_data_loader_cache(self):
+    def test_tomitas_1_w_data_loader_cache_and_parallel_cache(self):
         model = WeightedTomitasGrammars.get_automaton_1()
         generator = UniformLengthSequenceGenerator(alphabet=model.alphabet, max_seq_length=5, min_seq_length=0)
         sequences = generator.generate_words(2000)
@@ -179,6 +179,25 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         dataloader = PickleDataLoader(path)
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20,parallel_cache=True, cache_from_dataloader=dataloader)
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)        
+        extracted_model = result.model     
+        os.remove(path)
+        self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
+
+    def test_tomitas_1_w_data_loader_cache_without_parallel_cache(self):
+        model = WeightedTomitasGrammars.get_automaton_1()
+        generator = UniformLengthSequenceGenerator(alphabet=model.alphabet, max_seq_length=5, min_seq_length=0)
+        sequences = generator.generate_words(2000)
+        path = "./test_dataset"
+        symbols = list(model.alphabet.symbols)
+        symbols.sort()
+        symbols = [model.terminal_symbol] + symbols   
+        values = [OrderedDict(zip(symbols, model.last_token_probabilities(x, symbols))) for x in sequences]            
+        data = dict(zip(sequences, values))
+        joblib.dump(data, path)
+        dataloader = PickleDataLoader(path)
+        teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
+                                               max_seq_length=20,parallel_cache=False, cache_from_dataloader=dataloader)
         result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)        
         extracted_model = result.model     
         os.remove(path)
