@@ -419,3 +419,25 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         extracted_model = result.model
         self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
+
+    def test_arg_max_partitioner4(self):     
+        model = self.generate_PDFA_with_3_different_states_according_to_argmax()
+        partitioner = TopKProbabilityPartitioner(1)
+        comparator = WFAPartitionComparator(partitioner)
+        teacher = PDFATeacher(model, comparator)
+        learner = BoundedPDFAQuantizationNAryTreeLearner(partitioner,10, 2, generate_partial_hipothesis=True, mean_distribution_for_partial_hipothesis=True)
+        result = learner.learn(teacher)
+        extracted_model = result.model
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
+
+    def test_arg_max_partitioner5(self):     
+        model = self.generate_PDFA_with_3_different_states_according_to_argmax()
+        partitioner = TopKProbabilityPartitioner(1)
+        comparator = WFAPartitionComparator(partitioner)
+        teacher = PACBatchProbabilisticTeacher(model, epsilon = 0.05, delta = 0.05, comparator=comparator)
+        learner = BoundedPDFAQuantizationNAryTreeLearner(partitioner,10, 2, generate_partial_hipothesis=True, pre_cache_queries_for_building_hipothesis=True, mean_distribution_for_partial_hipothesis=True)
+        result = learner.learn(teacher)
+        extracted_model = result.model
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
