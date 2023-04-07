@@ -168,7 +168,7 @@ class PDFAQuantizationNAryTreeLearner:
         if self._verbose: print('CE:', counterexample)
         for prefix in counterexample.get_prefixes():
             s_i_minus_1 = s_i
-            s_i, updated_tree = self._tree.sift(prefix)
+            s_i, _ = self._tree.sift(prefix)
             s_hat_i = self.get_accessing_string(model, prefix)
             if not s_i == s_hat_i:
                 internal_node_string = prefix[-1] + self._tree.lca(s_i, s_hat_i)
@@ -254,7 +254,7 @@ class ClassificationTree:
                     updated_tree = True
                     node = new_node
                 else:
-                    return ClassificationTree.unknown_leaf,False
+                    return ClassificationTree.unknown_leaf, False
         self._sift_cache[sequence] = node.string
         return node.string, updated_tree
 
