@@ -11,7 +11,7 @@ from typing import Union
 class PDFATeacher(ProbabilisticTeacher):
 
     def __init__(self, model: WeightedAutomaton, comparison_strategy: FiniteAutomataComparator):
-        super().__init__()
+        super().__init__(model)
         self._comparison_strategy = comparison_strategy
         self.__target_pdfa_model = model
 
@@ -20,10 +20,6 @@ class PDFATeacher(ProbabilisticTeacher):
 
     def log_sequence_weight(self, sequence: Sequence):
         return self.__target_pdfa_model.log_sequence_weight(sequence)
-
-    def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]):
-        self._last_token_weight_queries_count += len(required_suffixes)
-        return self.__target_pdfa_model.get_last_token_weights(sequence, required_suffixes)
 
     def get_log_probability_error(self, seq, aut: PDFA):
         return abs(aut.log_sequence_weight(seq) - self.log_sequence_weight(seq))

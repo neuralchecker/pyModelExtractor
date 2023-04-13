@@ -8,16 +8,16 @@ from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from math import ceil, log, comb
 from typing import Union
 import numpy as np
+from pymodelextractor.utils.data_loader import DataLoader
 
 
 class PACProbabilisticTeacher(ProbabilisticTeacher):
 
     def __init__(self, model: ProbabilisticModel, comparator: FiniteAutomataComparator, epsilon: float = 0.05,
                  delta: float = 0.01, sequence_generator: SequenceGenerator = None, max_seq_length: int = 128,
-                 compute_epsilon_star: bool = True):
-        super().__init__()
+                 compute_epsilon_star: bool = True, parallel_cache = False, max_query_elements = 1_000_000, batch_size = 10_000, cache_from_dataloader:DataLoader = None):
+        super().__init__(model, parallel_cache, max_query_elements, batch_size, cache_from_dataloader)
         self._comparator = comparator
-        self._target_model = model
         self._epsilon = epsilon
         self._delta = delta
         self.sample_size = 0
@@ -29,15 +29,10 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
             self._sequence_generator = sequence_generator
 
 
-    def sequence_weight(self, sequence: Sequence):
-        return self._target_model.sequence_weight(sequence)
+
 
     def log_sequence_weight(self, sequence: Sequence):
         return self._target_model.log_sequence_weight(sequence)
-
-    def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]):
-        self._last_token_weight_queries_count +=len(required_suffixes)        
-        return self._target_model.get_last_token_weights(sequence, required_suffixes)
 
     def get_log_probability_error(self, seq, aut: WeightedAutomaton):
         return abs(aut.log_sequence_weight(seq) - self.log_sequence_weight(seq))

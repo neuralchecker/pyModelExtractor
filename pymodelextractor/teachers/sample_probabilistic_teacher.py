@@ -5,13 +5,15 @@ from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pythautomata.utilities.uniform_length_sequence_generator import UniformLengthSequenceGenerator
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
+from pymodelextractor.utils.data_loader import DataLoader
+
 from typing import Union, Sized
 
 
 class SampleProbabilisticTeacher(ProbabilisticTeacher):
     def __init__(self, model: ProbabilisticModel, comparator: FiniteAutomataComparator, sample_size: float = None,
-                 sequence_generator: SequenceGenerator = None, max_seq_length: int = 128, full_prefix_set = False):
-        super().__init__()
+                 sequence_generator: SequenceGenerator = None, max_seq_length: int = 128, full_prefix_set = False, parallel_cache = False, max_query_elements = 1_000_000, batch_size = 10_000, cache_from_dataloader:DataLoader = None):
+        super().__init__(model, parallel_cache, max_query_elements, batch_size, cache_from_dataloader)
         self._sample_size = sample_size
         self._target_model = model
         self._comparator = comparator
@@ -25,15 +27,8 @@ class SampleProbabilisticTeacher(ProbabilisticTeacher):
             self._sequence_generator = sequence_generator
         self.__rand_words = None
 
-    def sequence_weight(self, sequence: Sequence):
-        return self._target_model.sequence_weight(sequence)
-
     def log_sequence_weight(self, sequence: Sequence):
         return self._target_model.log_sequence_weight(sequence)
-
-    def last_token_weights(self, sequence: Sequence, required_suffixes: list[Sequence]):
-        self._last_token_weight_queries_count +=len(required_suffixes)            
-        return self._target_model.get_last_token_weights(sequence, required_suffixes)
 
     def get_log_probability_error(self, seq, aut: WeightedAutomaton):
         return abs(aut.log_sequence_weight(seq) - self.log_sequence_weight(seq))
