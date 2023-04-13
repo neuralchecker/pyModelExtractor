@@ -5,13 +5,14 @@ from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from pymodelextractor.teachers.sample_probabilistic_teacher import SampleProbabilisticTeacher
+from pymodelextractor.utils.data_loader import DataLoader
 from typing import Union, Sized
 
 
 class SampleBatchProbabilisticTeacher(SampleProbabilisticTeacher):
     def __init__(self, model: ProbabilisticModel, comparator: FiniteAutomataComparator, sample_size: float = None,
-                 sequence_generator: SequenceGenerator = None, max_seq_length: int = 128, full_prefix_set = False):
-        super().__init__(model, comparator, sample_size, sequence_generator, max_seq_length, full_prefix_set)
+                 sequence_generator: SequenceGenerator = None, max_seq_length: int = 128, full_prefix_set = False, parallel_cache = False, max_query_elements = 1_000_000, batch_size = 10_000, cache_from_dataloader:DataLoader = None):
+        super().__init__(model, comparator, sample_size, sequence_generator, max_seq_length, full_prefix_set, parallel_cache, max_query_elements, batch_size, cache_from_dataloader)
         assert (hasattr(model, 'get_last_token_weights_batch'))
     
     def last_token_weights_batch(self, sequences: list[Sequence], required_suffixes: list[Sequence]):
