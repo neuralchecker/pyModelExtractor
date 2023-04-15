@@ -21,7 +21,7 @@ class GeneralLStarLearner:
         self._max_states = max_states
         self._max_query_length = max_query_lenght
         self._max_time = max_time
-        self._last_model = None
+        self._history = []
 
     def _build_observation_table(self):
         self._observation_table = GeneralObservationTable()
@@ -69,27 +69,30 @@ class GeneralLStarLearner:
     def learn(self, teacher, observation_table: GeneralObservationTable = None,
                log_hierachy: int = 0) -> LearningResult:
         if self._max_time == -1:
-            stopped_by_bounds, _ = self._learn(teacher, observation_table, log_hierachy)
+            stopped_by_bounds, result = self._learn(teacher, observation_table, log_hierachy)
             if stopped_by_bounds and type(self._model_translator) == PartialDFATranslator:
-                self._last_model = self._model_translator.translate(self._observation_table,
+                last_model = self._model_translator.translate(self._observation_table,
                                                                 self._teacher.alphabet,
                                                                 self._teacher.output_alphabet)
-            return self._learning_results_for(self._last_model, self._max_time)
+                self._history.append(last_model)
+            return self._learning_results_for(self._history, result.info['duration'])
 
         try:
             with timeout(self._max_time):
                 stopped_by_bounds, _ = self._learn(teacher, observation_table, log_hierachy) 
                 if stopped_by_bounds and type(self._model_translator) == PartialDFATranslator:
-                    self._last_model = self._model_translator.translate(self._observation_table,
+                    last_model = self._model_translator.translate(self._observation_table,
                                                                     self._teacher.alphabet,
                                                                     self._teacher.output_alphabet)
-                return self._learning_results_for(self._last_model, self._max_time)
+                    self._history.append(last_model)
+                return self._learning_results_for(self._history, self._max_time)
         except TimeoutError:
             if type(self._model_translator) == PartialDFATranslator:
-                self._last_model = self._model_translator.translate(self._observation_table, 
+                last_model = self._model_translator.translate(self._observation_table, 
                                                                     self._teacher.alphabet, 
                                                                     self._teacher.output_alphabet)
-            return self._learning_results_for(self._last_model, self._max_time)
+                self._history.append(last_model)
+            return self._learning_results_for(self._history, self._max_time)
 
     def _learn(self, teacher: GeneralTeacher, observation_table: GeneralObservationTable = None,
                 log_hierachy: int = 0) -> tuple[bool, LearningResult]:
@@ -118,24 +121,24 @@ class GeneralLStarLearner:
             surpassed_max_query_len = self._close()
             
             if surpassed_max_query_len:
-                return True, self._learning_results_for(self._last_model, time.time() - start_time)
+                return True, self._learning_results_for(self._history, time.time() - start_time)
 
             surpassed_max_query_len = self._make_consistent()
             
             if surpassed_max_query_len:
-                return True, self._learning_results_for(self._last_model, time.time() - start_time)
+                return True, self._learning_results_for(self._history, time.time() - start_time)
 
             self._model_translator._output_alphabet = self._teacher.output_alphabet
             model = self._model_translator.translate(
                 self._observation_table, self._teacher.alphabet, self._teacher.output_alphabet)
-            self._last_model = model
+            self._history.append(model)
 
             start_eq_time = time.time()
             answer, counterexample = self._teacher.equivalence_query(model)
             eq_duration = time.time() - start_eq_time
 
             if (self._max_states != -1) and (len(model.states) > self._max_states):
-                return True, self._learning_results_for(model, time.time() - start_time)
+                return True, self._learning_results_for(self._history, time.time() - start_time)
 
             if not answer:
                 if self.log_hierachy >= debug_log:
@@ -144,7 +147,7 @@ class GeneralLStarLearner:
 
                 surpassed_max_query_len = self._update_observation_table_with(counterexample)
                 if surpassed_max_query_len:
-                    return True, self._learning_results_for(self._last_model, time.time() - start_time)
+                    return True, self._learning_results_for(self._history, time.time() - start_time)
                 
             else:
                 if self.log_hierachy >= debug_log:
@@ -155,7 +158,7 @@ class GeneralLStarLearner:
                 print("  # Iteration " + str(counter) + " ended, duration: " + str(duration) + "s")
             counter += 1
 
-        result = self._learning_results_for(model, time.time() - start_time)
+        result = self._learning_results_for(self._history, time.time() - start_time)
         duration = time.time() - start_time
         if self.log_hierachy > no_log:
             print("**** Learning finished in " + str(duration) + "s using " + str(counterexample_counter) \
@@ -177,15 +180,17 @@ class GeneralLStarLearner:
         
         return surpassed_max_query_len
     
-    def _learning_results_for(self, model, duration):
-        number_of_states = len(model.states) if model is not None else 0
+    def _learning_results_for(self, history, duration):
+        last_model = history[-1] if len(history) > 0 else None
+        number_of_states = len(last_model.states) if last_model is not None else 0
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'membership_queries_count': self._teacher.membership_queries_count,
             'observation_table': self._observation_table,
             'duration': duration,
+            'history': history
         }
-        return LearningResult(model, number_of_states, info)
+        return LearningResult(last_model, number_of_states, info)
 
     def _close(self) -> bool:
         start_closing_time = time.time()
