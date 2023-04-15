@@ -12,11 +12,12 @@ from pythautomata.utilities.automata_converter import AutomataConverter
 from pythautomata.utilities.simple_dfa_generator import generate_dfa
 from pymodelextractor.teachers.pac_comparison_strategy import PACComparisonStrategy
 from pymodelextractor.utils.time_bound_utilities import is_unix_system
+from pythautomata.automata.deterministic_finite_automaton import DeterministicFiniteAutomaton
 from itertools import chain
 
 
 class TestGeneralLStarLearner(unittest.TestCase):
-    '''
+    
     def test_generic_learner(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata()))
         for automaton in mergedAutomata:
@@ -74,7 +75,6 @@ class TestGeneralLStarLearner(unittest.TestCase):
             result = LStarFactory.get_moore_machine_lstar_learner(max_time=5)\
                 .learn(GeneralTeacher(moore, MooreMachineComparisonStrategy()))
             self.assertFalse(MooreMachineComparisonStrategy().are_equivalent(result.model, moore))
-    '''
 
     def test_pac_against_many_DFAs(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata()))
@@ -96,12 +96,5 @@ class TestGeneralLStarLearner(unittest.TestCase):
             teacher = GeneralTeacher(automaton, 
                                     PACComparisonStrategy(automaton.alphabet, 0.005, 0.005, 20))
             result = LStarFactory.get_dfa_lstar_learner().learn(teacher)
-            assert result.info['history'] != None
-
-
-
-
-        
-    
-
-    
+            assert len(result.info['history']) != 0
+            assert type(result.info['history'][0]) == DeterministicFiniteAutomaton

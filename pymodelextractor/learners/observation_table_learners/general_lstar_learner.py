@@ -69,13 +69,13 @@ class GeneralLStarLearner:
     def learn(self, teacher, observation_table: GeneralObservationTable = None,
                log_hierachy: int = 0) -> LearningResult:
         if self._max_time == -1:
-            stopped_by_bounds, _ = self._learn(teacher, observation_table, log_hierachy)
+            stopped_by_bounds, result = self._learn(teacher, observation_table, log_hierachy)
             if stopped_by_bounds and type(self._model_translator) == PartialDFATranslator:
                 last_model = self._model_translator.translate(self._observation_table,
                                                                 self._teacher.alphabet,
                                                                 self._teacher.output_alphabet)
                 self._history.append(last_model)
-            return self._learning_results_for(self._history, self._max_time)
+            return self._learning_results_for(self._history, result.info['duration'])
 
         try:
             with timeout(self._max_time):
