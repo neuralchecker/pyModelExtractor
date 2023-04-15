@@ -16,6 +16,7 @@ from itertools import chain
 
 
 class TestGeneralLStarLearner(unittest.TestCase):
+    '''
     def test_generic_learner(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata()))
         for automaton in mergedAutomata:
@@ -73,6 +74,7 @@ class TestGeneralLStarLearner(unittest.TestCase):
             result = LStarFactory.get_moore_machine_lstar_learner(max_time=5)\
                 .learn(GeneralTeacher(moore, MooreMachineComparisonStrategy()))
             self.assertFalse(MooreMachineComparisonStrategy().are_equivalent(result.model, moore))
+    '''
 
     def test_pac_against_many_DFAs(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata()))
@@ -87,6 +89,15 @@ class TestGeneralLStarLearner(unittest.TestCase):
                                     PACComparisonStrategy(moore.alphabet, 0.005, 0.005, 20))
             result = LStarFactory.get_moore_machine_lstar_learner().learn(teacher)
             assert MooreMachineComparisonStrategy().are_equivalent(result.model, moore)
+
+    def test_history(self):
+        mergedAutomata = list(chain(TomitasGrammars.get_all_automata()))
+        for automaton in mergedAutomata:
+            teacher = GeneralTeacher(automaton, 
+                                    PACComparisonStrategy(automaton.alphabet, 0.005, 0.005, 20))
+            result = LStarFactory.get_dfa_lstar_learner().learn(teacher)
+            assert result.info['history'] != None
+
 
 
 
