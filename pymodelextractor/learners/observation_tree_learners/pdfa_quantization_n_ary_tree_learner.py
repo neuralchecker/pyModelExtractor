@@ -12,6 +12,7 @@ from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLengthExceededException
 from collections import OrderedDict
 import math
+import warnings
 
 
 class PDFAQuantizationNAryTreeLearner:
@@ -91,7 +92,8 @@ class PDFAQuantizationNAryTreeLearner:
                 models.append(model)
                 size = len(model.weighted_states)
                 if verbose: print('Size after update:', size)
-                assert size > last_size, 'Possible infinite loop'
+                if size == last_size:
+                    warnings.warn('Possible infinite loop, last hipothesis has the same size as current hipothesis.\nSize: '+str(size))
                 last_size = size
                 
                 teacher_prob = list(self._teacher.next_token_probabilities(counterexample).values())                
