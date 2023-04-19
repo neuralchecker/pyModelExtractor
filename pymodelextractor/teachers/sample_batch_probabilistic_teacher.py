@@ -42,8 +42,8 @@ class SampleBatchProbabilisticTeacher(SampleProbabilisticTeacher):
                             self._all_rand_words_precomputed = True
                             break
                         self.__rand_words.append(next_element)
-                        batch.append(next_element)
-                yield batch
+                        batch.append(next_element)                
+                yield [batch]
         else:
             total = 0
             while total < self._sample_size:
@@ -51,7 +51,7 @@ class SampleBatchProbabilisticTeacher(SampleProbabilisticTeacher):
                 words_to_generate = min(self.batch_size, to_go)         
                 rand_words = sorted(self._sequence_generator.generate_words(words_to_generate))
                 total += len(words_to_generate)
-                yield rand_words
+                yield [rand_words]
 
     def equivalence_query(self, aut: WeightedAutomaton) -> Union[tuple[bool, Sized], tuple[bool, None]]:
         self._equivalence_queries_count += 1
@@ -61,7 +61,7 @@ class SampleBatchProbabilisticTeacher(SampleProbabilisticTeacher):
         for symbol in self.alphabet.symbols:
             suffixes.append(Sequence((symbol,)))
         generator = self.generate_batch_words()
-        for rand_words in next(generator):        
+        for rand_words in next(generator):                 
             results = self.last_token_weights_batch(rand_words, suffixes)
             for i in range(len(rand_words)):
                 word = rand_words[i]
