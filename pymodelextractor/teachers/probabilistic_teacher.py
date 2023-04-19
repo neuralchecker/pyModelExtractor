@@ -22,6 +22,7 @@ class ProbabilisticTeacher(ABC):
         self._target_model = model
         self._parallel_cache = parallel_cache
         self._max_query_elements = max_query_elements   
+        self._batch_size = batch_size
         if self._parallel_cache:
             manager = Manager()
             self._cache = manager.dict()

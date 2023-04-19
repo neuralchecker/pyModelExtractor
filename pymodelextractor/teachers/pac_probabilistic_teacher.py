@@ -22,7 +22,7 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         self._delta = delta
         self.sample_size = 0
         self.epsilon_star = 0
-        self._compute_epsilon_star = compute_epsilon_star
+        self._compute_epsilon_star = compute_epsilon_star        
         if sequence_generator is None:
             self._sequence_generator = UniformLengthSequenceGenerator(self._target_model.alphabet, max_seq_length= max_seq_length)
         else:
