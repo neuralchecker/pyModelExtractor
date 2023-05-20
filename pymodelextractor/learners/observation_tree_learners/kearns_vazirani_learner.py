@@ -48,7 +48,11 @@ class KearnsVaziraniLearner(Learner):
             while not are_equivalent:
                 self.update_tree(counterexample, model)
                 model = self.tentative_hypothesis()
-                are_equivalent, counterexample = self._teacher.equivalence_query(model)                
+                are_equivalent, counterexample = self._teacher.equivalence_query(model)
+                if not(are_equivalent):
+                    while self._teacher.membership_query(counterexample) != model.accepts(counterexample):
+                        self.update_tree(counterexample, model)
+                        model = self.tentative_hypothesis()               
 
         numberOfStates = len(model.states) if model is not None else 0
         info = {
@@ -58,6 +62,9 @@ class KearnsVaziraniLearner(Learner):
         }
         return LearningResult(model, numberOfStates, info)
 
+    def process_counterexample(self, counterexample: Sequence, model: DFA) -> bool:
+        return False
+    
     def tentative_hypothesis(self) -> DFA:
         states = {}
         for leaf in self._tree.leaves:

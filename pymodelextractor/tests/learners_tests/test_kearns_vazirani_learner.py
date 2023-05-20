@@ -11,6 +11,11 @@ from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
 from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
 from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
+from pythautomata.utilities.nicaud_dfa_generator import generate_dfa
+from pythautomata.base_types.symbol import SymbolStr
+from pythautomata.base_types.alphabet import Alphabet
+from pymodelextractor.teachers.pac_comparison_strategy import PACComparisonStrategy
+from pymodelextractor.teachers.general_teacher import GeneralTeacher
 from itertools import chain
 
 
@@ -58,3 +63,18 @@ class TestKearnsVaziraniLearner(unittest.TestCase):
             result = self.learner.learn(teacher)
             assert ComparisonStrategy().are_equivalent(
                 result.model, automaton)
+            
+    def test_with_100_states_automaton(self):
+        dfa = generate_dfa(alphabet= Alphabet(frozenset(map(SymbolStr, ["0", "1", "2"]))), nominal_size=100, seed=17)
+        teacher = self.teacher(dfa)
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, dfa)
+        
+    def test_automaton_with_PAC(self):
+        dfa = generate_dfa(alphabet= Alphabet(frozenset(map(SymbolStr, ["0", "1"]))), nominal_size=10, seed=17)
+        teacher = GeneralTeacher(dfa, 
+                                 PACComparisonStrategy(dfa.alphabet, 0.005, 0.005, 20))
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, dfa)
