@@ -8,7 +8,8 @@ from pymodelextractor.learners.learning_result import LearningResult
 
 
 class KearnsVaziraniLearner(Learner):
-    def __init__(self):
+    def __init__(self, counterexample_processing = 'None'):
+        self.counterexample_processing = counterexample_processing
         pass
 
     @property
@@ -61,9 +62,6 @@ class KearnsVaziraniLearner(Learner):
             'observation_tree': self._tree
         }
         return LearningResult(model, numberOfStates, info)
-
-    def process_counterexample(self, counterexample: Sequence, model: DFA) -> bool:
-        return False
     
     def tentative_hypothesis(self) -> DFA:
         states = {}
