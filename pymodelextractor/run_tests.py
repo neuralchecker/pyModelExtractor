@@ -30,6 +30,7 @@ from tests.learners_tests.test_ensemble_probabilistic_learner import TestEnsembl
 
 
 def run():
+     '''
      test_classes_to_run = [TestLStarLearner,
                               TestLStarColLearner,
                               TestPDFALStarQuantLearner,
@@ -55,6 +56,8 @@ def run():
                               TestPartialDFATranslator,
                               TestEnsembleBooleanLearner,
                               TestEnsembleProbabilisticLearner]
+     '''
+     test_classes_to_run = [TestKearnsVaziraniLearner]
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:

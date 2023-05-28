@@ -10,7 +10,7 @@ class RivestSchapire:
         upper = len(counterexample) - 2
         counterexample_out = target.membership_query(counterexample)
         while True:
-            mid = (lower + upper) / 2
+            mid = (lower + upper) // 2
             end_state = hypothesis.get_end_state(counterexample[:mid])
             prefix = end_state
             sec_half_counterexample = counterexample[mid:]
@@ -20,6 +20,6 @@ class RivestSchapire:
                 if upper < lower:
                     return sec_half_counterexample[1:]
             else:
-                upper = mid + 1
+                upper = mid - 1
                 if upper < lower:
                     return sec_half_counterexample

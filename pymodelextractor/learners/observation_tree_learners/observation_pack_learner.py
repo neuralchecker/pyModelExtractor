@@ -5,10 +5,12 @@ from pymodelextractor.learners.learner import Learner
 from pythautomata.automata.deterministic_finite_automaton import DeterministicFiniteAutomaton as DFA
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
 from pymodelextractor.learners.learning_result import LearningResult
+from pymodelextractor.learners.counterexample_processing.rivest_schapire import RivestSchapire
 
 
-class KearnsVaziraniLearner(Learner):
-    def __init__(self):
+class ObservationPackLearner(Learner):
+    def __init__(self, counterexample_handling = 'OneGlobally'):
+        self.counterexample_handling = counterexample_handling
         pass
 
     @property
@@ -22,20 +24,19 @@ class KearnsVaziraniLearner(Learner):
     def initialization(self, cache_in_tree: bool) -> tuple[bool, DFA]:        
         is_final = self._teacher.membership_query(epsilon)
         starting_dfa = self.create_single_state_DFA(is_final)
-        are_equivalent, counterexample = self._teacher.equivalence_query(starting_dfa)
+        are_equivalent, _ = self._teacher.equivalence_query(starting_dfa)
         if are_equivalent:
             return (True, starting_dfa)
 
         nodeRoot = ClassificationNode(epsilon)
-        nodeEpsilon = ClassificationNode(epsilon, parent = nodeRoot)
-        nodeCounterexample = ClassificationNode(counterexample, parent = nodeRoot)
+        node_q0 = ClassificationNode(epsilon, parent = nodeRoot)
         
         if is_final:
-            nodeRoot.right = nodeEpsilon
-            nodeRoot.left = nodeCounterexample
+            nodeRoot.right = None
+            nodeRoot.left = node_q0
         else:
-            nodeRoot.right = nodeCounterexample
-            nodeRoot.left = nodeEpsilon
+            nodeRoot.right = node_q0
+            nodeRoot.left = None
         self._tree = ClassificationTree(nodeRoot, self._teacher, cache_in_tree)
         return (False, None)
 
@@ -87,21 +88,7 @@ class KearnsVaziraniLearner(Learner):
         return state.name
         
     def update_tree(self, counterexample: Sequence, model: DFA)-> None:        
-        s_i = epsilon
-        gamma_j_minus_1 = epsilon
-        distinguishing_string_found = False
-        for prefix in counterexample.get_prefixes():
-            s_i_minus_1 = s_i
-            s_i = self._tree.sift(prefix)
-            s_hat_i = self.get_accessing_string(model,prefix)
-            if not s_i == s_hat_i:
-                internal_node_string = prefix[-1] + self._tree.lca(s_i, s_hat_i)
-                self._tree.update_node(s_i_minus_1, gamma_j_minus_1, internal_node_string)
-                distinguishing_string_found = True
-                break
-            gamma_j_minus_1 = prefix
-        #Some distinguishing string must have been found, if not an infinite loop occurs    
-        assert(distinguishing_string_found, 'Some distinguishing string must have been found, if not an infinite loop occurs')
+       return None
 
     def create_single_state_DFA(self, is_final: bool):
         epsilonState = State(epsilon, is_final=is_final)
@@ -161,40 +148,7 @@ class ClassificationTree():
             self._sift_cache[sequence] = node.string
 
         return node.string
-
-    # def get_distinguishing_string(self, string1, string2):
-    #     queue = []
-    #     queue.append(self.root)
-    #     result = []
-    #     while queue:
-    #         element = queue.pop()
-    #         if element.is_distinguishing_string(string1, string2):
-    #             return element.string
-    #         else:
-    #             if element.right:
-    #                 queue.append(element.right)
-    #             if element.left:
-    #                 queue.append(element.left)        
-    #     return None 
     
-    def lca(self, a:Sequence, b:Sequence) -> Sequence:
-        ''' lca: lowest common ancestor '''
-        if not a in self.leaves:
-            print('recorcholis batman')
-        t1 = self.leaves[a]
-        t2 = self.leaves[b]
-        if t1.depth < t2.depth:
-            t = t1
-            t1 = t2
-            t2 = t
-        while t1.depth > t2.depth:
-            t1 = t1.parent
-        while not (t1 is t2):
-            assert not ((t1 is self.root) or (t2 is self.root))
-            t1 = t1.parent
-            t2 = t2.parent
-        return t1.string
-
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
         old_string = old_node.string
@@ -241,12 +195,6 @@ class ClassificationNode():
     def is_leaf(self) -> bool:
         return self.right is None and self.left is None
     
-    # def is_distinguishing_string(self, string1: Sequence, string2: Sequence) -> bool:
-    #     if self.right is None or self.left is None: 
-    #         return False
-    #     else:
-    #         return self.left.has_leaf(string1) and self.right.has_leaf(string2) or self.left.has_leaf(string2) and self.right.has_leaf(string1) 
-
     def has_leaf(self, string: Sequence) -> bool:    
         queue = []
         queue.append(self)
