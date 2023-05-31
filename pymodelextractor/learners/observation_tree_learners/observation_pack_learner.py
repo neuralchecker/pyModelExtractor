@@ -52,7 +52,7 @@ class ObservationPackLearner(Learner):
         for transtion in self.transitions:
             access_string, symbol = transtion
             tgt = self._tree.sift(access_string, symbol)
-            self.transitions[]
+            #self.transitions[]
         return None
 
     def learn(self, teacher: Teacher) -> LearningResult:
