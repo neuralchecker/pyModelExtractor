@@ -9,8 +9,13 @@ from pymodelextractor.learners.counterexample_processing.rivest_schapire import 
 
 
 class ObservationPackLearner(Learner):
-    def __init__(self, counterexample_handling = 'OneGlobally'):
-        self.counterexample_handling = counterexample_handling
+    def __init__(self):
+        # Pointer from state to node
+        self.link_state_w_node = {}
+        # Pointer from node to state
+        self.link_node_w_state = {}
+        # Transitions
+        self.transitions = {}
         pass
 
     @property
@@ -21,28 +26,38 @@ class ObservationPackLearner(Learner):
     def _symbols(self):
         return self._teacher.alphabet.symbols
 
-    def initialization(self, cache_in_tree: bool) -> tuple[bool, DFA]:        
+    def initialization(self) -> tuple[bool, DFA]:        
         is_final = self._teacher.membership_query(epsilon)
         starting_dfa = self.create_single_state_DFA(is_final)
-        are_equivalent, _ = self._teacher.equivalence_query(starting_dfa)
-        if are_equivalent:
-            return (True, starting_dfa)
 
         nodeRoot = ClassificationNode(epsilon)
-        node_q0 = ClassificationNode(epsilon, parent = nodeRoot)
+        nodeEpsilon = ClassificationNode(epsilon, parent = nodeRoot)
         
         if is_final:
-            nodeRoot.right = None
-            nodeRoot.left = node_q0
+            nodeRoot.right = nodeEpsilon
         else:
-            nodeRoot.right = node_q0
-            nodeRoot.left = None
-        self._tree = ClassificationTree(nodeRoot, self._teacher, cache_in_tree)
-        return (False, None)
+            nodeRoot.left = nodeEpsilon
+    
+        self._tree = ClassificationTree(nodeRoot, self._teacher)
+        self.link_state_w_node[starting_dfa.initial_state] = nodeEpsilon
+        self.link_node_w_state[nodeEpsilon] = starting_dfa.initial_state
 
-    def learn(self, teacher: Teacher, cache_in_tree: bool = True) -> LearningResult:
+        # Initialize transitions pointing to root node (non-tree transitions)
+        for symbol in self._symbols:
+            self.transitions[(starting_dfa.initial_state, symbol)] = nodeRoot
+
+        return (False, None)
+    
+    def close_transitions(self):
+        for transtion in self.transitions:
+            access_string, symbol = transtion
+            tgt = self._tree.sift(access_string, symbol)
+            self.transitions[]
+        return None
+
+    def learn(self, teacher: Teacher) -> LearningResult:
         self._teacher = teacher
-        is_target_DFA, model = self.initialization(cache_in_tree)
+        is_target_DFA, model = self.initialization()
         if not is_target_DFA:
             model = self.tentative_hypothesis()
             are_equivalent, counterexample = self._teacher.equivalence_query(model)
@@ -136,16 +151,28 @@ class ClassificationTree():
                 return self._sift_cache[sequence]
 
         node = self.root
-        while not node.is_leaf():
+        prev_node = None
+        is_right = False
+        while (not node.is_leaf()) and (not node.is_leaf()):
             d = node.string
             sd = sequence+d
+            prev_node = node
             if self._ask_membership_query(sd):
+                is_right = True
                 node = node.right
             else:
+                is_right = False
                 node = node.left
 
-        if self._cache_queries:
-            self._sift_cache[sequence] = node.string
+        if node is None:
+            new_node = ClassificationNode(sequence, parent=prev_node)
+            if is_right:
+                prev_node.right = new_node
+            else:
+                prev_node.left = new_node
+            node = new_node
+
+        self._sift_cache[sequence] = node.string
 
         return node.string
     
