@@ -11,9 +11,9 @@ from pymodelextractor.learners.counterexample_processing.rivest_schapire import 
 class ObservationPackLearner(Learner):
     def __init__(self):
         # Pointer from state to node
-        self.link_state_w_node = {}
+        self.link_state_t_node = {}
         # Pointer from node to state
-        self.link_node_w_state = {}
+        self.link_node_t_state = {}
         # Transitions
         self.transitions = {}
         pass
@@ -26,7 +26,7 @@ class ObservationPackLearner(Learner):
     def _symbols(self):
         return self._teacher.alphabet.symbols
 
-    def initialization(self) -> tuple[bool, DFA]:        
+    def initialization(self) -> tuple[DFA, 'ClassificationNode']:        
         is_final = self._teacher.membership_query(epsilon)
         starting_dfa = self.create_single_state_DFA(is_final)
 
@@ -39,36 +39,42 @@ class ObservationPackLearner(Learner):
             nodeRoot.left = nodeEpsilon
     
         self._tree = ClassificationTree(nodeRoot, self._teacher)
-        self.link_state_w_node[starting_dfa.initial_state] = nodeEpsilon
-        self.link_node_w_state[nodeEpsilon] = starting_dfa.initial_state
+        self.link_state_t_node[starting_dfa.initial_state] = nodeEpsilon
+        self.link_node_t_state[nodeEpsilon] = starting_dfa.initial_state
 
         # Initialize transitions pointing to root node (non-tree transitions)
         for symbol in self._symbols:
             self.transitions[(starting_dfa.initial_state, symbol)] = nodeRoot
 
-        return (False, None)
+        return (starting_dfa, self._tree)
     
     def close_transitions(self):
         for transtion in self.transitions:
             access_string, symbol = transtion
-            tgt = self._tree.sift(access_string, symbol)
-            #self.transitions[]
-        return None
+            # check if transition is an open transition
+            if type(self.transitions[transtion]) == ClassificationNode:
+                tgt = self._tree.sift(access_string, symbol)
+                self.transitions[transtion] = tgt
+
+                if tgt not in self.link_node_t_state:
+                    # How do we know it is final?
+                    state = State(tgt, False)
+                    self.link_state_t_node[state] = tgt
+                    self.link_node_t_state[tgt] = state   
 
     def learn(self, teacher: Teacher) -> LearningResult:
         self._teacher = teacher
-        is_target_DFA, model = self.initialization()
-        if not is_target_DFA:
-            model = self.tentative_hypothesis()
+        model, self._tree = self.initialization()
+        are_equivalent, counterexample = self._teacher.equivalence_query(model)
+        while not are_equivalent:
+            self.analyze_inconsistency()
+            self.split()
+            self.close_transitions()
             are_equivalent, counterexample = self._teacher.equivalence_query(model)
-            while not are_equivalent:
-                self.update_tree(counterexample, model)
-                model = self.tentative_hypothesis()
-                are_equivalent, counterexample = self._teacher.equivalence_query(model)
-                if not(are_equivalent):
-                    while self._teacher.membership_query(counterexample) != model.accepts(counterexample):
-                        self.update_tree(counterexample, model)
-                        model = self.tentative_hypothesis()               
+            if not(are_equivalent):
+                while self._teacher.membership_query(counterexample) != model.accepts(counterexample):
+                    self.update_tree(counterexample, model)
+                    model = self.tentative_hypothesis()               
 
         numberOfStates = len(model.states) if model is not None else 0
         info = {
@@ -77,6 +83,12 @@ class ObservationPackLearner(Learner):
             'observation_tree': self._tree
         }
         return LearningResult(model, numberOfStates, info)
+    
+    def analyze_inconsistency():
+        return None
+    
+    def split():
+        return None
     
     def tentative_hypothesis(self) -> DFA:
         states = {}
