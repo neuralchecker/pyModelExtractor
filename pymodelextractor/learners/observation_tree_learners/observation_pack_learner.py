@@ -9,7 +9,7 @@ from pymodelextractor.learners.counterexample_processing.rivest_schapire import 
 
 
 class ObservationPackLearner(Learner):
-    def __init__(self):
+    def __init__(self, cex_analysis: str = 'rs'):
         # Pointer from state to node
         self.link_state_t_node = {}
         # Transitions
@@ -18,6 +18,10 @@ class ObservationPackLearner(Learner):
         self.outgoing = {}
         # Open transitions set
         self.open_transitions = {}
+        if cex_analysis == 'rs':
+            self.cex_analyzer = RivestSchapire()
+        else:
+            raise NotImplementedError('Counterexample analysis method not implemented')
         pass
 
     @property
@@ -63,7 +67,7 @@ class ObservationPackLearner(Learner):
             if new_state_discovered:
                 for symbol in self._symbols:
                     self.open_transitions.add(tgt, symbol)
-                new_state = self.create_single_state(is_final)
+                new_state = self.create_single_state(tgt.string, is_final)
                 self.link_state_t_node[new_state] = tgt
         
 
@@ -98,15 +102,17 @@ class ObservationPackLearner(Learner):
         self.close_transitions()
         return None
     
-    def analyze_inconsistency():
-        return None
+    def analyze_inconsistency(self, cex: Sequence) -> tuple(Sequence, Sequence, Sequence):
+        v = self.cex_analyzer.analyze(cex)
+        u = cex[:-len(v)]
+        a = cex[-len(v):]
+        return u,a,v
     
-    def split(self, tree: 'ClassificationTree', u: Sequence, a: Sequence, v: Sequence):
+    def split(self, u: Sequence, a: Sequence, v: Sequence):
         q_old = self.get_state_sequence(u+a)
-        q_new = u+a
+        q_new = self.create_single_state(u+a, False)
         self.create_transitions_for_new_state(q_new)
         self.split_leaf(q_old, q_new, v)
-        return None
     
     def split_leaf(self, q_old: State, q_new: State, v: Sequence):
         old_leaf = self.link_state_t_node[q_old]
@@ -123,8 +129,9 @@ class ObservationPackLearner(Learner):
 
         self.link_state_t_node[q_new] = new_leaf
 
-    def get_state_sequence(self, sequence: Sequence):
-        state = epsilon
+    def get_state(self, sequence: Sequence) -> State:
+        # Getting first state
+        state = list(self.link_state_t_node.keys())[0]
         if sequence[0] == epsilon:
             sequence = sequence[1:]
                         
@@ -148,9 +155,8 @@ class ObservationPackLearner(Learner):
         
         return DFA(self._alphabet, states[epsilon], set(states.values()), None)
              
-    def create_single_state(self, is_final: bool) -> State: 
-        epsilonState = State(epsilon, is_final=is_final)
-        return epsilonState
+    def create_single_state(self, name: str, is_final: bool) -> State: 
+        return State(name, is_final=is_final)
 
 class ClassificationTree():
     def __init__(self, root: 'ClassificationNode', teacher: Teacher, cache_queries: bool = True):
