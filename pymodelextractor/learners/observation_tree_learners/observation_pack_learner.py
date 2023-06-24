@@ -12,10 +12,12 @@ class ObservationPackLearner(Learner):
     def __init__(self):
         # Pointer from state to node
         self.link_state_t_node = {}
-        # Pointer from node to state
-        self.link_node_t_state = {}
         # Transitions
         self.transitions = {}
+        # Outgoing transitions of a state
+        self.outgoing = {}
+        # Open transitions set
+        self.open_transitions = {}
         pass
 
     @property
@@ -26,9 +28,9 @@ class ObservationPackLearner(Learner):
     def _symbols(self):
         return self._teacher.alphabet.symbols
 
-    def initialization(self) -> tuple[DFA, 'ClassificationNode']:        
+    def initialization(self) -> 'ClassificationNode':       
         is_final = self._teacher.membership_query(epsilon)
-        starting_dfa = self.create_single_state_DFA(is_final)
+        hypothesis = self.create_single_state(is_final) 
 
         nodeRoot = ClassificationNode(epsilon)
         nodeEpsilon = ClassificationNode(epsilon, parent = nodeRoot)
@@ -39,37 +41,38 @@ class ObservationPackLearner(Learner):
             nodeRoot.left = nodeEpsilon
     
         self._tree = ClassificationTree(nodeRoot, self._teacher)
-        self.link_state_t_node[starting_dfa.initial_state] = nodeEpsilon
-        self.link_node_t_state[nodeEpsilon] = starting_dfa.initial_state
+        self.link_state_t_node[hypothesis.initial_state] = nodeEpsilon
 
         # Initialize transitions pointing to root node (non-tree transitions)
+        # and so add them to open transitions set
         for symbol in self._symbols:
-            self.transitions[(starting_dfa.initial_state, symbol)] = nodeRoot
+            self.transitions[(hypothesis.initial_state, symbol)] = (nodeRoot, None)
+            self.open_transitions.add(hypothesis.initial_state.name, symbol)
 
-        return (starting_dfa, self._tree)
+        self.close_transitions()
+
+        return self._tree
     
     def close_transitions(self):
-        for transtion in self.transitions:
-            access_string, symbol = transtion
-            # check if transition is an open transition
-            if type(self.transitions[transtion]) == ClassificationNode:
-                tgt = self._tree.sift(access_string, symbol)
-                self.transitions[transtion] = tgt
-
-                if tgt not in self.link_node_t_state:
-                    # How do we know it is final?
-                    state = State(tgt, False)
-                    self.link_state_t_node[state] = tgt
-                    self.link_node_t_state[tgt] = state   
+        while len(self.open_transition) > 0:
+            transition = self.open_transition.pop()
+            transition_aseq = transition[0]+transition[1]
+            tgt, new_state_discovered, is_final = self._tree.sift(transition_aseq)
+            self.transitions[transition] = tgt.string
+            # New state discovered
+            if new_state_discovered:
+                for symbol in self._symbols:
+                    self.open_transitions.add(tgt, symbol)
+                new_state = self.create_single_state(is_final)
+                self.link_state_t_node[new_state] = tgt
+        
 
     def learn(self, teacher: Teacher) -> LearningResult:
         self._teacher = teacher
         model, self._tree = self.initialization()
         are_equivalent, counterexample = self._teacher.equivalence_query(model)
         while not are_equivalent:
-            self.analyze_inconsistency()
-            self.split()
-            self.close_transitions()
+            self.refine()
             are_equivalent, counterexample = self._teacher.equivalence_query(model)
             if not(are_equivalent):
                 while self._teacher.membership_query(counterexample) != model.accepts(counterexample):
@@ -84,11 +87,52 @@ class ObservationPackLearner(Learner):
         }
         return LearningResult(model, numberOfStates, info)
     
+    def create_transitions_for_new_state(self, q_new: Sequence):
+        for symbol in self._symbols:
+            self.transitions[q_new, symbol] = (self._tree.root, None)
+            self.open_transitions.add(q_new, symbol)
+    
+    def refine(self):
+        self.analyze_inconsistency()
+        self.split()
+        self.close_transitions()
+        return None
+    
     def analyze_inconsistency():
         return None
     
-    def split():
+    def split(self, tree: 'ClassificationTree', u: Sequence, a: Sequence, v: Sequence):
+        q_old = self.get_state_sequence(u+a)
+        q_new = u+a
+        self.create_transitions_for_new_state(q_new)
+        self.split_leaf(q_old, q_new, v)
         return None
+    
+    def split_leaf(self, q_old: State, q_new: State, v: Sequence):
+        old_leaf = self.link_state_t_node[q_old]
+        old_leaf_parent = old_leaf.parent
+        new_parent = ClassificationNode(v, parent = old_leaf_parent)
+        new_leaf = ClassificationNode(q_new.name, parent = new_parent)
+    
+        if self._tree._ask_membership_query(q_old.name+v):
+            new_parent.right = old_leaf
+            new_parent.left = new_leaf
+        else:
+            new_parent.left = old_leaf
+            new_parent.right = new_leaf
+
+        self.link_state_t_node[q_new] = new_leaf
+
+    def get_state_sequence(self, sequence: Sequence):
+        state = epsilon
+        if sequence[0] == epsilon:
+            sequence = sequence[1:]
+                        
+        while len(sequence)>0:
+            node_state = self.transitions[(state, sequence[0])]
+            state = node_state[1]
+            sequence = sequence[1:]
+        return state
     
     def tentative_hypothesis(self) -> DFA:
         states = {}
@@ -103,25 +147,10 @@ class ObservationPackLearner(Learner):
                 state.add_transition(symbol, states[access_string_of_transition])
         
         return DFA(self._alphabet, states[epsilon], set(states.values()), None)
-        
-    def get_accessing_string(self, model: DFA, sequence: Sequence):
-        state = min(model.initial_states)
-        if sequence == epsilon: 
-            return state.name
-            
-        while len(sequence)>0:
-            state = state.next_state_for(sequence[0])
-            sequence = sequence[1:]
-        return state.name
-        
-    def update_tree(self, counterexample: Sequence, model: DFA)-> None:        
-       return None
-
-    def create_single_state_DFA(self, is_final: bool):
+             
+    def create_single_state(self, is_final: bool) -> State: 
         epsilonState = State(epsilon, is_final=is_final)
-        for symbol in self._symbols:
-            epsilonState.add_transition(symbol, epsilonState)
-        return DFA(self._alphabet, epsilonState, set([epsilonState]), None)
+        return epsilonState
 
 class ClassificationTree():
     def __init__(self, root: 'ClassificationNode', teacher: Teacher, cache_queries: bool = True):
@@ -157,14 +186,14 @@ class ClassificationTree():
 
         return mq
 
-    def sift(self, sequence: Sequence) -> Sequence:
-        if self._cache_queries:
-            if sequence in self._sift_cache:
-                return self._sift_cache[sequence]
-
+    def sift(self, sequence: Sequence) -> tuple('ClassificationNode', bool, bool):
         node = self.root
         prev_node = None
         is_right = False
+        first_mq = True
+        is_final = False
+        new_state_discovered = False
+
         while (not node.is_leaf()) and (not node.is_leaf()):
             d = node.string
             sd = sequence+d
@@ -176,7 +205,13 @@ class ClassificationTree():
                 is_right = False
                 node = node.left
 
+            if first_mq and is_right:
+                is_final = True
+            elif first_mq and not is_right:
+                is_final = False
+
         if node is None:
+            new_state_discovered = True
             new_node = ClassificationNode(sequence, parent=prev_node)
             if is_right:
                 prev_node.right = new_node
@@ -184,9 +219,7 @@ class ClassificationTree():
                 prev_node.left = new_node
             node = new_node
 
-        self._sift_cache[sequence] = node.string
-
-        return node.string
+        return node, new_state_discovered, is_final
     
     def update_node(self, node_to_be_replaced, leaf_1, distinguishing_string):
         old_node = self.leaves[node_to_be_replaced]
