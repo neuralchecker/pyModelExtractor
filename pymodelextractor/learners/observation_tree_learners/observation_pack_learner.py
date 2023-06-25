@@ -38,10 +38,10 @@ class ObservationPackLearner(Learner):
     
     def learn(self, teacher: Teacher) -> LearningResult:
         self._teacher = teacher
-        model, self._tree = self.initialization()
+        model = self.initialization()
         are_equivalent, counterexample = self._teacher.equivalence_query(model)
         while not are_equivalent:
-            self.refine()
+            model = self.refine(model, counterexample)
             if self._tree._ask_membership_query(counterexample) == model.accepts(counterexample):
                 are_equivalent, counterexample = self._teacher.equivalence_query(model)
                 
@@ -56,8 +56,8 @@ class ObservationPackLearner(Learner):
     def initialization(self) -> DFA:       
         is_final = self._teacher.membership_query(epsilon)
         epsilon_state = self.create_single_state(epsilon, is_final) 
-        hypothesis =  DFA(self._alphabet, epsilon_state, set([epsilon_state]), None)
 
+        hypothesis =  DFA(self._alphabet, epsilon_state, set([epsilon_state]), None)
         nodeRoot = ClassificationNode(epsilon)
         nodeEpsilon = ClassificationNode(epsilon, parent = nodeRoot)
         
@@ -78,7 +78,7 @@ class ObservationPackLearner(Learner):
 
         return hypothesis
     
-    def close_transitions(self, model: DFA):
+    def close_transitions(self, model: DFA) -> DFA:
         while len(self.open_transitions) > 0:
             transition = self.open_transitions.pop()
             state = transition[0]
@@ -89,20 +89,22 @@ class ObservationPackLearner(Learner):
             # New state discovered
             if new_state_discovered:
                 new_state = self.create_single_state(tgt.string, is_final)
-                
+
                 for symbol in self._symbols:
                     self.open_transitions.add((new_state, symbol))
 
                 self.link_state_t_node[new_state] = tgt
                 self.link_node_t_state[tgt] = new_state
 
-            state.transitions[symbol] = self.link_node_t_state[tgt]
+            state.transitions[symbol] = set()
+            state.transitions[symbol].add(self.link_node_t_state[tgt])
+            
             #self.transitions[transition] = self.link_node_t_state[tgt]
             self.outgoing[state] = self.link_node_t_state[tgt]
             self.incoming[self.link_node_t_state[tgt]] = state
 
-            states = list(self.link_state_t_node.keys())
-            model = DFA(self._alphabet, model.initial_state, 
+        states = list(self.link_state_t_node.keys())
+        return DFA(self._alphabet, model.initial_state, 
                         set(states), None)
     
     def create_transitions_for_new_state(self, q_new: Sequence):
@@ -110,15 +112,17 @@ class ObservationPackLearner(Learner):
             #self.transitions[q_new, symbol] = None
             self.open_transitions.add(q_new, symbol)
     
-    def refine(self, model: DFA):
-        u,a,v = self.analyze_inconsistency()
+    def refine(self, model: DFA, counterexample: Sequence) -> DFA:
+        u,a,v = self.analyze_inconsistency(counterexample, model)
         self.split(u,a,v)
-        self.close_transitions(model)
+        model = self.close_transitions(model)
+        return model
     
-    def analyze_inconsistency(self, cex: Sequence) -> tuple[Sequence, Sequence, Sequence]:
-        v = self.cex_analyzer.analyze(cex)
-        u = cex[:len(cex) - len(v) - 1]
-        a = cex[len(cex) - len(v) - 1]
+    def analyze_inconsistency(self, counterexample: Sequence, hypothesis: DFA) -> \
+    tuple[Sequence, Sequence, Sequence]:
+        v = self.cex_analyzer.process_counterexample(counterexample, hypothesis, self._teacher)
+        u = counterexample[:len(counterexample) - len(v) - 1]
+        a = counterexample[len(counterexample) - len(v) - 1]
         return (u,a,v)
     
     def split(self, u: Sequence, a: Sequence, v: Sequence):
@@ -161,8 +165,8 @@ class ObservationPackLearner(Learner):
         for transition in state_incoming_transitions:
             self.open_transitions.add(transition)
 
-    def create_single_state(self, name: str, is_final: bool) -> State: 
-        return State(name, is_final=is_final)
+    def create_single_state(self, name: Sequence, is_final: bool) -> State: 
+        return State(name=name, is_final=is_final)
 
 class ClassificationTree():
     def __init__(self, root: 'ClassificationNode', teacher: Teacher, cache_queries: bool = True):
