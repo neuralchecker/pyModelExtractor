@@ -69,7 +69,7 @@ class ObservationPackLearner(Learner):
         self.link_node_t_state[nodeEpsilon] = hypothesis.initial_state
 
         for symbol in self._symbols:
-            self.open_transitions.add(tuple((hypothesis.initial_state, symbol)))
+            self.open_transitions.add((hypothesis.initial_state, symbol))
 
         self.close_transitions(hypothesis)
 
@@ -77,6 +77,7 @@ class ObservationPackLearner(Learner):
     
     def close_transitions(self, model: DFA) -> DFA:
         while len(self.open_transitions) > 0:
+           # print(self.open_transitions)
             state, symbol = self.open_transitions.pop()
             transition_aseq = state.name+symbol
             tgt, new_state_discovered, is_final = self._tree.sift(transition_aseq)
@@ -86,23 +87,23 @@ class ObservationPackLearner(Learner):
                 new_state = self.create_single_state(tgt.string, is_final)
 
                 for symbol in self._symbols:
-                    self.open_transitions.add(tuple((new_state, symbol)))
+                    self.open_transitions.add((new_state, symbol))
 
                 self.link_state_t_node[new_state] = tgt
                 self.link_node_t_state[tgt] = new_state
 
             state.transitions[symbol] = {self.link_node_t_state[tgt]}
 
-            self.outgoing[state].add(self.link_node_t_state[tgt])
-            self.incoming[self.link_node_t_state[tgt]].add(state)
+            self.outgoing[state].add((self.link_node_t_state[tgt], symbol))
+            self.incoming[self.link_node_t_state[tgt]].add((state, symbol))
 
         states = list(self.link_state_t_node.keys())
         return DFA(self._alphabet, model.initial_state, 
                         set(states), None)
     
-    def create_transitions_for_new_state(self, q_new: Sequence):
+    def create_transitions_for_new_state(self, q_new: State):
         for symbol in self._symbols:
-            self.open_transitions.add(tuple((q_new, symbol)))
+            self.open_transitions.add((q_new, symbol))
     
     def refine(self, model: DFA, counterexample: Sequence) -> DFA:
         u,a,v = self.analyze_inconsistency(counterexample, model)
@@ -123,7 +124,7 @@ class ObservationPackLearner(Learner):
     def split(self, u: Sequence, a: Sequence, v: Sequence, hypothesis: DFA):
         q_old = self.get_end_state(hypothesis, u + a)
         q_new = self.create_single_state(u + a, q_old.is_final)
-        self.create_transitions_for_new_state(q_new.name)
+        self.create_transitions_for_new_state(q_new)
         self.split_leaf(q_old, q_new, v)
         self.reset_closed_transitions(q_old)
 
@@ -132,13 +133,8 @@ class ObservationPackLearner(Learner):
         old_leaf_parent = old_leaf.parent
         new_parent = ClassificationNode(v, parent = old_leaf_parent)
         new_leaf = ClassificationNode(q_new.name, parent = new_parent)
-
-        print(q_old.name)
         q_old_seq = self.cex_analyzer.get_sequence(q_old.name)
 
-        print("PEPE", q_old_seq)
-        print(type(q_old_seq))
-        print(type(v))
         if self._tree._ask_membership_query(q_old_seq + v):
             new_parent.right = old_leaf
             new_parent.left = new_leaf
@@ -147,18 +143,21 @@ class ObservationPackLearner(Learner):
             new_parent.right = new_leaf
 
         self.link_state_t_node[q_new] = new_leaf
+        self.link_node_t_state[new_leaf] = q_new
     
     def get_end_state(self, hypothesis: DFA, sequenceValue: tuple[SymbolStr]) -> State:
         actual_state = hypothesis.initial_state
         if sequenceValue != ():
             for symbol in sequenceValue:
+                print(actual_state.name)
+                print(actual_state.transitions)
                 actual_state = actual_state.next_state_for(symbol)
         return actual_state
     
     def reset_closed_transitions(self, state: State):
         self.open_transitions = self.outgoing[state].union(self.incoming[state])
-        self.incoming[state] = {}
-        self.outgoing[state] = {}
+        self.incoming[state] = set()
+        self.outgoing[state] = set()
 
     def create_single_state(self, name: Sequence, is_final: bool) -> State: 
         new_state = State(name=name, is_final=is_final)
