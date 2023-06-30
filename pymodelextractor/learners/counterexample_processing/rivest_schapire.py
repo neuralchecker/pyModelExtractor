@@ -34,13 +34,3 @@ class RivestSchapire:
             for symbol in sequence:
                 actual_state = actual_state.next_state_for(symbol)
         return actual_state
-    
-    def get_sequence(self, name: str) -> Sequence:
-        if name == 'ϵ':
-            return Sequence()
-        
-        symbols = []
-        for char in name:
-            symbols.append(SymbolStr(char))
-        
-        return Sequence(symbols)

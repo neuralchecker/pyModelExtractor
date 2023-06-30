@@ -39,7 +39,7 @@ class ObservationPackLearner(Learner):
         model = self.initialization()
         are_equivalent, counterexample = self._teacher.equivalence_query(model)
         counter = 0
-        while not are_equivalent and counter < 2:
+        while not are_equivalent:
             counter += 1
             model = self.refine(model, counterexample)
             if self._tree._ask_membership_query(counterexample) == model.accepts(counterexample):
@@ -76,9 +76,8 @@ class ObservationPackLearner(Learner):
     
     def close_transitions(self, model: DFA) -> DFA:
         while len(self.open_transitions) > 0:
-            print(self.open_transitions)
             state, symbol = self.open_transitions.pop()
-            transition_aseq = state.name+symbol
+            transition_aseq = state.name + symbol
             tgt, new_state_discovered, is_final = self._tree.sift(transition_aseq)
 
             # New state discovered
@@ -93,9 +92,8 @@ class ObservationPackLearner(Learner):
             self.incoming[self.link_node_t_state[tgt]].add((state, symbol))
 
         states = list(self.link_state_t_node.keys())
-        for state in states:
-            print(state.transitions)
-
+        #for state in states:
+         #   print(state.name, state.transitions)
         return DFA(self._alphabet, model.initial_state, 
                         set(states), None)
     
@@ -108,13 +106,17 @@ class ObservationPackLearner(Learner):
     def analyze_inconsistency(self, counterexample: Sequence, hypothesis: DFA) -> \
     tuple[Sequence, Sequence, Sequence]:
         v = self.cex_analyzer.process_counterexample(counterexample, hypothesis, self._teacher)
-        u = Sequence([counterexample[:len(counterexample) - len(v) - 1]])
+        u = Sequence(counterexample.value[:len(counterexample) - len(v) - 1])
         a = Sequence([counterexample[len(counterexample) - len(v) - 1]])
         return (u,a,v)
     
     def split(self, u: Sequence, a: Sequence, v: Sequence, hypothesis: DFA):
-        q_old = self.cex_analyzer.get_end_state(hypothesis, u + a)
-        q_new = self.create_single_state(u + a, q_old.is_final)
+        ua = u + a
+        if(u == Sequence()): 
+            ua = a
+
+        q_old = self.cex_analyzer.get_end_state(hypothesis, ua)
+        q_new = self.create_single_state(ua, q_old.is_final)
         self.split_leaf(q_old, q_new, v)
         self.reset_closed_transitions(q_old)
 
@@ -141,9 +143,6 @@ class ObservationPackLearner(Learner):
     
     def reset_closed_transitions(self, state: State):
         self.open_transitions = self.open_transitions.union(self.outgoing[state].union(self.incoming[state]))
-        print("OPEN", self.outgoing[state])
-        print("CLOSED", self.incoming[state])
-        print("UNION", self.outgoing[state].union(self.incoming[state]))
         self.incoming[state] = set()
         self.outgoing[state] = set()
 
@@ -185,7 +184,7 @@ class ClassificationTree():
 
         while (not node.is_leaf()):
             d = node.string
-            sd = sequence+d
+            sd = sequence + d
             prev_node = node
             if self._ask_membership_query(sd):
                 is_right = True
