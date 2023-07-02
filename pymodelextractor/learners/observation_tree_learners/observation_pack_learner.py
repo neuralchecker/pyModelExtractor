@@ -34,12 +34,13 @@ class ObservationPackLearner(Learner):
     def _symbols(self):
         return self._teacher.alphabet.symbols
     
+    # CHANGE OUTGOING TO FOR #
     def learn(self, teacher: Teacher) -> LearningResult:
         self._teacher = teacher
         model = self.initialization()
         are_equivalent, counterexample = self._teacher.equivalence_query(model)
         counter = 0
-        while not are_equivalent:
+        while not are_equivalent and counter < 10:
             counter += 1
             model = self.refine(model, counterexample)
             if self._tree._ask_membership_query(counterexample) == model.accepts(counterexample):
@@ -77,7 +78,8 @@ class ObservationPackLearner(Learner):
     def close_transitions(self, model: DFA) -> DFA:
         while len(self.open_transitions) > 0:
             state, symbol = self.open_transitions.pop()
-            transition_aseq = state.name + symbol
+            transition_aseq = state.name + Sequence([symbol])
+            print("aseq", transition_aseq)
             tgt, new_state_discovered, is_final = self._tree.sift(transition_aseq)
 
             # New state discovered
@@ -88,32 +90,38 @@ class ObservationPackLearner(Learner):
 
             state.transitions[symbol] = {self.link_node_t_state[tgt]}
 
-            self.outgoing[state].add((self.link_node_t_state[tgt], symbol))
+            self.outgoing[state].add((state, symbol))
             self.incoming[self.link_node_t_state[tgt]].add((state, symbol))
 
         states = list(self.link_state_t_node.keys())
-        #for state in states:
-         #   print(state.name, state.transitions)
+        for state in states:
+            print(state.name, state.transitions)
         return DFA(self._alphabet, model.initial_state, 
                         set(states), None)
     
     def refine(self, model: DFA, counterexample: Sequence) -> DFA:
         u,a,v = self.analyze_inconsistency(counterexample, model)
-        self.split(u,a,v, model)
+        print("u", u, "a", a, "v", v)
+        self.split(u, a ,v ,model)
         model = self.close_transitions(model)
         return model
     
     def analyze_inconsistency(self, counterexample: Sequence, hypothesis: DFA) -> \
     tuple[Sequence, Sequence, Sequence]:
         v = self.cex_analyzer.process_counterexample(counterexample, hypothesis, self._teacher)
-        u = Sequence(counterexample.value[:len(counterexample) - len(v) - 1])
+        if counterexample[:len(counterexample) - len(v) - 1] == () or counterexample[:len(counterexample) - len(v) - 1] == []:
+            u = Sequence()
+        else:
+            u = Sequence(counterexample[:len(counterexample) - len(v) - 1])
+
         a = Sequence([counterexample[len(counterexample) - len(v) - 1]])
         return (u,a,v)
     
     def split(self, u: Sequence, a: Sequence, v: Sequence, hypothesis: DFA):
-        ua = u + a
         if(u == Sequence()): 
             ua = a
+        else:
+            ua = u + a
 
         q_old = self.cex_analyzer.get_end_state(hypothesis, ua)
         q_new = self.create_single_state(ua, q_old.is_final)
@@ -121,6 +129,7 @@ class ObservationPackLearner(Learner):
         self.reset_closed_transitions(q_old)
 
     def split_leaf(self, q_old: State, q_new: State, v: Sequence):
+        print(self.link_state_t_node[q_old].string)
         old_leaf = self.link_state_t_node[q_old]
         old_leaf_parent = old_leaf.parent
         new_parent = ClassificationNode(v, parent = old_leaf_parent)
@@ -192,7 +201,8 @@ class ClassificationTree():
             else:
                 is_right = False
                 node = node.left
-
+            
+            print(f"sift {d}-{sd}-{is_right}")
             if first_mq:
                 first_mq = False
                 is_final = is_right
@@ -205,7 +215,7 @@ class ClassificationTree():
                 else:
                     prev_node.left = new_node
                 node = new_node
-
+        print("end_sift", node.string)
         return node, new_state_discovered, is_final
     
 class ClassificationNode():
@@ -217,5 +227,3 @@ class ClassificationNode():
 
     def is_leaf(self) -> bool:
         return self.right is None and self.left is None
-
-          
