@@ -13,12 +13,12 @@ class RivestSchapire:
         upper = len(counterexample) - 2
         while True:
             mid = (lower + upper) // 2
-            if counterexample[:mid] == () or counterexample[:mid] == []:
+            if counterexample[:mid] == ():
                  end_state = self.get_end_state(hypothesis, Sequence())
             else:
                 end_state = self.get_end_state(hypothesis, Sequence(counterexample[:mid]))
             prefix = end_state.name
-            if counterexample[mid:] == () or counterexample[mid:] == []:
+            if counterexample[mid:] == ():
                 sec_half_counterexample = Sequence()
             else:
                 sec_half_counterexample = Sequence(counterexample[mid:])

@@ -102,8 +102,7 @@ class ObservationPackLearner(Learner):
     tuple[Sequence, Sequence, Sequence]:
         v = self.cex_analyzer.process_counterexample(counterexample, 
                                                      hypothesis, self._teacher)
-        if counterexample[:len(counterexample) - len(v) - 1] == () or \
-            counterexample[:len(counterexample) - len(v) - 1] == []:
+        if counterexample[:len(counterexample) - len(v) - 1] == ():
             u = Sequence()
         else:
             u = Sequence(counterexample[:len(counterexample) - len(v) - 1])
