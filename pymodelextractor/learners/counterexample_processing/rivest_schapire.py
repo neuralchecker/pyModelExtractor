@@ -18,10 +18,7 @@ class RivestSchapire:
             else:
                 end_state = self.get_end_state(hypothesis, Sequence(counterexample[:mid]))
             prefix = end_state.name
-            if counterexample[mid:] == ():
-                sec_half_counterexample = Sequence()
-            else:
-                sec_half_counterexample = Sequence(counterexample[mid:])
+            sec_half_counterexample = Sequence(counterexample[mid:])
             mq = target.membership_query(prefix + sec_half_counterexample)
             if mq == counterexample_out:
                 lower = mid + 1
