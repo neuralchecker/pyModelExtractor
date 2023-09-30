@@ -1,7 +1,7 @@
 import unittest
 
-from pymodelextractor.learners.observation_tree_learners.kearns_vazirani_learner import \
-    KearnsVaziraniLearner
+from pymodelextractor.learners.observation_tree_learners.observation_pack_learner import \
+    ObservationPackLearner
 from pymodelextractor.teachers.automaton_teacher import \
     DeterministicFiniteAutomatonTeacher as AutomatonTeacher
 from pythautomata.automata.deterministic_finite_automaton import \
@@ -19,9 +19,9 @@ from pymodelextractor.teachers.general_teacher import GeneralTeacher
 from itertools import chain
 
 
-class TestKearnsVaziraniLearner(unittest.TestCase):
+class TestObservationPackLearner(unittest.TestCase):
     def setUp(self):
-        self.learner = KearnsVaziraniLearner()
+        self.learner = ObservationPackLearner()
 
     def teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, ComparisonStrategy())
@@ -32,7 +32,7 @@ class TestKearnsVaziraniLearner(unittest.TestCase):
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar1)
-
+    
     def test_tomitas_2(self):
         grammar2 = TomitasGrammars.get_automaton_2()
         teacher = self.teacher(grammar2)
@@ -46,9 +46,16 @@ class TestKearnsVaziraniLearner(unittest.TestCase):
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, grammar3)
-
+        
     def test_tomitas_4(self):
         grammar4 = TomitasGrammars.get_automaton_4()
+        teacher = self.teacher(grammar4)
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, grammar4)
+
+    def test_tomitas_5(self):
+        grammar4 = TomitasGrammars.get_automaton_5()
         teacher = self.teacher(grammar4)
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
@@ -57,20 +64,24 @@ class TestKearnsVaziraniLearner(unittest.TestCase):
     def test_against_many_DFAs(self):
         mergedAutomata = list(chain(TomitasGrammars.get_all_automata(),
                                     BolligHabermehlKernLeuckerAutomata.get_all_automata(),
-                                    OmlinGilesAutomata.get_all_automata()))
+                                    OmlinGilesAutomata.get_all_automata()
+                                    ))
+        
         for automaton in mergedAutomata:
+            self.learner = ObservationPackLearner()
             teacher = self.teacher(automaton)
             result = self.learner.learn(teacher)
             assert ComparisonStrategy().are_equivalent(
                 result.model, automaton)
-            
+      
     def test_with_100_states_automaton(self):
         dfa = generate_dfa(alphabet= Alphabet(frozenset(map(SymbolStr, ["0", "1", "2"]))), nominal_size=100, seed=17)
         teacher = self.teacher(dfa)
         result = self.learner.learn(teacher)
+        print(result.info["equivalence_queries_count"])
         assert ComparisonStrategy().are_equivalent(
             result.model, dfa)
-        
+    
     def test_automaton_with_PAC(self):
         dfa = generate_dfa(alphabet= Alphabet(frozenset(map(SymbolStr, ["0", "1"]))), nominal_size=10, seed=17)
         teacher = GeneralTeacher(dfa, 

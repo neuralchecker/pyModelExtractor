@@ -27,6 +27,7 @@ from tests.learners_tests.test_base_observation_table import TestBaseObservation
 from tests.learners_tests.test_partial_table_translator import TestPartialDFATranslator
 from tests.learners_tests.test_ensemble_boolean_learner import TestEnsembleBooleanLearner
 from tests.learners_tests.test_ensemble_probabilistic_learner import TestEnsembleProbabilisticLearner
+from pymodelextractor.tests.learners_tests.test_observation_pack_learner import TestObservationPackLearner
 
 
 def run():
@@ -54,7 +55,8 @@ def run():
                               TestBaseObservationTable,
                               TestPartialDFATranslator,
                               TestEnsembleBooleanLearner,
-                              TestEnsembleProbabilisticLearner]
+                              TestEnsembleProbabilisticLearner,
+                              TestObservationPackLearner]
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:
