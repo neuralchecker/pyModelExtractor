@@ -21,6 +21,7 @@ from pymodelextractor.teachers.general_teacher import GeneralTeacher
 from pythautomata.base_types.state import State
 from pythautomata.base_types.symbol import SymbolStr
 from itertools import chain
+from pythautomata.model_exporters.dot_exporters.dfa_dot_exporting_strategy import DfaDotExportingStrategy
 
 class TestObservationPackLearner(unittest.TestCase):
     def setUp(self):

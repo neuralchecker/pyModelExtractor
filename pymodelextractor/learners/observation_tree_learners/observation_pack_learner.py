@@ -6,8 +6,6 @@ from pythautomata.automata.deterministic_finite_automaton import DeterministicFi
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.learners.counterexample_processing.rivest_schapire import RivestSchapire
-from pythautomata.model_exporters.dot_exporters.dfa_dot_exporting_strategy import DfaDotExportingStrategy
-# import Symbol
 from pythautomata.base_types.symbol import Symbol
 
 class ObservationPackLearner(Learner):
@@ -45,6 +43,10 @@ class ObservationPackLearner(Learner):
                 hypothesis.accepts(counterexample):
                 are_equivalent, counterexample = self._teacher.equivalence_query(hypothesis)
                 
+        # Convert state names into strings
+        for state in hypothesis.states:
+            state.name = str(state.name) 
+                    
         numberOfStates = len(hypothesis.states) if hypothesis is not None else 0
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
