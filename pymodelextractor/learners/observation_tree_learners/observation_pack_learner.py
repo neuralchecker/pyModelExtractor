@@ -6,7 +6,7 @@ from pythautomata.automata.deterministic_finite_automaton import DeterministicFi
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.learners.counterexample_processing.rivest_schapire import RivestSchapire
-from pythautomata.model_exporters.dot_exporters.dfa_dot_exporting_strategy import DfaDotExportingStrategy
+from pythautomata.base_types.symbol import Symbol
 
 class ObservationPackLearner(Learner):
     def __init__(self):
@@ -43,6 +43,10 @@ class ObservationPackLearner(Learner):
                 hypothesis.accepts(counterexample):
                 are_equivalent, counterexample = self._teacher.equivalence_query(hypothesis)
                 
+        # Convert state names into strings
+        for state in hypothesis.states:
+            state.name = str(state.name) 
+                    
         numberOfStates = len(hypothesis.states) if hypothesis is not None else 0
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
@@ -85,10 +89,11 @@ class ObservationPackLearner(Learner):
 
             state.transitions[symbol] = {self.link_node_t_state[tgt]}
 
-            self.outgoing[state].add((state, symbol))
+            self.outgoing[state].add((self.link_node_t_state[tgt], symbol))
             self.incoming[self.link_node_t_state[tgt]].add((state, symbol))
 
         states = list(self.link_state_t_node.keys())
+                            
         return DFA(self._alphabet, hypothesis.initial_state, 
                         set(states), None)
     
@@ -103,17 +108,13 @@ class ObservationPackLearner(Learner):
         v = self.cex_analyzer.process_counterexample(counterexample, 
                                                      hypothesis, self._teacher)
         u = Sequence(counterexample[:len(counterexample) - len(v) - 1])
-        a = Sequence([counterexample[len(counterexample) - len(v) - 1]])
+        a = counterexample[len(counterexample) - len(v) - 1]
         return (u,a,v)
     
-    def split(self, u: Sequence, a: Sequence, v: Sequence, hypothesis: DFA):
-        if(u == Sequence()): 
-            ua = a
-        else:
-            ua = u + a
-
-        q_old = self.cex_analyzer.get_end_state(hypothesis, ua)
-        q_new = self.create_single_state(ua, q_old.is_final)
+    def split(self, u: Sequence, a: Symbol, v: Sequence, hypothesis: DFA):
+        q_pred = self.cex_analyzer.get_end_state(hypothesis, u)
+        q_old = q_pred.next_state_for(a)
+        q_new = self.create_single_state(q_pred.name+a, q_old.is_final)
         self.split_leaf(q_old, q_new, v)
         self.reset_closed_transitions(q_old)
 
@@ -148,7 +149,7 @@ class ObservationPackLearner(Learner):
                 )
         self.incoming[state] = set()
         self.outgoing[state] = set()
-
+        
     def create_single_state(self, name: Sequence, is_final: bool) -> State: 
         new_state = State(name=name, is_final=is_final)
         self.outgoing[new_state] = set()
@@ -162,7 +163,6 @@ class ClassificationTree():
         self._teacher = teacher
         self.root = root
         self._mq_cache = {}
-        self._sift_cache = {}
 
     def _ask_membership_query(self, sequence: Sequence) -> bool:
         if sequence in self._mq_cache:
