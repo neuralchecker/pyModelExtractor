@@ -13,10 +13,7 @@ class RivestSchapire:
         upper = len(counterexample) - 2
         while True:
             mid = (lower + upper) // 2
-            if counterexample[:mid] == ():
-                 end_state = self.get_end_state(hypothesis, Sequence())
-            else:
-                end_state = self.get_end_state(hypothesis, Sequence(counterexample[:mid]))
+            end_state = self.get_end_state(hypothesis, counterexample[:mid])
             prefix = end_state.name
             sec_half_counterexample = Sequence(counterexample[mid:])
             mq = target.membership_query(prefix + sec_half_counterexample)
@@ -31,7 +28,6 @@ class RivestSchapire:
                 
     def get_end_state(self, hypothesis: DFA, sequence: Sequence) -> State:
         actual_state = hypothesis.initial_state
-        if sequence != Sequence():
-            for symbol in sequence:
-                actual_state = actual_state.next_state_for(symbol)
+        for symbol in sequence:
+            actual_state = actual_state.next_state_for(symbol)
         return actual_state

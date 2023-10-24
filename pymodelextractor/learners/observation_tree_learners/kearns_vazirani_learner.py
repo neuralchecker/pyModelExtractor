@@ -52,7 +52,11 @@ class KearnsVaziraniLearner(Learner):
                 if not(are_equivalent):
                     while self._teacher.membership_query(counterexample) != model.accepts(counterexample):
                         self.update_tree(counterexample, model)
-                        model = self.tentative_hypothesis()               
+                        model = self.tentative_hypothesis()
+                                               
+        # Convert state names into strings
+        for state in model.states:
+            state.name = str(state.name)   
 
         numberOfStates = len(model.states) if model is not None else 0
         info = {
