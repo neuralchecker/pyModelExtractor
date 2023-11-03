@@ -10,6 +10,17 @@ from pythautomata.base_types.symbol import Symbol
 
 class ObservationPackLearner(Learner):
     def __init__(self):
+        pass
+
+    @property
+    def _alphabet(self):
+        return self._teacher.alphabet
+
+    @property
+    def _symbols(self):
+        return self._teacher.alphabet.symbols
+    
+    def learn(self, teacher: Teacher) -> LearningResult:
         # Pointer from state to node
         self.link_state_t_node = {}
         # Pointer from node to state
@@ -22,17 +33,7 @@ class ObservationPackLearner(Learner):
         self.open_transitions = set()
         # Rivest Schapire counterexample processing
         self.cex_analyzer = RivestSchapire()
-        pass
-
-    @property
-    def _alphabet(self):
-        return self._teacher.alphabet
-
-    @property
-    def _symbols(self):
-        return self._teacher.alphabet.symbols
-    
-    def learn(self, teacher: Teacher) -> LearningResult:
+        
         self._teacher = teacher
         hypothesis = self.initialization()
         are_equivalent, counterexample = self._teacher.equivalence_query(hypothesis)

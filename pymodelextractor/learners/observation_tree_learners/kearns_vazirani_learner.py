@@ -48,21 +48,18 @@ class KearnsVaziraniLearner(Learner):
             while not are_equivalent:
                 self.update_tree(counterexample, model)
                 model = self.tentative_hypothesis()
-                are_equivalent, counterexample = self._teacher.equivalence_query(model)
-                if not(are_equivalent):
-                    while self._teacher.membership_query(counterexample) != model.accepts(counterexample):
-                        self.update_tree(counterexample, model)
-                        model = self.tentative_hypothesis()
-                                               
+                if self._teacher.membership_query(counterexample) == model.accepts(counterexample):
+                    are_equivalent, counterexample = self._teacher.equivalence_query(model)
+                            
         # Convert state names into strings
         for state in model.states:
-            state.name = str(state.name)   
+            state.name = str(state.name)
 
         numberOfStates = len(model.states) if model is not None else 0
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'membership_queries_count': self._teacher.membership_queries_count,
-            'observation_tree': self._tree
+            'observation_tree': self._tree,
         }
         return LearningResult(model, numberOfStates, info)
     
