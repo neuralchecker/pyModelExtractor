@@ -320,7 +320,7 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
     def test_against_random_PDFAs(self):
         models = self.generate_random_pdfas(sizes=[7, 10, 20], n=10)
         for model in models:
-            print('Extracting model:', model.name)
+            #print('Extracting model:', model.name)
             partitions2 = 20            
             comparator2 = WFAQuantizationComparator(partitions2)
             partitioner2 = QuantizationProbabilityPartitioner(partitions2)
