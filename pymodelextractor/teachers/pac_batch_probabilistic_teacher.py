@@ -8,7 +8,6 @@ from pythautomata.base_types.symbol import Symbol
 from pymodelextractor.utils.data_loader import DataLoader
 
 from typing import Union
-import numpy as np
 from collections import OrderedDict
 class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
 
@@ -29,7 +28,7 @@ class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
             suffixes.append(Sequence((symbol,)))
 
         rand_words = self._sequence_generator.generate_words(sample_size)
-        np.sort(rand_words)
+        rand_words.sort(key=len)
         results = self._target_model.get_last_token_weights_batch(rand_words, suffixes)
         for i in range(len(rand_words)):
             word = rand_words[i]

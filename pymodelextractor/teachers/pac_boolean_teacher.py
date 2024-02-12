@@ -6,7 +6,6 @@ from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.sequence import Sequence
 from pythautomata.abstract.boolean_model import BooleanModel
 from math import ceil, log, comb
-import numpy as np
 
 
 class PACBooleanTeacher(Teacher):
@@ -55,7 +54,7 @@ class PACBooleanTeacher(Teacher):
         counterexample = None
 
         sequences = self._sequence_generator.generate_words(sample_size)
-        np.sort(sequences)
+        sequences.sort(key=len)
         for sequence in sequences:
             if self.__target_model.accepts(sequence) != model.accepts(sequence):
                 if not self.__compute_epsilon_star:
