@@ -55,7 +55,8 @@ class PACBooleanTeacher(Teacher):
         counterexample = None
 
         sequences = self._sequence_generator.generate_words(sample_size)
-        np.sort(sequences)
+        sequences.sort(key=len)
+        #np.sort(sequences)
         for sequence in sequences:
             if self.__target_model.accepts(sequence) != model.accepts(sequence):
                 if not self.__compute_epsilon_star:
