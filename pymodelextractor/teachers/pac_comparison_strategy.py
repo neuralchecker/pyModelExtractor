@@ -31,8 +31,8 @@ class PACComparisonStrategy:
             sequences = self._sequence_generator.generate_words(sample_size)
             error_count = 0
             counterexample = None
-
-            np.sort(sequences)
+            sequences.sort(key=len)
+            #np.sort(sequences)
             for sequence in sequences:
                 if target_model.process_query(sequence) != model.process_query(sequence):
                     if not self._compute_epsilon_star:

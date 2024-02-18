@@ -16,13 +16,14 @@ import warnings
 
 
 class PDFAQuantizationNAryTreeLearner:
-    def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True, exhaust_counterexample = False):
+    def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True, exhaust_counterexample = False, omit_zero_transitions = False):
         self.probability_partitioner = probabilityPartitioner
         self._pre_cache_queries_for_building_hipothesis = pre_cache_queries_for_building_hipothesis
         self._verbose = False
         self._tree = None
         self._check_probabilistic_hipothesis = check_probabilistic_hipothesis
         self._exhaust_counterexample = exhaust_counterexample
+        self._omit_zero_transitions = omit_zero_transitions
         pass
 
     @property
@@ -76,9 +77,11 @@ class PDFAQuantizationNAryTreeLearner:
         models = []
         is_target_DFA, model = self.initialization(verbose)
         symbols = list(self._alphabet.symbols)
+        epsilon_probablity = self._teacher.next_token_probabilities(Sequence())
         if not is_target_DFA:
             for symbol in symbols:
-                self._tree.sift(Sequence([symbol]))
+                if epsilon_probablity[symbol] != 0 or not self._omit_zero_transitions:
+                    self._tree.sift(Sequence([symbol]))
             
             model = self.tentative_hypothesis()
             models.append(model)
@@ -142,13 +145,27 @@ class PDFAQuantizationNAryTreeLearner:
 
             for access_string, state in states.items():
                 for symbol in symbols:
-                    access_string_of_transition, updated_tree = self._tree.sift(access_string + symbol)
-                    if updated_tree:
-                        break
-                    state.add_transition(symbol, states[access_string_of_transition],
-                                         self._tree.leaves[access_string].probabilities[symbol])
+                    if self._tree.leaves[access_string].probabilities[symbol] > 0 or not self._omit_zero_transitions:
+                        access_string_of_transition, updated_tree = self._tree.sift(access_string + symbol)
+                        if updated_tree:
+                            break
+                        state.add_transition(symbol, states[access_string_of_transition],
+                                            self._tree.leaves[access_string].probabilities[symbol])
                 if updated_tree:
                     break
+
+        if self._omit_zero_transitions:
+            hole = WeightedState("HOLE", 0, 1)
+            for symbol in symbols:
+                hole.add_transition(symbol, hole, 0)
+            added_transitions = 0
+            for access_string, state in states.items():
+                for symbol in symbols:
+                    if symbol not in state.transitions_set:
+                        state.add_transition(symbol, hole, 0)
+                        added_transitions+=1                        
+            if added_transitions > 0:
+                states[hole.name] = hole
 
         comparator = WFAToleranceComparator()
         states = set(states.values())

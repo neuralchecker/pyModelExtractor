@@ -30,7 +30,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         model = WeightedTomitasGrammars.get_automaton_1()
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -39,7 +39,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -49,7 +49,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
@@ -58,7 +58,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -67,7 +67,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -77,7 +77,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
@@ -86,7 +86,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
@@ -95,7 +95,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         model = WeightedTomitasGrammars.get_automaton_1()
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -104,7 +104,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)           
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)          
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -114,7 +114,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)           
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)          
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
@@ -123,7 +123,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)     
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)    
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -132,7 +132,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)     
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)    
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -142,7 +142,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)     
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)    
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
@@ -151,7 +151,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)            
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)           
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
 
@@ -160,7 +160,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         model = WeightedTomitasGrammars.get_automaton_1()
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20,parallel_cache=True)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)       
         extracted_model = result.model     
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
     
@@ -179,7 +179,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         dataloader = PickleDataLoader(path)
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20,parallel_cache=True, cache_from_dataloader=dataloader)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)       
         extracted_model = result.model     
         os.remove(path)
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
@@ -198,7 +198,7 @@ class TestPACBatchTeacherQuant(unittest.TestCase):
         dataloader = PickleDataLoader(path)
         teacher = PACBatchProbabilisticTeacher(model, 0.05, 0.01, comparator = self.comparator,
                                                max_seq_length=20,parallel_cache=False, cache_from_dataloader=dataloader)
-        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher, verbose = True)        
+        result = self.learner(self.probability_partitioner, pre_cache_queries_for_building_hipothesis = True).learn(teacher)       
         extracted_model = result.model     
         os.remove(path)
         self.assertTrue(self.comparator.are_equivalent(model, extracted_model))
