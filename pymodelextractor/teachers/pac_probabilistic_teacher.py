@@ -50,7 +50,8 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
             suffixes.append(Sequence((symbol,)))
         
         rand_words = self._sequence_generator.generate_words(sample_size)
-        np.sort(rand_words)
+        rand_words.sort(key=len)
+        #np.sort(rand_words)
         counterexample = None
         for word in rand_words:  
             obs1 = self._target_model.get_last_token_weights(word, suffixes)
