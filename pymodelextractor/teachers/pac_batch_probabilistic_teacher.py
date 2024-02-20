@@ -8,7 +8,6 @@ from pythautomata.base_types.symbol import Symbol
 from pymodelextractor.utils.data_loader import DataLoader
 
 from typing import Union
-import numpy as np
 from collections import OrderedDict
 class PACBatchProbabilisticTeacher(PACProbabilisticTeacher):
 
