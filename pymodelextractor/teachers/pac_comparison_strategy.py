@@ -30,7 +30,6 @@ class PACComparisonStrategy:
             sequences = self._sequence_generator.generate_words(sample_size)
             error_count = 0
             counterexample = None
-
             sequences.sort(key=len)
             for sequence in sequences:
                 if target_model.process_query(sequence) != model.process_query(sequence):
