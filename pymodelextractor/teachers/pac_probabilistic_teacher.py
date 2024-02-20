@@ -7,7 +7,6 @@ from pymodelextractor.teachers.probabilistic_teacher import ProbabilisticTeacher
 from pythautomata.abstract.finite_automaton import FiniteAutomataComparator
 from math import ceil, log, comb
 from typing import Union
-import numpy as np
 from pymodelextractor.utils.data_loader import DataLoader
 
 
@@ -51,7 +50,6 @@ class PACProbabilisticTeacher(ProbabilisticTeacher):
         
         rand_words = self._sequence_generator.generate_words(sample_size)
         rand_words.sort(key=len)
-        #np.sort(rand_words)
         counterexample = None
         for word in rand_words:  
             obs1 = self._target_model.get_last_token_weights(word, suffixes)

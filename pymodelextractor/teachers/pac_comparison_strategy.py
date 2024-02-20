@@ -6,7 +6,6 @@ from pythautomata.abstract.model import Model
 from pythautomata.abstract.boolean_model import BooleanModel
 from pythautomata.utilities.sequence_generator import SequenceGenerator
 from math import ceil, log, comb
-import numpy as np
 
 
 class PACComparisonStrategy:
@@ -32,7 +31,6 @@ class PACComparisonStrategy:
             error_count = 0
             counterexample = None
             sequences.sort(key=len)
-            #np.sort(sequences)
             for sequence in sequences:
                 if target_model.process_query(sequence) != model.process_query(sequence):
                     if not self._compute_epsilon_star:
