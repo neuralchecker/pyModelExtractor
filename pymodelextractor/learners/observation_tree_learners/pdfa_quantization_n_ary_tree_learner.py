@@ -199,9 +199,20 @@ class PDFAQuantizationNAryTreeLearner:
         final_weight = probabilities[self.terminal_symbol]
         probabilities.pop(self.terminal_symbol)
         initialState = WeightedState(epsilon, 1, final_weight=final_weight)
+        states = {initialState}
+        hole = None
+        if self._omit_zero_transitions:
+            hole = WeightedState("HOLE", 0, 1)
+            for symbol in probabilities.keys():
+                hole.add_transition(symbol, hole, 0)
+            states.add(hole)            
         for symbol, probability in probabilities.items():
-            initialState.add_transition(symbol, initialState, probability)
-        return PDFA(self._alphabet, {initialState}, self.terminal_symbol, comparator=WFAToleranceComparator(), check_is_probabilistic=self._check_probabilistic_hipothesis)
+            if probability > 0 or not self._omit_zero_transitions:
+                initialState.add_transition(symbol, initialState, probability)
+            else:
+                
+                initialState.add_transition(symbol, hole, probability)            
+        return PDFA(self._alphabet, states, self.terminal_symbol, comparator=WFAToleranceComparator(), check_is_probabilistic=self._check_probabilistic_hipothesis)
 
 
 class ClassificationTree:
