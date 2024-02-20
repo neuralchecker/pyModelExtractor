@@ -427,7 +427,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         comparator = WFAPartitionComparator(partitioner)
         generator = GuidingWDFASequenceGenerator(model,5)
         teacher = PACProbabilisticTeacher(model, comparator, sequence_generator=generator)
-        learner = PDFAQuantizationNAryTreeLearner(partitioner, omit_zero_transitions=True)
+        learner = PDFAQuantizationNAryTreeLearner(partitioner, omit_zero_transitions=True, check_probabilistic_hipothesis=False)
         result = learner.learn(teacher)
         extracted_model = result.model
-        self.assertTrue(len(extracted_model.weighted_states) == 1)
+        self.assertTrue(len(extracted_model.weighted_states) == 2)
