@@ -78,7 +78,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
             self.__reset_states(states)
             self.__add_transitions(observation_table, states)
             was_deterministic = self.__make_deterministic(states, comparator)
-        wfa_states = self.__make_wfa_states(states)
+        wfa_states = self.__make_wfa_states(states, terminal_symbol)
         self.__add_wfa_transitions(states, wfa_states)
         wfa_states = set(wfa_states)
         return PDFA(observation_table.alphabet, wfa_states, terminal_symbol, PDFAComparator())
@@ -137,7 +137,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
                             min_dist_arg = np.argmin(membership_values)
                             state.add_transition(prefix, symbol.value[0], min_dist_arg, obs[symbol_pos])
 
-    def __make_wfa_states(self, intermediate_states):
+    def __make_wfa_states(self, intermediate_states, terminal_symbol):
         wfa_states = list()
         i = 0
         for state in intermediate_states:
@@ -148,7 +148,7 @@ class PDFALStarObservationTableTranslation(PDFAObservationTableTranslator):
             for obs in state.observations.values():
                 final_values_sum += obs[0]
             final_value = final_values_sum / len(state.observations)
-            ws = WeightedState('q' + str(i), initial_value, final_value)
+            ws = WeightedState('q' + str(i), initial_value, final_value, terminal_symbol=terminal_symbol)
             wfa_states.append(ws)
             i += 1
         return wfa_states

@@ -86,9 +86,9 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         for leaf_str, leaf in self._tree.leaves.items():
             initial_weight = 1 if leaf_str == epsilon else 0
             terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
-            state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability)
+            state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability, terminal_symbol=self.terminal_symbol)
             states[leaf_str] = state
-        unknown_state =  WeightedState(self._tree.unknown_leaf, 0, -1)     
+        unknown_state =  WeightedState(self._tree.unknown_leaf, 0, -1, terminal_symbol=self.terminal_symbol)     
         partial_distributions = []
         states[self._tree.unknown_leaf] = unknown_state
         accessed_states = set()
