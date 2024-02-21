@@ -140,7 +140,7 @@ class PDFAQuantizationNAryTreeLearner:
             for leaf_str, leaf in self._tree.leaves.items():
                 initial_weight = 1 if leaf_str == epsilon else 0
                 terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
-                state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability)
+                state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability, terminal_symbol=self.terminal_symbol)
                 states[leaf_str] = state
 
             for access_string, state in states.items():
@@ -155,7 +155,7 @@ class PDFAQuantizationNAryTreeLearner:
                     break
 
         if self._omit_zero_transitions:
-            hole = WeightedState("HOLE", 0, 1)
+            hole = WeightedState("HOLE", 0, 1, terminal_symbol=self.terminal_symbol)
             for symbol in symbols:
                 hole.add_transition(symbol, hole, 0)
             added_transitions = 0
@@ -198,11 +198,11 @@ class PDFAQuantizationNAryTreeLearner:
     def create_single_state_PDFA(self, probabilities: OrderedDict[Symbol, float]):
         final_weight = probabilities[self.terminal_symbol]
         probabilities.pop(self.terminal_symbol)
-        initialState = WeightedState(epsilon, 1, final_weight=final_weight)
+        initialState = WeightedState(epsilon, 1, final_weight=final_weight, terminal_symbol=self.terminal_symbol)
         states = {initialState}
         hole = None
         if self._omit_zero_transitions:
-            hole = WeightedState("HOLE", 0, 1)
+            hole = WeightedState("HOLE", 0, 1, terminal_symbol=self.terminal_symbol)
             for symbol in probabilities.keys():
                 hole.add_transition(symbol, hole, 0)
             states.add(hole)            
