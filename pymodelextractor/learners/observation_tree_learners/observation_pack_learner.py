@@ -152,7 +152,7 @@ class ObservationPackLearner(Learner):
         self.outgoing[state] = set()
         
     def create_single_state(self, name: Sequence, is_final: bool) -> State: 
-        new_state = State(name=name, is_final=is_final)
+        new_state = State(name=name, is_final=is_final, access_string=name)
         self.outgoing[new_state] = set()
         self.incoming[new_state] = set()
         for symbol in self._symbols:

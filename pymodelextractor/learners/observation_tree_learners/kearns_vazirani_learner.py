@@ -67,7 +67,7 @@ class KearnsVaziraniLearner(Learner):
         states = {}
         for leaf in self._tree.leaves:
             is_final = self._tree._ask_membership_query(leaf)
-            state = State(leaf, is_final)
+            state = State(leaf, is_final, access_string=leaf)
             states[leaf] = state
         
         for access_string, state in states.items():
@@ -105,7 +105,7 @@ class KearnsVaziraniLearner(Learner):
         assert(distinguishing_string_found, 'Some distinguishing string must have been found, if not an infinite loop occurs')
 
     def create_single_state_DFA(self, is_final: bool):
-        epsilonState = State(epsilon, is_final=is_final)
+        epsilonState = State(epsilon, is_final=is_final, access_string=epsilon)
         for symbol in self._symbols:
             epsilonState.add_transition(symbol, epsilonState)
         return DFA(self._alphabet, epsilonState, set([epsilonState]), None)

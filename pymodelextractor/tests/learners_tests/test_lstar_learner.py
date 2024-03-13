@@ -7,8 +7,11 @@ from pymodelextractor.teachers.automaton_teacher import \
 from pythautomata.automata.deterministic_finite_automaton import \
     DeterministicFiniteAutomaton
 from pythautomata.automata_definitions.tomitas_grammars import TomitasGrammars
-from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import BolligHabermehlKernLeuckerAutomata
+from pythautomata.automata_definitions.bollig_habermehl_kern_leucker_automata import \
+    BolligHabermehlKernLeuckerAutomata
 from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAutomata
+from pythautomata.model_comparators.state_prefix_random_walk import \
+    StatePrefixRandomWalkComparisonStrategy as StatePrefixRandomWalk
 from pythautomata.model_comparators.hopcroft_karp_comparison_strategy import \
     HopcroftKarpComparisonStrategy as ComparisonStrategy
 from itertools import chain
@@ -21,6 +24,10 @@ class TestLStarLearner(unittest.TestCase):
 
     def teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, ComparisonStrategy())
+    
+    def sp_rw_teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
+        return AutomatonTeacher(automaton, StatePrefixRandomWalk(
+            number_steps=1000))
 
     def test_tomitas_1(self):
         grammar1 = TomitasGrammars.get_automaton_1()
@@ -59,4 +66,11 @@ class TestLStarLearner(unittest.TestCase):
             result = self.learner.learn(teacher)
             assert ComparisonStrategy().are_equivalent(
                 result.model, automaton)
+            
+    def test_tomitas_4_state_prefix_random_walk(self):
+        grammar4 = TomitasGrammars.get_automaton_4()
+        teacher = self.sp_rw_teacher(grammar4)
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, grammar4)
         
