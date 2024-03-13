@@ -43,7 +43,7 @@ class FAObservationTableTranslator(ObservationTableTranslator):
                 sequences.append(sequence)
                 added_rows.add(tuple(observation_table[sequence]))
 
-        return {seq: State(str(seq), observation_table[seq][0]) for seq in sequences}
+        return {seq: State(str(seq), observation_table[seq][0], access_string=seq) for seq in sequences}
 
     def _find_state_with_row(self, row_to_find: list[bool], observation_table: ObservationTable,
                              sequence_states: dict[Sequence, State]) -> Union[State, None]:
