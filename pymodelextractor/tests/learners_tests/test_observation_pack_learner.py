@@ -38,7 +38,7 @@ class TestObservationPackLearner(unittest.TestCase):
     
     def teacher_sp_rw(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, SPRWComparisonStrategy(
-            number_steps=1000))
+            number_steps=100))
         
     def test_tomitas_1(self):
         grammar1 = TomitasGrammars.get_automaton_1()

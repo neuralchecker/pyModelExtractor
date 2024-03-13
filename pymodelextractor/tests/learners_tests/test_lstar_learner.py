@@ -25,7 +25,7 @@ class TestLStarLearner(unittest.TestCase):
     def teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, ComparisonStrategy())
     
-    def teacher_sp_rw(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
+    def sp_rw_teacher(self, automaton: DeterministicFiniteAutomaton) -> AutomatonTeacher:
         return AutomatonTeacher(automaton, StatePrefixRandomWalk(
             number_steps=1000))
 
