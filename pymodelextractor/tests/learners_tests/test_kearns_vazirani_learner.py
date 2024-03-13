@@ -14,6 +14,8 @@ from pythautomata.automata_definitions.omlin_giles_automata import OmlinGilesAut
 from pythautomata.utilities.nicaud_dfa_generator import generate_dfa
 from pythautomata.base_types.symbol import SymbolStr
 from pythautomata.base_types.alphabet import Alphabet
+from pythautomata.model_comparators.state_prefix_random_walk import StatePrefixRandomWalkComparisonStrategy \
+    as StatePrefixRandomWalk
 from pymodelextractor.teachers.pac_comparison_strategy import PACComparisonStrategy
 from pymodelextractor.teachers.general_teacher import GeneralTeacher
 from itertools import chain
@@ -78,3 +80,10 @@ class TestKearnsVaziraniLearner(unittest.TestCase):
         result = self.learner.learn(teacher)
         assert ComparisonStrategy().are_equivalent(
             result.model, dfa)
+        
+    def test_tomitas_with_state_prefix_RW(self):
+        grammar4 = TomitasGrammars.get_automaton_4()
+        teacher = AutomatonTeacher(grammar4, StatePrefixRandomWalk(1000))
+        result = self.learner.learn(teacher)
+        assert ComparisonStrategy().are_equivalent(
+            result.model, grammar4)
