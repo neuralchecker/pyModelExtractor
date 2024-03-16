@@ -249,7 +249,7 @@ testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "no
 
 [[package]]
 name = "pythautomata"
-version = "0.38.9"
+version = "0.39.1"
 description = "ORT's implementation of various kinds of automata"
 category = "main"
 optional = false
