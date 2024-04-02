@@ -47,7 +47,7 @@ class PDFAQuantizationNAryTreeLearner:
         return self._teacher.next_token_probabilities(value)
     
     def _is_counterexample(self, sequence, hypothesis):
-        teacher_probs = self._perform_next_token_probabilities(sequence)
+        teacher_probs = list(self._perform_next_token_probabilities(sequence).values())
         hypothesis_probs = hypothesis.last_token_probabilities(sequence, self._all_symbols_sorted)
         return teacher_probs!=hypothesis_probs
 
