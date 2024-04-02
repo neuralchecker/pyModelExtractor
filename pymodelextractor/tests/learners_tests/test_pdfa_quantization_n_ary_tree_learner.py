@@ -392,8 +392,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         self.assertTrue(result.info['last_token_weight_queries_count'] > 0)        
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
-    def generate_PDFA_with_section_reachable_through_zero_transitions(self):
-        
+    def generate_PDFA_with_section_reachable_through_zero_transitions(self):        
         qeps = WeightedState("qeps", 1, 0.6)
         q1 = WeightedState("q0", 0, 0.5)
         q11 = WeightedState("q1", 0, 0.2)
@@ -404,6 +403,25 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         qeps.add_transition(one, q1, 0)
         q1.add_transition(zero, q1, 0)
         q1.add_transition(one, q11, 0.5)
+        q11.add_transition(zero, q11, 0)
+        q11.add_transition(one, q1, 0.8)      
+        states = {qeps, q1, q11}
+        comparator = WFAQuantizationComparator(100)
+        return ProbabilisticDeterministicFiniteAutomaton(binaryAlphabet, states, SymbolStr("$"), comparator,
+                                                         "PDFA_with_section_reachable_through_zero_transitions")
+    
+    
+    def generate_PDFA_with_section_reachable_through_zero_transitions2(self):        
+        qeps = WeightedState("qeps", 1, 0.4)
+        q1 = WeightedState("q0", 0, 0.5)
+        q11 = WeightedState("q1", 0, 0.2)
+
+        zero = SymbolStr('0')
+        one = SymbolStr('1')
+        qeps.add_transition(zero, qeps, 0.4)
+        qeps.add_transition(one, q1, 0.2)
+        q1.add_transition(zero, q1, 0.5)
+        q1.add_transition(one, q11, 0)
         q11.add_transition(zero, q11, 0)
         q11.add_transition(one, q1, 0.8)      
         states = {qeps, q1, q11}
@@ -431,3 +449,14 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         result = learner.learn(teacher)
         extracted_model = result.model
         self.assertTrue(len(extracted_model.weighted_states) == 2)
+
+    def test_learn_approximate_PDFA_w_zero_transition2(self):     
+        model = self.generate_PDFA_with_section_reachable_through_zero_transitions2()
+        partitioner = QuantizationProbabilityPartitioner(100)
+        comparator = WFAPartitionComparator(partitioner)
+        generator = GuidingWDFASequenceGenerator(model,500, random_stop_proba=0.001)
+        teacher = PACProbabilisticTeacher(model, comparator, sequence_generator=generator)
+        learner = PDFAQuantizationNAryTreeLearner(partitioner, omit_zero_transitions=True, check_probabilistic_hipothesis=False)
+        result = learner.learn(teacher)
+        extracted_model = result.model
+        self.assertTrue(len(extracted_model.weighted_states) == 3)
