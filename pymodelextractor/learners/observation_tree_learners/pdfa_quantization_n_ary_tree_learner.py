@@ -45,6 +45,16 @@ class PDFAQuantizationNAryTreeLearner:
 
     def _perform_next_token_probabilities(self, value):
         return self._teacher.next_token_probabilities(value)
+    
+    def _is_counterexample(self, sequence, hypothesis):
+        teacher_probs = self._perform_next_token_probabilities(sequence)
+        hypothesis_probs = hypothesis.last_token_probabilities(sequence, self._all_symbols_sorted)
+        return teacher_probs!=hypothesis_probs
+
+    def _shorten_counterexample(self, counterexample, hypothesis):
+        for prefix in counterexample.get_prefixes():
+            if self._is_counterexample(prefix, hypothesis):
+                return prefix
 
     def initialization(self, verbose) -> tuple[bool, ProbabilisticDeterministicFiniteAutomaton]:
         probabilities = self._perform_next_token_probabilities(epsilon)
@@ -53,6 +63,9 @@ class PDFAQuantizationNAryTreeLearner:
         if are_equivalent:
             self._tree = None
             return True, starting_pdfa
+
+        if self._omit_zero_transitions:
+            counterexample = self._shorten_counterexample(counterexample, starting_pdfa)
 
         next_token_probabilities_epsilon = self._perform_next_token_probabilities(epsilon)
         next_token_probabilities_counterexample = self._perform_next_token_probabilities(counterexample)
