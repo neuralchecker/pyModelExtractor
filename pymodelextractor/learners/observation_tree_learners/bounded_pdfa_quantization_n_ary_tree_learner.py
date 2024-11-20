@@ -95,13 +95,14 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         for access_string, state in states.items():
             if access_string!=self._tree.unknown_leaf:
                 for symbol in symbols:
-                    access_string_of_transition, _ = self._tree.sift(access_string + symbol, update=False)
-                    if access_string_of_transition != access_string:
-                        accessed_states.add(access_string_of_transition)
-                    state.add_transition(symbol, states[access_string_of_transition],
-                                            self._tree.leaves[access_string].probabilities[symbol]) 
-                    if access_string_of_transition == self._tree.unknown_leaf:
-                        partial_distributions.append(self._tree._next_token_probabilities(access_string + symbol, check_max_query_length=False))
+                    if self._tree.leaves[access_string].probabilities[symbol] > 0 or not self._omit_zero_transitions:
+                        access_string_of_transition, _ = self._tree.sift(access_string + symbol, update=False)
+                        if access_string_of_transition != access_string:
+                            accessed_states.add(access_string_of_transition)
+                        state.add_transition(symbol, states[access_string_of_transition],
+                                                self._tree.leaves[access_string].probabilities[symbol]) 
+                        if access_string_of_transition == self._tree.unknown_leaf:
+                            partial_distributions.append(self._tree._next_token_probabilities(access_string + symbol, check_max_query_length=False))
         
         if self._compute_mean_distribution_for_partial_hipothesis:
             for symbol in symbols:
