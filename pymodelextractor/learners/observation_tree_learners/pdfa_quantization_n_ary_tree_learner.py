@@ -10,6 +10,7 @@ from pythautomata.automata.wheighted_automaton_definition.probabilistic_determin
 from pymodelextractor.learners.observation_table_learners.observation_table import epsilon
 from pymodelextractor.learners.learning_result import LearningResult
 from pymodelextractor.exceptions.query_length_exceeded_exception import QueryLengthExceededException
+from pymodelextractor.exceptions.number_of_states_exceeded_exception import NumberOfStatesExceededException
 from collections import OrderedDict
 import math
 import warnings
@@ -88,6 +89,7 @@ class PDFAQuantizationNAryTreeLearner:
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         models = []
+        if verbose: print('Starting learning process')
         is_target_DFA, model = self.initialization(verbose)
         symbols = list(self._alphabet.symbols)
         epsilon_probablity = self._teacher.next_token_probabilities(Sequence())
@@ -99,8 +101,8 @@ class PDFAQuantizationNAryTreeLearner:
             model = self.tentative_hypothesis()
             models.append(model)
             last_size = len(model.weighted_states)
+            if verbose: print('Running EQ')
             are_equivalent, counterexample = self._perform_equivalence_query(model)
-
             while not are_equivalent:
                 if verbose: print('Size before update:', last_size)                
                 self.update_tree(counterexample, model)
@@ -122,9 +124,9 @@ class PDFAQuantizationNAryTreeLearner:
                     models.append(model)
                     model_prob = model.last_token_probabilities(counterexample, self._all_symbols_sorted)
                     ce_is_correct = self.probability_partitioner.are_in_same_partition(teacher_prob, model_prob)
-
+                if verbose: print('Running EQ')
                 are_equivalent, counterexample = self._perform_equivalence_query(model)
-
+        if verbose: print('Learning process finished')
         result = self._learning_results_for(model)
         return result
 
@@ -232,7 +234,7 @@ class ClassificationTree:
     unknown_leaf = "UNKNOWN"
 
     def __init__(self, root: 'ClassificationNode', teacher: ProbabilisticTeacher, probability_partitioner: ProbabilityPartitioner,
-                 max_query_length: int = math.inf, verbose=False):
+                 max_query_length: int = math.inf, verbose=False, max_states: int = math.inf,check_max_states_in_tree = False):
         self.leaves = dict()
         self._teacher = teacher
         self.root = root
@@ -243,8 +245,10 @@ class ClassificationTree:
         self._next_token_probabilities_cache = dict()
         self._partitions_cache = dict()
         self._sift_cache = dict()
-        self.max_query_length = max_query_length        
+        self._max_query_length = max_query_length        
         self._verbose = verbose
+        self._check_max_states_in_tree = check_max_states_in_tree
+        self._max_states = max_states
         
 
     @property
@@ -296,6 +300,12 @@ class ClassificationTree:
                     self.leaves.update({new_node.string: new_node})
                     updated_tree = True
                     node = new_node
+                    if self._check_max_states_in_tree:
+                        if len(self.leaves) > self._max_states:
+                            raise NumberOfStatesExceededException(
+                                f"The maximum number of states ({self._max_states}) has been exceeded. "
+                                f"Current number of leaves: {len(self.leaves)}."
+                            )
                 else:
                     return ClassificationTree.unknown_leaf, False
         self._sift_cache[sequence] = node.string
@@ -311,7 +321,7 @@ class ClassificationTree:
         return None
 
     def _next_token_probabilities(self, sequence: Sequence, check_max_query_length = True):
-        if check_max_query_length and len(sequence) > self.max_query_length:
+        if check_max_query_length and len(sequence) > self._max_query_length:
             raise QueryLengthExceededException
         if sequence in self._next_token_probabilities_cache:
             return self._next_token_probabilities_cache[sequence]
@@ -372,8 +382,14 @@ class ClassificationTree:
         })
         if self._verbose:
             print(self.leaves.keys())
-            print("--------")
+            print("--------")       
         self._update_sift_cache(old_string)
+        if self._check_max_states_in_tree:
+            if len(self.leaves) > self._max_states:
+                raise NumberOfStatesExceededException(
+                    f"The maximum number of states ({self._max_states}) has been exceeded. "
+                    f"Current number of leaves: {len(self.leaves)}."
+                )
 
     def _update_sift_cache(self, old_string):
         keys_to_remove = []

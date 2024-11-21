@@ -342,6 +342,15 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
         self.assertTrue(result.info['equivalence_queries_count'] > 0)
 
+    def test_bounded_tomitas_7_2(self):
+        learner = BoundedPDFAQuantizationNAryTreeLearner(self.partitioner,max_states= 2, max_query_length=100, check_max_states_in_tree=True)
+        model = WeightedTomitasGrammars.get_automaton_7()        
+        teacher = PDFATeacher(model, self.comparator)
+        result = learner.learn(teacher)
+        extracted_model = result.model
+        self.assertNotEqual(model, extracted_model)
+        self.assertTrue(result.info['last_token_weight_queries_count'] > 0)
+        self.assertTrue(result.info['equivalence_queries_count'] > 0)
     
     def generate_PDFA_with_3_equivalent_states_according_to_argmax(self):
         
