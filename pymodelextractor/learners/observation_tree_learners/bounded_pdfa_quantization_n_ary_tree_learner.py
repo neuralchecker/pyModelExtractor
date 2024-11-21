@@ -15,7 +15,7 @@ from pythautomata.automata.wheighted_automaton_definition.weighted_state import 
 import numpy as np
 
 class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
-    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True, exhaust_counterexample = False, mean_distribution_for_partial_hipothesis = False, omit_zero_transitions = False):
+    def __init__(self, partitioner, max_states, max_query_length, max_seconds_run=None, generate_partial_hipothesis = False, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True, exhaust_counterexample = False, mean_distribution_for_partial_hipothesis = False, omit_zero_transitions = False, check_max_states_in_tree = False):
         super().__init__(partitioner, pre_cache_queries_for_building_hipothesis, check_probabilistic_hipothesis, exhaust_counterexample, omit_zero_transitions)
         self._max_states = max_states
         self._max_query_length = max_query_length
@@ -26,6 +26,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         self._history = []        
         self._generate_partial_hipothesis = generate_partial_hipothesis
         self._compute_mean_distribution_for_partial_hipothesis = mean_distribution_for_partial_hipothesis
+        self._check_max_states_in_tree = check_max_states_in_tree
         
 
     def _perform_equivalence_query(self, model):
@@ -70,7 +71,9 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         try:
             ret = super().initialization(verbose)
             if not ret[0]:
-                self._tree.max_query_length = self._max_query_length
+                self._tree._max_query_length = self._max_query_length
+                self._tree._max_states = self._max_states
+                self._tree._check_max_states_in_tree = self._check_max_states_in_tree
             return ret
         except QueryLengthExceededException:
             print("QueryLengthExceeded")
