@@ -459,4 +459,4 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         learner = PDFAQuantizationNAryTreeLearner(partitioner, omit_zero_transitions=True, check_probabilistic_hipothesis=False)
         result = learner.learn(teacher)
         extracted_model = result.model
-        self.assertTrue(len(extracted_model.weighted_states) == 3)
+        self.assertTrue(len(extracted_model.weighted_states) == 2)

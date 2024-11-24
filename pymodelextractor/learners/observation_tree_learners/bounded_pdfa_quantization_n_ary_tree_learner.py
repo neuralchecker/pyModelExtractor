@@ -95,14 +95,20 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         partial_distributions = []
         states[self._tree.unknown_leaf] = unknown_state
         accessed_states = set()
-        for access_string, state in states.items():
+        
+        states_to_visit = []
+        states_to_visit.append(epsilon)
+        
+        while states_to_visit:
+            access_string = states_to_visit.pop()
+            accessed_states.add(access_string)
             if access_string!=self._tree.unknown_leaf:
                 for symbol in symbols:
                     if self._tree.leaves[access_string].probabilities[symbol] > 0 or not self._omit_zero_transitions:
                         access_string_of_transition, _ = self._tree.sift(access_string + symbol, update=False)
-                        if access_string_of_transition != access_string:
-                            accessed_states.add(access_string_of_transition)
-                        state.add_transition(symbol, states[access_string_of_transition],
+                        if access_string_of_transition not in accessed_states:
+                            states_to_visit.append(access_string_of_transition)
+                        states[access_string].add_transition(symbol, states[access_string_of_transition],
                                                 self._tree.leaves[access_string].probabilities[symbol]) 
                         if access_string_of_transition == self._tree.unknown_leaf:
                             partial_distributions.append(self._tree._next_token_probabilities(access_string + symbol, check_max_query_length=False))
@@ -115,6 +121,19 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         else:
             for symbol in symbols:
                 states[self._tree.unknown_leaf].add_transition(symbol, states[self._tree.unknown_leaf], -1)
+
+        if self._omit_zero_transitions:
+            hole = WeightedState("HOLE", 0, 1, terminal_symbol=self.terminal_symbol)
+            for symbol in symbols:
+                hole.add_transition(symbol, hole, 0)
+            added_transitions = 0
+            for access_string, state in states.items():
+                for symbol in symbols:
+                    if symbol not in state.transitions_set:
+                        state.add_transition(symbol, hole, 0)
+                        added_transitions+=1                        
+            if added_transitions > 0:
+                states[hole.name] = hole
 
         for state in list(states.keys()).copy():
             if state not in accessed_states and states[state].initial_weight != 1:
