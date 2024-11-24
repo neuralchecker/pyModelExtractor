@@ -147,27 +147,36 @@ class PDFAQuantizationNAryTreeLearner:
         states = {}
         symbols = list(self._alphabet.symbols)
         symbols.sort()
-        updated_tree = True
-        while updated_tree:
-            if self._pre_cache_queries_for_building_hipothesis:
-                self._tree.cache_queries_for_building_hipothesis()
+        #updated_tree = True
+        #while updated_tree:
+        if self._pre_cache_queries_for_building_hipothesis:
+            self._tree.cache_queries_for_building_hipothesis()
 
-            for leaf_str, leaf in self._tree.leaves.items():
-                initial_weight = 1 if leaf_str == epsilon else 0
-                terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
-                state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability, terminal_symbol=self.terminal_symbol)
-                states[leaf_str] = state
+        for leaf_str, leaf in self._tree.leaves.items():
+            initial_weight = 1 if leaf_str == epsilon else 0
+            terminal_symbol_probability = leaf.probabilities[self.terminal_symbol]
+            state = WeightedState(leaf_str, initial_weight, terminal_symbol_probability, terminal_symbol=self.terminal_symbol)
+            states[leaf_str] = state
+        
+        visited_states = set()
+        states_to_visit = []
+        states_to_visit.append(epsilon)
+        while states_to_visit:
+            access_string = states_to_visit.pop()
+            visited_states.add(access_string)
+            for symbol in symbols:
+                if self._tree.leaves[access_string].probabilities[symbol] > 0 or not self._omit_zero_transitions:
+                    access_string_of_transition, updated_tree = self._tree.sift(access_string + symbol)
+                    if updated_tree:
+                        new_leaf = self._tree.leaves[access_string_of_transition]
+                        terminal_symbol_probability = new_leaf.probabilities[self.terminal_symbol]
+                        new_state = WeightedState(access_string_of_transition, 0, terminal_symbol_probability, terminal_symbol=self.terminal_symbol)
+                        states[access_string_of_transition]= new_state
 
-            for access_string, state in states.items():
-                for symbol in symbols:
-                    if self._tree.leaves[access_string].probabilities[symbol] > 0 or not self._omit_zero_transitions:
-                        access_string_of_transition, updated_tree = self._tree.sift(access_string + symbol)
-                        if updated_tree:
-                            break
-                        state.add_transition(symbol, states[access_string_of_transition],
-                                            self._tree.leaves[access_string].probabilities[symbol])
-                if updated_tree:
-                    break
+                    states[access_string].add_transition(symbol, states[access_string_of_transition],
+                                        self._tree.leaves[access_string].probabilities[symbol])
+                    if access_string_of_transition not in visited_states:
+                        states_to_visit.append(access_string_of_transition)
 
         if self._omit_zero_transitions:
             hole = WeightedState("HOLE", 0, 1, terminal_symbol=self.terminal_symbol)
@@ -181,6 +190,10 @@ class PDFAQuantizationNAryTreeLearner:
                         added_transitions+=1                        
             if added_transitions > 0:
                 states[hole.name] = hole
+        
+        for state in list(states.keys()).copy():
+            if state not in visited_states and states[state].initial_weight != 1:
+                del states[state]
 
         comparator = WFAToleranceComparator()
         states = set(states.values())

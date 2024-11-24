@@ -56,6 +56,7 @@ def run():
                               TestEnsembleBooleanLearner,
                               TestEnsembleProbabilisticLearner,
                               TestObservationPackLearner]
+     
      loader = TestLoader()
      suites_list = []
      for test_class in test_classes_to_run:
