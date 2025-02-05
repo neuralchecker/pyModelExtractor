@@ -50,8 +50,8 @@ class PDFAQuantizationNAryTreeLearner:
     def _is_counterexample(self, sequence, hypothesis):
         teacher_probs = list(self._perform_next_token_probabilities(sequence).values())
         hypothesis_probs = hypothesis.last_token_probabilities(sequence, self._all_symbols_sorted)
-        return teacher_probs!=hypothesis_probs
-
+        return not self.probability_partitioner.are_in_same_partition(teacher_probs, hypothesis_probs)
+        
     def _shorten_counterexample(self, counterexample, hypothesis):
         for prefix in counterexample.get_prefixes():
             if self._is_counterexample(prefix, hypothesis):
