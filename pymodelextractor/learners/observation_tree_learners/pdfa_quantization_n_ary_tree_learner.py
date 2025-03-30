@@ -14,7 +14,8 @@ from pymodelextractor.exceptions.number_of_states_exceeded_exception import Numb
 from collections import OrderedDict
 import math
 import warnings
-
+from graphviz import Digraph
+import numpy as np
 
 class PDFAQuantizationNAryTreeLearner:
     def __init__(self, probabilityPartitioner: ProbabilityPartitioner, pre_cache_queries_for_building_hipothesis = False, check_probabilistic_hipothesis = True, exhaust_counterexample = False, omit_zero_transitions = False):
@@ -91,6 +92,9 @@ class PDFAQuantizationNAryTreeLearner:
         models = []
         if verbose: print('Starting learning process')
         is_target_DFA, model = self.initialization(verbose)
+        print("\n")
+        self._tree.pretty_print()
+        self._tree.plot_tree().render('tree_visualization_ini', view=False)
         symbols = list(self._alphabet.symbols)
         epsilon_probablity = self._teacher.next_token_probabilities(Sequence())
         if not is_target_DFA:
@@ -102,6 +106,9 @@ class PDFAQuantizationNAryTreeLearner:
             models.append(model)
             last_size = len(model.weighted_states)
             if verbose: print('Running EQ')
+            print("\n")
+            self._tree.pretty_print()
+            self._tree.plot_tree().render('tree_visualization_first_hyp', view=False)
             are_equivalent, counterexample = self._perform_equivalence_query(model)
             while not are_equivalent:
                 if verbose: print('Size before update:', last_size)                
@@ -125,6 +132,10 @@ class PDFAQuantizationNAryTreeLearner:
                     model_prob = model.last_token_probabilities(counterexample, self._all_symbols_sorted)
                     ce_is_correct = self.probability_partitioner.are_in_same_partition(teacher_prob, model_prob)
                 if verbose: print('Running EQ')
+                print("\n")
+                self._tree.pretty_print()
+                graph = self._tree.plot_tree()
+                graph.render('tree_visualization' + str(len(models)-1), view=False)
                 are_equivalent, counterexample = self._perform_equivalence_query(model)
         if verbose: print('Learning process finished')
         result = self._learning_results_for(model)
@@ -411,7 +422,129 @@ class ClassificationTree:
                 keys_to_remove.append(seq)
 
         for seq in keys_to_remove:
-            del self._sift_cache[seq] 
+            del self._sift_cache[seq]
+
+    def pretty_print(self, node=None, indent="", last=True):
+        """
+        Prints the tree structure in a human-readable format.
+        """
+        if node is None:
+            node = self.root
+            
+        node_type = "Leaf" if node.is_leaf() else "Node"
+        label = f"{node_type}: '{node.string}'"
+        
+        print(indent, end="")
+        if last:
+            print("└── ", end="")
+            new_indent = indent + "    "
+        else:
+            print("├── ", end="")
+            new_indent = indent + "│   "
+        print(label)
+        
+        # Recursively print children
+        children = list(node.childs.values())
+        for i, child in enumerate(children):
+            self.pretty_print(child, new_indent, i == len(children) - 1) 
+
+    def plot_tree(self):
+        """
+        Visualizes the tree with:
+        - Gray internal nodes
+        - Partition-colored leaf nodes
+        - Edges colored by sift distribution
+
+        Usage:
+        ```
+        graph = tree.plot_tree()
+        graph.render('tree_visualization', view=True) # Save the graph to a png file and view it
+        ```
+        """
+        
+        def make_hashable_and_normalize(arr):
+            """Converts a numpy array to a hashable tuple and normalizes it."""
+            if arr.sum() != 0:
+                arr = arr/arr.sum()
+            return tuple(arr)
+        
+        def get_partition_and_color(probabilities):
+            """Returns (hashable_partition, color) for the given probabilities."""
+            partition = self.probability_partitioner.get_partition(probabilities)
+            hashable_part = make_hashable_and_normalize(partition)
+            if hashable_part not in partition_colors:
+                partition_colors[hashable_part] = color_palette[len(partition_colors) % len(color_palette)]
+            
+            return hashable_part, partition_colors[hashable_part]
+        
+        class Counter:
+            # This class is used to create unique IDs for nodes in the graph.
+            def __init__(self):
+                self.value = 0
+        
+        def add_node(node, parent_id=None, parent_string=None):
+            current_id = counter.value
+            counter.value += 1
+            
+            if node.is_leaf():
+                partition, color = get_partition_and_color(list(node.probabilities.values()))                
+                graph.node(str(current_id), f"Leaf\n'{node.string}'",  
+                           fillcolor=color, style='filled')
+                
+                # Add to legend
+                formatted_partition = ', '.join(f'{x:.2f}' for x in partition)
+                legend_entries[partition] = (formatted_partition, color)
+            else:
+                graph.node(str(current_id), f"Node\n'{node.string}'", 
+                           fillcolor='lightgray', style='filled')
+            
+            # Add colored edge from parent to child
+            if parent_id is not None:
+                probs = (list(self._next_token_probabilities(node.string + parent_string).values() 
+                        if node.is_leaf() else list(node.probabilities.values())))
+                partition, edge_color = get_partition_and_color(probs)
+                
+                graph.edge(str(parent_id), str(current_id), color=edge_color, penwidth='2')
+                legend_entries[partition] = (', '.join(f'{x:.2f}' for x in partition), edge_color)
+                
+            # Add children
+            for child in node.childs.values():
+                add_node(child, current_id, node.string)
+        
+        
+        graph = Digraph(format='png')
+        graph.attr('node', shape='box', style='rounded')
+        
+        # Track partitions and assign colors
+        partition_colors = {}
+        color_palette = [
+            'lightblue', 'lightgreen', 'lightpink',
+            'lavender', 'peachpuff', 'aquamarine', 'lightcoral',
+            'lightcyan', 'wheat'
+        ]
+        counter = Counter()
+        legend_entries = {}
+        
+        
+        add_node(self.root)
+        
+        # Add detailed legend
+        if legend_entries:
+            with graph.subgraph(name='cluster_legend') as legend:
+                legend.attr(label='Partition Legend', style='rounded')
+                legend.attr(rank='same')
+                
+                for i, (partition, color) in enumerate(legend_entries.values()):
+                    legend.node(f'legend_{i}',
+                            label=f'[{partition}]',
+                            shape='box',
+                            style='filled',
+                            fillcolor=color)
+                    if i > 0:
+                        # This is for making the legend vertical
+                        legend.edge(f'legend_{i-1}', f'legend_{i}', style='invis') 
+        
+        return graph
 
 class ClassificationNode:
     def __init__(self, string: Sequence, parent: 'ClassificationNode' = None, probabilities=None):
