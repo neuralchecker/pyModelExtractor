@@ -80,6 +80,9 @@ class PDFAQuantizationNAryTreeLearner:
         nodeRoot.childs[tuple(next_token_probabilities_counterexample.values())] = nodeCounterexample
 
         self._tree = ClassificationTree(nodeRoot, self._teacher, self.probability_partitioner, verbose=verbose)
+        if verbose:
+            print('Initial tree')
+            self._tree.pretty_print()
         return False, starting_pdfa
 
     def learn(self, teacher: ProbabilisticTeacher, verbose: bool = False) -> LearningResult:
@@ -90,11 +93,11 @@ class PDFAQuantizationNAryTreeLearner:
         self.terminal_symbol = teacher.terminal_symbol
         self._teacher = teacher
         models = []
+        tree_history = []
         if verbose: print('Starting learning process')
         is_target_DFA, model = self.initialization(verbose)
-        print("\n")
-        self._tree.pretty_print()
-        self._tree.plot_tree().render('tree_visualization_ini', view=False)
+        if self._tree is not None:
+            tree_history.append(self._tree.copy())
         symbols = list(self._alphabet.symbols)
         epsilon_probablity = self._teacher.next_token_probabilities(Sequence())
         if not is_target_DFA:
@@ -105,10 +108,11 @@ class PDFAQuantizationNAryTreeLearner:
             model = self.tentative_hypothesis()
             models.append(model)
             last_size = len(model.weighted_states)
-            if verbose: print('Running EQ')
-            print("\n")
-            self._tree.pretty_print()
-            self._tree.plot_tree().render('tree_visualization_first_hyp', view=False)
+            tree_history.append(self._tree.copy())
+            if verbose: 
+                print('Current tree')
+                self._tree.pretty_print()
+                print('Running EQ')
             are_equivalent, counterexample = self._perform_equivalence_query(model)
             while not are_equivalent:
                 if verbose: print('Size before update:', last_size)                
@@ -131,17 +135,17 @@ class PDFAQuantizationNAryTreeLearner:
                     models.append(model)
                     model_prob = model.last_token_probabilities(counterexample, self._all_symbols_sorted)
                     ce_is_correct = self.probability_partitioner.are_in_same_partition(teacher_prob, model_prob)
-                if verbose: print('Running EQ')
-                print("\n")
-                self._tree.pretty_print()
-                graph = self._tree.plot_tree()
-                graph.render('tree_visualization' + str(len(models)-1), view=False)
+                if verbose:
+                    print('Current tree')
+                    self._tree.pretty_print()
+                    print('Running EQ')
+                tree_history.append(self._tree.copy())
                 are_equivalent, counterexample = self._perform_equivalence_query(model)
         if verbose: print('Learning process finished')
-        result = self._learning_results_for(model)
+        result = self._learning_results_for(model, tree_history)
         return result
 
-    def _learning_results_for(self, model, rename_states = False):
+    def _learning_results_for(self, model, tree_history = None, rename_states = False):
         numberOfStates = len(model.weighted_states) if model is not None else 0
         if rename_states:
             for count, state in enumerate(model.weighted_states):
@@ -150,7 +154,8 @@ class PDFAQuantizationNAryTreeLearner:
         info = {
             'equivalence_queries_count': self._teacher.equivalence_queries_count,
             'last_token_weight_queries_count': self._teacher.last_token_weight_queries_count,
-            'observation_tree': self._tree
+            'observation_tree': self._tree,
+            'tree_history': tree_history,
         }
         return LearningResult(model, numberOfStates, info)
 
@@ -254,6 +259,7 @@ class PDFAQuantizationNAryTreeLearner:
         return PDFA(self._alphabet, states, self.terminal_symbol, comparator=WFAToleranceComparator(), check_is_probabilistic=self._check_probabilistic_hipothesis)
 
 
+# TODO: Possibly move this class to a separate file. Watch out for other classificatino tree implementations.
 class ClassificationTree:
     unknown_leaf = "UNKNOWN"
 
@@ -545,6 +551,48 @@ class ClassificationTree:
                         legend.edge(f'legend_{i-1}', f'legend_{i}', style='invis') 
         
         return graph
+    
+    def copy(self) -> 'ClassificationTree':
+        """Creates a deep copy of the ClassificationTree."""
+        # Create a copy of the root node first
+        root_copy = self._copy_node(self.root)
+        
+        # Create a new tree with the copied root
+        new_tree = ClassificationTree(
+            root=root_copy,
+            teacher=self._teacher,
+            probability_partitioner=self.probability_partitioner,
+            max_query_length=self._max_query_length,
+            verbose=self._verbose,
+            max_states=self._max_states,
+            check_max_states_in_tree=self._check_max_states_in_tree
+        )
+        
+        # Copy all the caches and dictionaries
+        new_tree._next_token_probabilities_cache = self._next_token_probabilities_cache.copy()
+        new_tree._partitions_cache = self._partitions_cache.copy()
+        new_tree._sift_cache = self._sift_cache.copy()
+        new_tree._equivalence_dict = self._equivalence_dict.copy()
+        
+        return new_tree
+
+    def _copy_node(self, node: 'ClassificationNode') -> 'ClassificationNode':
+        """Helper method to recursively copy a node and its children."""
+        # Create a copy of the current node
+        node_copy = ClassificationNode(
+            string=node.string,
+            parent=None,  # Will be set when copying parent
+            probabilities=node.probabilities.copy() if node.probabilities else None
+        )
+        node_copy._depth = node._depth
+        
+        # Recursively copy all children
+        for probs, child in node.childs.items():
+            child_copy = self._copy_node(child)
+            child_copy.parent = node_copy
+            node_copy.childs[probs] = child_copy
+        
+        return node_copy
 
 class ClassificationNode:
     def __init__(self, string: Sequence, parent: 'ClassificationNode' = None, probabilities=None):

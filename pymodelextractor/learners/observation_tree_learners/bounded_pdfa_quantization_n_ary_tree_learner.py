@@ -24,6 +24,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
         self._exceeded_max_mq_length = False
         self._exceded_time_bound = False
         self._history = []        
+        self._tree_history = []
         self._generate_partial_hipothesis = generate_partial_hipothesis
         self._compute_mean_distribution_for_partial_hipothesis = mean_distribution_for_partial_hipothesis
         self._check_max_states_in_tree = check_max_states_in_tree
@@ -61,7 +62,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             self._history.append(partial_hipothesis)
 
         hist = list(self._history)
-        result = self._learning_results_for(hist[-1] if len(hist) > 0 else None)
+        result = self._learning_results_for(hist[-1] if len(hist) > 0 else None, self._tree_history)
         result.info['NumberOfStatesExceeded'] = self._exceeded_max_states
         result.info['QueryLengthExceeded'] = self._exceeded_max_mq_length
         result.info['TimeExceeded'] = self._exceded_time_bound
