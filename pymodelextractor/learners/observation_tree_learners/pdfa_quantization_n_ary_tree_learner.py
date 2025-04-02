@@ -194,6 +194,10 @@ class PDFAQuantizationNAryTreeLearner:
                     if access_string_of_transition not in visited_states:
                         states_to_visit.append(access_string_of_transition)
 
+        for state in list(states.keys()).copy():
+            if state not in visited_states and states[state].initial_weight != 1:
+                del states[state]
+        
         if self._omit_zero_transitions:
             hole = WeightedState("HOLE", 0, 1, terminal_symbol=self.terminal_symbol)
             for symbol in symbols:
@@ -206,10 +210,6 @@ class PDFAQuantizationNAryTreeLearner:
                         added_transitions+=1                        
             if added_transitions > 0:
                 states[hole.name] = hole
-        
-        for state in list(states.keys()).copy():
-            if state not in visited_states and states[state].initial_weight != 1:
-                del states[state]
 
         comparator = WFAToleranceComparator()
         states = set(states.values())

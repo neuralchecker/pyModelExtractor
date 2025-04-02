@@ -21,6 +21,7 @@ from pythautomata.base_types.alphabet import Alphabet
 from pythautomata.base_types.symbol import SymbolStr
 from pythautomata.utilities.probability_partitioner import QuantizationProbabilityPartitioner, TopKProbabilityPartitioner
 from pythautomata.utilities.guiding_wfa_sequence_generator import GuidingWDFASequenceGenerator
+from pythautomata.utilities.pdfa_operations import check_is_minimal
 
 binaryAlphabet = Alphabet(frozenset((SymbolStr('0'), SymbolStr('1'))))
 
@@ -449,6 +450,9 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         result = learner.learn(teacher)
         extracted_model = result.model
         self.assertTrue(len(extracted_model.weighted_states) == 2)
+        # This test checks that the model is minimal. But check_is_minimal function also goes through the states and check that the
+        # transitions are correct. Which is something that was broken in the past. 
+        self.assertTrue(check_is_minimal(extracted_model))
 
     def test_learn_approximate_PDFA_w_zero_transition2(self):     
         model = self.generate_PDFA_with_section_reachable_through_zero_transitions2()
@@ -459,4 +463,7 @@ class TestPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         learner = PDFAQuantizationNAryTreeLearner(partitioner, omit_zero_transitions=True, check_probabilistic_hipothesis=False)
         result = learner.learn(teacher)
         extracted_model = result.model
-        self.assertTrue(len(extracted_model.weighted_states) == 2)
+        self.assertTrue(len(extracted_model.weighted_states) == 3) # 2 states + hole
+        # This test checks that the model is minimal. But this function also goes through the states and check that the
+        # transitions are correct. Which is something that was broken in the past. 
+        self.assertTrue(check_is_minimal(extracted_model))

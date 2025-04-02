@@ -32,6 +32,7 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
 
     def _perform_equivalence_query(self, model):
         self._history.append(model)
+        self._tree_history.append(self._tree)
         if len(model.weighted_states) > self._max_states:
             raise NumberOfStatesExceededException
         return super()._perform_equivalence_query(model)
@@ -123,6 +124,10 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
             for symbol in symbols:
                 states[self._tree.unknown_leaf].add_transition(symbol, states[self._tree.unknown_leaf], -1)
 
+        for state in list(states.keys()).copy():
+            if state not in accessed_states and states[state].initial_weight != 1:
+                del states[state]
+        
         if self._omit_zero_transitions:
             hole = WeightedState("HOLE", 0, 1, terminal_symbol=self.terminal_symbol)
             for symbol in symbols:
@@ -135,10 +140,6 @@ class BoundedPDFAQuantizationNAryTreeLearner(PDFAQuantizationNAryTreeLearner):
                         added_transitions+=1                        
             if added_transitions > 0:
                 states[hole.name] = hole
-
-        for state in list(states.keys()).copy():
-            if state not in accessed_states and states[state].initial_weight != 1:
-                del states[state]
 
         comparator = WFAToleranceComparator()
         states = set(states.values())

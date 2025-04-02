@@ -53,6 +53,7 @@ class TestBoundedPDFAQuantizantionNAryTreeLearner(unittest.TestCase):
         self.assertEqual(model, extracted_model)
         self.assertTrue(result.info['last_token_weight_queries_count']>0)        
         self.assertTrue(result.info['equivalence_queries_count']>0)
+        self.assertTrue(len(result.info['tree_history'])>0)
 
     def test_tomitas_2(self):
         model = WeightedTomitasGrammars.get_automaton_2()
