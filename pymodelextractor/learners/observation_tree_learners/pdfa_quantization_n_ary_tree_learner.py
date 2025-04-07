@@ -483,6 +483,13 @@ class ClassificationTree:
             
             return hashable_part, partition_colors[hashable_part]
         
+        def get_access_string_for_node(node):
+            """Get an access string by finding a leaf descendant"""
+            if node.is_leaf():
+                return node.string
+            first_child = next(iter(node.childs.values()))
+            return get_access_string_for_node(first_child)
+        
         class Counter:
             # This class is used to create unique IDs for nodes in the graph.
             def __init__(self):
@@ -506,8 +513,13 @@ class ClassificationTree:
             
             # Add colored edge from parent to child
             if parent_id is not None:
-                probs = (list(self._next_token_probabilities(node.string + parent_string).values() 
-                        if node.is_leaf() else list(node.probabilities.values())))
+                if node.is_leaf():
+                    full_string = node.string + parent_string
+                else:
+                    access_string = get_access_string_for_node(node)
+                    full_string = access_string + parent_string
+                
+                probs = list(self._next_token_probabilities(full_string).values())
                 partition, edge_color = get_partition_and_color(probs)
                 
                 graph.edge(str(parent_id), str(current_id), color=edge_color, penwidth='2')
